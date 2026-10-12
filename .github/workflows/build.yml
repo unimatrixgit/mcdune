@@ -24,8 +24,23 @@ jobs:
         with:
           gradle-version: '8.14'
 
-      - name: Compile plugin
-        run: gradle clean build
+- name: Find and compile DuneRealms
+  shell: bash
+  run: |
+    echo "Looking for Gradle project..."
+    find . -name build.gradle.kts
+
+    BUILD_FILE=$(find . -name build.gradle.kts -print -quit)
+
+    if [ -z "$BUILD_FILE" ]; then
+      echo "ERROR: build.gradle.kts was not found!"
+      exit 1
+    fi
+
+    PROJECT_DIR=$(dirname "$BUILD_FILE")
+    echo "Building project in: $PROJECT_DIR"
+
+    gradle -p "$PROJECT_DIR" clean build
 
       - name: Upload plugin JAR
         uses: actions/upload-artifact@v4
