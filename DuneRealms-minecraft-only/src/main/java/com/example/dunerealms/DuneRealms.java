@@ -380,7 +380,24 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
                 // Only the current Steward of Dune has legal spice travel privileges.
                 if(emperorSanctioned(p,planet)) {
                     if(sharedDatabase==null){p.sendMessage(ChatColor.RED+"Emperor-sanctioned travel requires shared database.");return;}
-                    sharedDatabase.issueArrakisPermit(p.getUniqueId(),System.currentTimeMillis()+120000L);
+                    
+try {
+    sharedDatabase.issueArrakisPermit(
+        p.getUniqueId(),
+        System.currentTimeMillis() + 120000L
+    );
+} catch (java.sql.SQLException e) {
+    getLogger().log(
+        java.util.logging.Level.SEVERE,
+        "Failed to issue Arrakis travel permit for " + p.getName(),
+        e
+    );
+    p.sendMessage(
+        ChatColor.RED + "Unable to authorize Arrakis travel. Please try again."
+    );
+    return true;
+}
+
                 }
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                 DataOutputStream data = new DataOutputStream(bytes);
