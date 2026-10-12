@@ -39,7 +39,7 @@ public final class SharedDatabase {
             try(PreparedStatement q=c.prepareStatement("SELECT faction,solaris,inventory FROM dune_players WHERE uuid=?")){
                 q.setObject(1,p.getUniqueId());
                 try (ResultSet r = q.executeQuery()) {
-    if (r.next()) {
+                    if (r.next()) {
                     factions.put(p.getUniqueId(),r.getString(1));money.put(p.getUniqueId(),r.getInt(2));
                     String blob=r.getString(3);
                     if(blob!=null && !blob.isBlank()){
