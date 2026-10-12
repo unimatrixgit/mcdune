@@ -68,7 +68,7 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
     private ArrakisWater arrakisWater;
 
     @Override public void onEnable() {
-        saveDefaultConfig(); itemKey = new NamespacedKey(this, "item"); npcKey = new NamespacedKey(this, "guild"); wormKey = new NamespacedKey(this, "sandworm"); armorFactionKey = new NamespacedKey(this, "armor_faction");
+        initializeConfig(); itemKey = new NamespacedKey(this, "item"); npcKey = new NamespacedKey(this, "guild"); wormKey = new NamespacedKey(this, "sandworm"); armorFactionKey = new NamespacedKey(this, "armor_faction");
         dataFile = new File(getDataFolder(), "players.yml"); data = YamlConfiguration.loadConfiguration(dataFile);
         for (String key : data.getKeys(false)) try {
             UUID id = UUID.fromString(key); selected.put(id, data.getString(key + ".faction", "")); money.put(id, data.getInt(key + ".solaris", 0));
@@ -83,14 +83,21 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
         }
         if (!getConfig().getBoolean("network.enabled", true)) {
         for (String name : planets) {
-            WorldCreator creator = new WorldCreator(name).environment(World.Environment.NORMAL).generator(new PlanetGenerator(name));
+            if (!getConfig().getBoolean("planets." + name + ".enabled", true)) continue;
+            WorldCreator creator = new WorldCreator(name).environment(World.Environment.NORMAL).generator(new PlanetGenerator(this, name));
             World world = Bukkit.createWorld(creator);
-            if (world != null) { world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, !name.equals("arrakis")); world.setTime(name.equals("giedi_prime") ? 18000 : 6000); }
+            if (world != null) {
+                world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, !name.equals("arrakis"));
+                world.setTime(name.equals("giedi_prime") ? 18000 : 6000);
+                setupPlanetSpawn(world);
+            }
         }
         } else {
             String localPlanet = getConfig().getString("network.local-planet", "arrakis");
             if (!Arrays.asList(planets).contains(localPlanet)) throw new IllegalStateException("Invalid network.local-planet: " + localPlanet);
-            Bukkit.createWorld(new WorldCreator(localPlanet).environment(World.Environment.NORMAL).generator(new PlanetGenerator(localPlanet)));
+            if (!getConfig().getBoolean("planets." + localPlanet + ".enabled", true)) throw new IllegalStateException("network.local-planet is disabled in config: " + localPlanet);
+            World world = Bukkit.createWorld(new WorldCreator(localPlanet).environment(World.Environment.NORMAL).generator(new PlanetGenerator(this, localPlanet)));
+            if (world != null) setupPlanetSpawn(world);
             getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         }
         if(getConfig().getBoolean("database.enabled",false)) {
@@ -108,7 +115,92 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
         Objects.requireNonNull(getCommand("dune")).setExecutor(this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getScheduler().runTaskTimer(this, this::spawnSandworms, 200L, 200L);
-        getLogger().info("DuneRealms enabled. Four worlds and Arrakis sandworms ready.");
+        getLogger().info("DuneRealms enabled. Planet worlds, spawn points, Guild navigators, and Arrakis sandworms ready.");
+    }
+    private void initializeConfig() {
+        if (getResource("config.yml") != null) saveDefaultConfig();
+        org.bukkit.configuration.file.FileConfiguration config = getConfig();
+        config.addDefault("network.enabled", false);
+        config.addDefault("network.local-planet", "arrakis");
+        config.addDefault("travel-price", 100);
+        config.addDefault("spice-sell-price", 100);
+        config.addDefault("spice-respawn-seconds", 120);
+        config.addDefault("spice-deposits.per-chunk", 2);
+        config.addDefault("spice-deposits.respawn-seconds", 120);
+        config.addDefault("guild-npc.enabled", true);
+        addPlanetDefaults(config, "arrakis", 70, 11, "DESERT", "SAND", "RED_SAND", 63, false, false, 0, Map.of("COAL_ORE", 2, "IRON_ORE", 2, "COPPER_ORE", 1));
+        addPlanetDefaults(config, "giedi_prime", 61, 5, "SWAMP", "BLACKSTONE", "DEEPSLATE", 63, true, false, 0, Map.of("COAL_ORE", 14, "IRON_ORE", 12, "COPPER_ORE", 9, "GOLD_ORE", 7, "REDSTONE_ORE", 8, "LAPIS_ORE", 5, "DIAMOND_ORE", 4, "EMERALD_ORE", 2));
+        addPlanetDefaults(config, "kaitain", 70, 3, "PLAINS", "GRASS_BLOCK", "DIRT", 0, false, false, 64, Map.of("COAL_ORE", 4, "IRON_ORE", 5, "GOLD_ORE", 15, "DIAMOND_ORE", 18, "EMERALD_ORE", 3));
+        addPlanetDefaults(config, "caladan", 67, 10, "JUNGLE", "GRASS_BLOCK", "DIRT", 64, true, true, 0.11, Map.of("COAL_ORE", 4, "IRON_ORE", 5, "COPPER_ORE", 5, "DIAMOND_ORE", 2));
+        addPlanetDefaults(config, "sigma_draconis_iv", 72, 14, "SNOWY_PLAINS", "SNOW_BLOCK", "DEEPSLATE", 0, false, false, 0, Map.of("COAL_ORE", 5, "IRON_ORE", 5, "COPPER_ORE", 2, "DIAMOND_ORE", 2));
+        config.options().copyDefaults(true);
+        saveConfig();
+    }
+    private void addPlanetDefaults(org.bukkit.configuration.file.FileConfiguration config, String name, int height, int variation,
+                                  String biome, String surface, String filler, int waterLevel, boolean swampWater,
+                                  boolean trees, double flowers, Map<String, Integer> ores) {
+        String path = "planets." + name + ".";
+        config.addDefault(path + "enabled", true);
+        config.addDefault(path + "spawn.x", 0);
+        config.addDefault(path + "spawn.z", 0);
+        config.addDefault(path + "terrain.base-height", height);
+        config.addDefault(path + "terrain.height-variation", variation);
+        config.addDefault(path + "terrain.noise-scale", 0.02);
+        config.addDefault(path + "biome", biome);
+        config.addDefault(path + "surface", surface);
+        config.addDefault(path + "filler", filler);
+        config.addDefault(path + "water.level", waterLevel);
+        config.addDefault(path + "water.swamp-pools", swampWater);
+        config.addDefault(path + "water.coverage", 0.18);
+        config.addDefault(path + "vegetation.trees", trees);
+        config.addDefault(path + "vegetation.tree-chance", trees ? 0.035 : 0.0);
+        config.addDefault(path + "vegetation.flowers-per-chunk", flowers);
+        config.addDefault(path + "ores.min-y", -48);
+        config.addDefault(path + "ores.max-y", 48);
+        config.addDefault(path + "ores.vein-size", 5);
+        for (Map.Entry<String, Integer> ore : ores.entrySet()) config.addDefault(path + "ores." + ore.getKey(), ore.getValue());
+    }
+    private void setupPlanetSpawn(World world) {
+        String name = world.getName().toLowerCase(Locale.ROOT);
+        int x = getConfig().getInt("planets." + name + ".spawn.x", 0);
+        int z = getConfig().getInt("planets." + name + ".spawn.z", 0);
+        world.getChunkAt(x >> 4, z >> 4).load(true);
+        Location spawn = findSafeSpawn(world, x, z);
+        world.setSpawnLocation(spawn);
+        if (getConfig().getBoolean("guild-npc.enabled", true)) ensureGuildNpc(world, spawn);
+    }
+    private Location findSafeSpawn(World world, int x, int z) {
+        for (int radius = 0; radius <= 12; radius++) {
+            for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+                if (radius > 0 && Math.abs(dx) != radius && Math.abs(dz) != radius) continue;
+                int bx = x + dx, bz = z + dz;
+                int y = world.getHighestBlockYAt(bx, bz);
+                Material ground = world.getBlockAt(bx, y, bz).getType();
+                if (!ground.isSolid() || ground == Material.MAGMA_BLOCK || ground == Material.CACTUS || ground == Material.POWDER_SNOW) continue;
+                if (world.getBlockAt(bx, y + 1, bz).isLiquid() || world.getBlockAt(bx, y + 2, bz).isLiquid()) continue;
+                return new Location(world, bx + 0.5, y + 1, bz + 0.5);
+            }
+        }
+        int y = Math.max(world.getMinHeight() + 2, world.getHighestBlockYAt(x, z) + 1);
+        return new Location(world, x + 0.5, y, z + 0.5);
+    }
+    private void ensureGuildNpc(World world, Location spawn) {
+        Location npcLocation = findSafeSpawn(world, spawn.getBlockX() + 2, spawn.getBlockZ());
+        for (Entity entity : world.getNearbyEntities(npcLocation, 8, 5, 8)) {
+            if (entity instanceof Villager villager && villager.getPersistentDataContainer().has(npcKey, PersistentDataType.BYTE)) {
+                villager.teleport(npcLocation);
+                return;
+            }
+        }
+        Villager villager = world.spawn(npcLocation, Villager.class);
+        villager.setCustomName(ChatColor.LIGHT_PURPLE + "Spacing Guild Navigator");
+        villager.setCustomNameVisible(true);
+        villager.setProfession(Villager.Profession.CLERIC);
+        villager.setAI(false);
+        villager.setInvulnerable(true);
+        villager.setSilent(true);
+        villager.setPersistent(true);
+        villager.getPersistentDataContainer().set(npcKey, PersistentDataType.BYTE, (byte) 1);
     }
     @Override public void onDisable() { if(serverJobs!=null)serverJobs.save(); savePlayers(); }
     private void savePlayers() {
@@ -398,8 +490,8 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
             return;
         }
         World w = Bukkit.getWorld(planet); if (w == null) { p.sendMessage("World unavailable."); return; }
-        int y = w.getHighestBlockYAt(0, 0) + 2;
-        p.teleport(new Location(w, 0.5, Math.max(y, 66), 0.5));
+        Location arrival = w.getSpawnLocation().clone();
+        p.teleport(arrival);
         if(planet.equals("arrakis"))Bukkit.getScheduler().runTaskLater(this,()->checkArrakisArrival(p),1L);
         p.sendMessage(ChatColor.AQUA + "Spacing Guild arrival: " + planet);
     }
@@ -454,7 +546,7 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
                 Villager v = p.getWorld().spawn(p.getLocation(), Villager.class); v.setCustomName(ChatColor.LIGHT_PURPLE + "Spacing Guild Navigator"); v.setCustomNameVisible(true);
                 v.setProfession(Villager.Profession.CLERIC); v.setAI(false); v.getPersistentDataContainer().set(npcKey, PersistentDataType.BYTE, (byte)1);
             }
-            case "givespice" -> { if (p.hasPermission("dune.admin")) p.getInventory().addItem(custom(Material.ORANGE_DYE, "Melange Spice", "spice")); }
+            case "givespice" -> { if (p.hasPermission("dune.admin")) p.getInventory().addItem(spiceDrop(p, 1)); }
             default -> p.sendMessage("Use /dune help");
         }
         return true;
@@ -555,7 +647,7 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
         int index = Arrays.asList(factions).indexOf(faction);
         if (index < 0) return;
         World w = Bukkit.getWorld(planets[index]);
-        if (w != null) e.setRespawnLocation(new Location(w, 0.5, Math.max(66, w.getHighestBlockYAt(0,0)+2), 0.5));
+        if (w != null) e.setRespawnLocation(w.getSpawnLocation().clone());
     }
     @EventHandler public void onNpc(PlayerInteractEntityEvent e) {
         if (e.getRightClicked().getPersistentDataContainer().has(npcKey, PersistentDataType.BYTE)) { e.setCancelled(true); travelMenu(e.getPlayer()); }
@@ -571,9 +663,14 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
         money.merge(p.getUniqueId(), -cost, Integer::sum); savePlayers(); p.closeInventory(); teleport(p, planet);
     }
     @EventHandler public void onSpice(BlockBreakEvent e) {
-        Block block = e.getBlock(); if (!block.getWorld().getName().equals("arrakis") || block.getType() != Material.RED_SAND) return;
-        Player p = e.getPlayer(); if (!is(p.getInventory().getItemInMainHand(), "shovel") || !wearingStillsuit(p)) {
-            e.setCancelled(true); p.sendMessage(ChatColor.RED + "Wear a full stillsuit and use a Netherite Spice Harvest Shovel to extract spice."); return;
+        Block block = e.getBlock();
+        if (!block.getWorld().getName().equals("arrakis") || block.getType() != Material.SUSPICIOUS_SAND) return;
+        Player p = e.getPlayer();
+        ItemStack held = p.getInventory().getItemInMainHand();
+        if (held.getType() != Material.NETHERITE_SHOVEL || !is(held, "shovel")) {
+            e.setCancelled(true);
+            p.sendMessage(ChatColor.RED + "Only the Spice Harvest Shovel from /dune kit can mine a spice deposit.");
+            return;
         }
         e.setDropItems(false); e.setExpToDrop(0);
         int amount = selected.getOrDefault(p.getUniqueId(), "").equals("Fremen") ? 2 : 1;
@@ -599,13 +696,29 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
                 savePlayers();
                 p.sendMessage(ChatColor.GOLD + "Job spice: +" + workerPay + " Solaris (15% share).");
                 // Contract spice is sold automatically, not dropped as a second payout.
-                if (credited == amount) return;
+                if (credited == amount) {
+                    scheduleSpiceRespawn(block.getLocation());
+                    return;
+                }
                 amount -= credited;
             }
         }
-        block.getWorld().dropItemNaturally(block.getLocation(), custom(Material.ORANGE_DYE, "Melange Spice", "spice").asQuantity(amount));
-        Location loc = block.getLocation(); long delay = 20L * getConfig().getLong("spice-respawn-seconds", 120);
-        Bukkit.getScheduler().runTaskLater(this, () -> { if (loc.getChunk().isLoaded() && loc.getBlock().getType() == Material.AIR) loc.getBlock().setType(Material.RED_SAND); }, delay);
+        block.getWorld().dropItemNaturally(block.getLocation(), spiceDrop(p, amount));
+        scheduleSpiceRespawn(block.getLocation());
+    }
+    private void scheduleSpiceRespawn(Location location) {
+        Location loc = location.clone();
+        long delay = 20L * getConfig().getLong("spice-deposits.respawn-seconds", getConfig().getLong("spice-respawn-seconds", 120));
+        Bukkit.getScheduler().runTaskLater(this, () -> { if (loc.getChunk().isLoaded() && loc.getBlock().getType() == Material.AIR) loc.getBlock().setType(Material.SUSPICIOUS_SAND); }, delay);
+    }
+    private ItemStack spiceDrop(Player miner, int amount) {
+        ItemStack spice = custom(Material.ORANGE_DYE, "Melange Spice", "spice").asQuantity(amount);
+        ItemMeta meta = spice.getItemMeta();
+        String faction = selected.getOrDefault(miner.getUniqueId(), "Unaffiliated");
+        meta.setLore(List.of(ChatColor.GOLD + "Price: " + getConfig().getInt("spice-sell-price", 100) + " Solaris each",
+            ChatColor.GRAY + "Mined by: " + miner.getName() + " ; faction: " + faction));
+        spice.setItemMeta(meta);
+        return spice;
     }
     private boolean isWorm(Entity entity) {
         return entity.getPersistentDataContainer().has(wormKey, PersistentDataType.BYTE);
@@ -676,7 +789,7 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
                 int y = w.getHighestBlockYAt(x,z);
                 Block b = w.getBlockAt(x,y,z);
                 if (b.getType() == Material.SAND || b.getType() == Material.RED_SAND) {
-                    b.setType(Material.RED_SAND);
+                    b.setType(Material.SUSPICIOUS_SAND);
                     placed++;
                 }
             }
@@ -694,44 +807,113 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
         if (faction.equals("Fremen") && p.getWorld().getName().equals("arrakis")) p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 130, 0, true, false));
     }
     private static class PlanetGenerator extends ChunkGenerator {
+        private final DuneRealms plugin;
         private final String planet;
-        PlanetGenerator(String planet) { this.planet = planet; }
+        PlanetGenerator(DuneRealms plugin, String planet) { this.plugin = plugin; this.planet = planet; }
         @Override public List<BlockPopulator> getDefaultPopulators(World world) {
             return planet.equals("arrakis") ? List.of(new ArrakisWater.SietchPopulator()) : List.of();
         }
         @Override public void generateNoise(WorldInfo world, Random random, int chunkX, int chunkZ, ChunkData data) {
-            int sea = 63;
+            String path = "planets." + planet + ".";
+            int minY = world.getMinHeight(), maxY = world.getMaxHeight() - 1;
+            int baseHeight = plugin.getConfig().getInt(path + "terrain.base-height", 68);
+            double variation = plugin.getConfig().getDouble(path + "terrain.height-variation", 8);
+            double scale = Math.max(0.001, plugin.getConfig().getDouble(path + "terrain.noise-scale", 0.02));
+            int waterLevel = plugin.getConfig().getInt(path + "water.level", 63);
+            Material surface = configuredMaterial(path + "surface", Material.GRASS_BLOCK);
+            Material filler = configuredMaterial(path + "filler", Material.DIRT);
+            Material core = planet.equals("giedi_prime") || planet.equals("sigma_draconis_iv") ? Material.DEEPSLATE : Material.STONE;
+            double flowers = Math.max(0, plugin.getConfig().getDouble(path + "vegetation.flowers-per-chunk", 0));
+            double treeChance = Math.max(0, plugin.getConfig().getDouble(path + "vegetation.tree-chance", 0));
+            int[][] heights = new int[16][16];
             for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
                 int gx = chunkX * 16 + x, gz = chunkZ * 16 + z;
-                double n = Math.sin(gx * .018) * Math.cos(gz * .021) + Math.sin(gx * .057 + gz * .029) * .4;
-                int h = switch (planet) {
-                    case "arrakis" -> 70 + (int)(n * 12);
-                    case "giedi_prime" -> 66 + (int)(n * 9);
-                    case "kaitain" -> 75 + (int)(n * 7);
-                    default -> 55 + (int)(n * 17);
-                };
-                data.setBlock(x, world.getMinHeight(), z, Material.BEDROCK);
-                Material core = planet.equals("giedi_prime") ? Material.DEEPSLATE : Material.STONE;
-                for (int y = world.getMinHeight() + 1; y < h - 4; y++) data.setBlock(x, y, z, core);
-                for (int y = h - 4; y <= h; y++) {
-                    Material surface = switch (planet) {
-                        case "arrakis" -> random.nextInt(12) == 0 ? Material.RED_SAND : Material.SAND;
-                        case "giedi_prime" -> random.nextInt(8) == 0 ? Material.COAL_BLOCK : Material.BLACKSTONE;
-                        case "kaitain" -> y == h ? Material.GRASS_BLOCK : Material.DIRT;
-                        default -> y == h ? Material.GRASS_BLOCK : Material.DIRT;
-                    };
-                    data.setBlock(x, y, z, surface);
+                double n = Math.sin(gx * scale) * Math.cos(gz * scale * 1.13)
+                    + Math.sin(gx * scale * 2.7 + gz * scale * 1.45) * 0.35;
+                int h = Math.max(minY + 8, Math.min(maxY - 8, baseHeight + (int) Math.round(n * variation)));
+                heights[x][z] = h;
+                data.setBlock(x, minY, z, Material.BEDROCK);
+                for (int y = minY + 1; y < h - 3; y++) data.setBlock(x, y, z, core);
+                for (int y = h - 3; y < h; y++) data.setBlock(x, y, z, filler);
+                data.setBlock(x, h, z, surface);
+
+                if (plugin.getConfig().getBoolean(path + "water.swamp-pools", false) && h < waterLevel) {
+                    double poolNoise = Math.sin(gx * 0.035) * Math.cos(gz * 0.031);
+                    double coverage = Math.max(0, Math.min(1, plugin.getConfig().getDouble(path + "water.coverage", 0.18)));
+                    if (poolNoise > 0.72 - coverage * 0.75) {
+                        for (int y = h + 1; y <= Math.min(waterLevel, maxY); y++) data.setBlock(x, y, z, Material.WATER);
+                    }
                 }
-                if (planet.equals("caladan") && h < sea) for (int y = h + 1; y <= sea; y++) data.setBlock(x, y, z, Material.WATER);
+                if (flowers > 0 && surface == Material.GRASS_BLOCK && random.nextDouble() < Math.min(1, flowers / 256.0)) {
+                    Material[] flowerTypes = {Material.POPPY, Material.DANDELION, Material.CORNFLOWER,
+                        Material.AZURE_BLUET, Material.ALLIUM, Material.OXEYE_DAISY};
+                    data.setBlock(x, h + 1, z, flowerTypes[random.nextInt(flowerTypes.length)]);
+                }
+                if (plugin.getConfig().getBoolean(path + "vegetation.trees", false)
+                    && surface == Material.GRASS_BLOCK && random.nextDouble() < treeChance && x >= 3 && x <= 12 && z >= 3 && z <= 12) {
+                    placeJungleTree(data, x, h + 1, z, random, maxY);
+                }
             }
+            if (planet.equals("arrakis")) placeSpiceDeposits(data, heights, random, minY, maxY);
+            placeOres(data, random, path, minY, maxY);
         }
         @Override public BiomeProvider getDefaultBiomeProvider(WorldInfo worldInfo) {
             return new BiomeProvider() {
                 @Override public Biome getBiome(WorldInfo info, int x, int y, int z) {
-                    return switch (planet) { case "arrakis" -> Biome.DESERT; case "giedi_prime" -> Biome.BADLANDS; case "kaitain" -> Biome.PLAINS; default -> Biome.OCEAN; };
+                    String configured = plugin.getConfig().getString("planets." + planet + ".biome", "PLAINS");
+                    try { return Biome.valueOf(configured.toUpperCase(Locale.ROOT)); }
+                    catch (IllegalArgumentException ex) { return Biome.PLAINS; }
                 }
                 @Override public List<Biome> getBiomes(WorldInfo info) { return List.of(getBiome(info, 0, 64, 0)); }
             };
+        }
+        private Material configuredMaterial(String path, Material fallback) {
+            String name = plugin.getConfig().getString(path, fallback.name());
+            Material material = Material.matchMaterial(name == null ? "" : name);
+            return material == null ? fallback : material;
+        }
+        private void placeSpiceDeposits(ChunkData data, int[][] heights, Random random, int minY, int maxY) {
+            int count = Math.max(0, plugin.getConfig().getInt("spice-deposits.per-chunk", 2));
+            for (int i = 0; i < count; i++) {
+                int x = random.nextInt(16), z = random.nextInt(16), y = heights[x][z];
+                if (y + 1 < maxY && y > minY) data.setBlock(x, y, z, Material.SUSPICIOUS_SAND);
+            }
+        }
+        private void placeOres(ChunkData data, Random random, String path, int minWorldY, int maxWorldY) {
+            org.bukkit.configuration.ConfigurationSection ores = plugin.getConfig().getConfigurationSection(path + "ores");
+            if (ores == null) return;
+            int minY = Math.max(minWorldY + 1, plugin.getConfig().getInt(path + "ores.min-y", -48));
+            int maxY = Math.min(maxWorldY - 4, plugin.getConfig().getInt(path + "ores.max-y", 48));
+            int veinSize = Math.max(1, Math.min(16, plugin.getConfig().getInt(path + "ores.vein-size", 5)));
+            if (maxY < minY) return;
+            for (String key : ores.getKeys(false)) {
+                Material ore = Material.matchMaterial(key);
+                if (ore == null || !key.endsWith("_ORE")) continue;
+                int attempts = Math.max(0, Math.min(64, ores.getInt(key, 0)));
+                for (int attempt = 0; attempt < attempts; attempt++) {
+                    int x = random.nextInt(16), z = random.nextInt(16), y = minY + random.nextInt(maxY - minY + 1);
+                    for (int n = 0; n < veinSize; n++) {
+                        int vx = Math.max(0, Math.min(15, x + random.nextInt(3) - 1));
+                        int vz = Math.max(0, Math.min(15, z + random.nextInt(3) - 1));
+                        int vy = Math.max(minY, Math.min(maxY, y + random.nextInt(3) - 1));
+                        Material existing = data.getType(vx, vy, vz);
+                        if (existing == Material.STONE || existing == Material.DEEPSLATE || existing == Material.TUFF) data.setBlock(vx, vy, vz, ore);
+                    }
+                }
+            }
+        }
+        private void placeJungleTree(ChunkData data, int x, int y, int z, Random random, int maxY) {
+            int height = 4 + random.nextInt(4);
+            if (y + height + 2 >= maxY || data.getType(x, y - 1, z) != Material.GRASS_BLOCK) return;
+            for (int dy = 0; dy < height; dy++) data.setBlock(x, y + dy, z, Material.JUNGLE_LOG);
+            for (int dy = height - 2; dy <= height + 1; dy++) {
+                int radius = dy >= height ? 1 : 2;
+                for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+                    if (Math.abs(dx) == radius && Math.abs(dz) == radius && random.nextBoolean()) continue;
+                    int lx = x + dx, lz = z + dz, ly = y + dy;
+                    if (lx >= 0 && lx < 16 && lz >= 0 && lz < 16 && data.getType(lx, ly, lz).isAir()) data.setBlock(lx, ly, lz, Material.JUNGLE_LEAVES);
+                }
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ arrakis-sun:
 
 # One Paper backend per planet, connected through Velocity's BungeeCord plugin messaging support.
 network:
-  enabled: true
+  enabled: false
   local-planet: arrakis  # CHANGE for each backend
   servers:
     arrakis: arrakis
