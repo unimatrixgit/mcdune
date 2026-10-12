@@ -1,5 +1,7 @@
 package com.example.dunerealms;
 
+import org.bukkit.block.Biome;
+import org.bukkit.generator.BiomeProvider;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.*;
@@ -470,7 +472,14 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
         if (jobs.isEmpty()) { p.sendMessage("No jobs listed. Use /dune job post <spice quota>."); return; }
         for (Job j : jobs.values()) {
             String name = Bukkit.getOfflinePlayer(j.owner()).getName();
-            p.sendMessage(ChatColor.YELLOW + (name == null ? j.owner() : name) + ": " + (j.quota()-j.harvested()) + " spice remaining; /dune job accept " + (name == null ? j.owner() : name));
+           p.sendMessage(
+    ChatColor.YELLOW.toString()
+    + (name == null ? j.owner() : name)
+    + ": "
+    + (j.quota() - j.harvested())
+    + " spice remaining; /dune job accept "
+    + (name == null ? j.owner() : name)
+);
         }
     }
     private void jobCommand(Player p, String[] args) {
