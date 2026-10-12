@@ -1,0 +1,23 @@
+# CHOAM contracts rotate on the hour (server clock, UTC epoch boundaries).
+offers-per-hour: 3
+jobs:
+  small-spice-run:
+    title: "Arrakis Spice Collection"
+    spice-required: 100
+    pay: 3000
+    time-limit-minutes: 30
+  guild-supply:
+    title: "Spacing Guild Supply Order"
+    spice-required: 250
+    pay: 8500
+    time-limit-minutes: 45
+  imperial-contract:
+    title: "Imperial Spice Shipment"
+    spice-required: 500
+    pay: 20000
+    time-limit-minutes: 60
+  dangerous-harvest:
+    title: "Deep Desert Extraction"
+    spice-required: 800
+    pay: 35000
+    time-limit-minutes: 90

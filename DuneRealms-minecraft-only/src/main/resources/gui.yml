@@ -1,0 +1,168 @@
+# Background glass colors for each faction. Ordos is the display alias for Fremen.
+backgrounds:
+  harkonnen: RED_STAINED_GLASS_PANE
+  ordos: GREEN_STAINED_GLASS_PANE
+  fremen: ORANGE_STAINED_GLASS_PANE
+  spacing_guild: BLACK_STAINED_GLASS_PANE
+  atreides: BLUE_STAINED_GLASS_PANE
+  corrino: PURPLE_STAINED_GLASS_PANE
+  default: GRAY_STAINED_GLASS_PANE
+
+# Edit icons, names, lore, slots and actions. Reload with /dune guireload.
+# Actions: open:<menu>, dune:<subcommand>, close, none.
+# Dynamic lists: server_jobs, factions, planets.
+menus:
+  main:
+    title: "&6Dune | Main Menu"
+    size: 54
+    items:
+      guild:
+        slot: 10
+        icon: COMPASS
+        name: "&eSpacing Guild"
+        lore: ["&7Travel to another planet", "&7Fare: %travel_cost% Solaris"]
+        action: "open:travel"
+      choam:
+        slot: 12
+        icon: EMERALD
+        name: "&eCHOAM Contracts"
+        lore: ["&7Hourly server jobs", "&7Failure fine: 5%"]
+        action: "open:serverjobs"
+      exchange:
+        slot: 14
+        icon: WRITABLE_BOOK
+        name: "&ePlayer Spice Exchange"
+        lore: ["&7Worker receives 15%", "&7Sponsor receives 85%"]
+        action: "open:exchange"
+      wallet:
+        slot: 16
+        icon: GOLD_INGOT
+        name: "&6Wallet: %balance% Solaris"
+        lore: ["&7Click to view balance"]
+        action: "dune:balance"
+      sell:
+        slot: 28
+        icon: ORANGE_DYE
+        name: "&eSell Spice"
+        lore: ["&7Sell harvested spice"]
+        action: "dune:sell"
+      kit:
+        slot: 30
+        icon: LEATHER_CHESTPLATE
+        name: "&eStillsuit Kit"
+        lore: ["&7Get a netherite spice shovel and armor"]
+        action: "dune:kit"
+      winged_stillsuit:
+        slot: 34
+        icon: ELYTRA
+        name: "&dWinged Stillsuit Upgrade"
+        lore:
+          - "&7Merge worn chestplate with an Elytra"
+          - "&6Cost: 1,000,000 Solaris"
+          - "&7Wear stillsuit chestplate and carry Elytra"
+        action: "dune:elytra"
+      faction:
+        slot: 32
+        icon: NETHER_STAR
+        name: "&eChoose Faction"
+        lore: ["&7Select your homeworld"]
+        action: "open:factions"
+  serverjobs:
+    title: "&6Dune | CHOAM Jobs"
+    size: 54
+    items:
+      active:
+        slot: 49
+        icon: CLOCK
+        name: "&eCurrent Contract"
+        lore: ["&7%active_job%"]
+        action: none
+      back:
+        slot: 53
+        icon: ARROW
+        name: "&eBack"
+        action: "open:main"
+    dynamic:
+      type: server_jobs
+      start-slot: 10
+      step: 1
+      max-items: 27
+      icon: PAPER
+      name: "&e%id%"
+      lore: ["&7%description%", "&aClick to accept"]
+      action: "dune:serverjobs accept %id%"
+  exchange:
+    title: "&6Dune | Player Exchange"
+    size: 54
+    items:
+      server:
+        slot: 4
+        icon: EMERALD
+        name: "&eServer Jobs"
+        action: "open:serverjobs"
+      post100:
+        slot: 45
+        icon: PAPER
+        name: "&ePost 100 Spice"
+        action: "dune:job post 100"
+      post500:
+        slot: 46
+        icon: PAPER
+        name: "&ePost 500 Spice"
+        action: "dune:job post 500"
+      post1000:
+        slot: 47
+        icon: PAPER
+        name: "&ePost 1000 Spice"
+        action: "dune:job post 1000"
+      cancel:
+        slot: 48
+        icon: BARRIER
+        name: "&cCancel Listing"
+        action: "dune:job cancel"
+      leave:
+        slot: 50
+        icon: OAK_DOOR
+        name: "&eLeave Job"
+        action: "dune:job finish"
+      back:
+        slot: 53
+        icon: ARROW
+        name: "&eBack"
+        action: "open:main"
+  travel:
+    title: "&6Dune | Guild Travel"
+    size: 54
+    items:
+      back:
+        slot: 53
+        icon: ARROW
+        name: "&eBack"
+        action: "open:main"
+    dynamic:
+      type: planets
+      start-slot: 10
+      step: 2
+      max-items: 4
+      icon: ENDER_PEARL
+      name: "&eTravel to %id%"
+      lore: ["&7Fare: %travel_cost% Solaris"]
+      action: "dune:travel %id%"
+  factions:
+    title: "&6Dune | Factions"
+    size: 54
+    items:
+      back:
+        slot: 53
+        icon: ARROW
+        name: "&eBack"
+        action: "open:main"
+    dynamic:
+      type: factions
+      start-slot: 10
+      step: 2
+      max-items: 5
+      icon: SHIELD
+      name: "&e%id%"
+      lore: ["&7Click to join %id%"]
+      action: "dune:choose %id%"

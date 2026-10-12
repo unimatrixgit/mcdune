@@ -1,0 +1,12 @@
+name: DuneRealms
+version: 1.0.0
+main: com.example.dunerealms.DuneRealms
+api-version: '1.21'
+description: Dune-inspired factions, spice, planets and Guild travel
+commands:
+  dune:
+    description: Dune realms commands
+    usage: /dune help
+permissions:
+  dune.admin:
+    default: op

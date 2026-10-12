@@ -1,0 +1,83 @@
+# DuneRealms for Paper 1.21.4
+
+Requires Java 21 and Gradle 8+. Run `gradle build` and copy `build/libs/DuneRealms-1.0.0.jar` into your Paper server's `plugins/` directory. Restart the server. This project is source code, not a precompiled JAR.
+
+Commands: `/dune choose fremen|harkonnen|corrino|atreides`, `/dune kit`, `/dune balance`, `/dune sell`, `/dune travel`, `/dune guildnpc` (OP), `/dune givespice` (OP).
+
+Worlds are generated on first server start: `arrakis`, `giedi_prime`, `kaitain`, `caladan`. Custom generator selection only applies when a world is first generated. Existing worlds with these names will not be replaced. For safety, back up your server before installing.
+
+Red sand in Arrakis is harvestable spice. You need all four stillsuit pieces equipped and the custom netherite spice shovel in hand. Spice can be sold with `/dune sell` and Solaris spent at Guild NPCs or `/dune travel`. Each faction has a passive perk; Fremen harvest double spice. Player faction and balances persist in `plugins/DuneRealms/players.yml`.
+
+Limitations: this is a gameplay prototype, not a fully polished mod. Custom equipment uses vanilla items and colored names, not resource-pack models. Worlds have themed terrain, but no cities, unique buildings, or detailed biome decorations. Guild NPCs are placed by operators. No permissions-based faction change for ordinary players. The plugin has not been compiled or tested against a running Paper server in this environment.
+
+## Sandworms (Shai-Hulud)
+
+Hostile, oversized husks representing sandworms spawn on sandy surfaces near players **only on Arrakis**, roughly every 10 seconds with a configurable chance. They target players, have 500 health and 30 base melee attack damage (Warden-level values), and play a Warden roar when emerging. They cannot teleport to other worlds. Settings are under `sandworms` in `config.yml`. The worm is represented by a scaled vanilla husk; a true animated worm model would require a resource pack or model plugin.
+
+## Spice contracts and sandworm blooms
+- On Arrakis, defeating a sandworm generates a broad patch of red-sand spice deposits with a target base harvest value of 100,000 Solaris (actual value depends on available sandy terrain and faction bonuses).
+- Players begin on their faction's homeworld after choosing a faction and respawn there.
+- `/dune exchange` shows open spice contracts.
+- `/dune job post <spice quota>` creates a contract.
+- `/dune job accept <player>` accepts another player's contract and transports the worker to Arrakis.
+- Contract harvesting pays 15% of spice sale value to the worker and 85% to the sponsor automatically, with no double sale of contracted spice.
+- `/dune job finish` leaves a job; `/dune job cancel` cancels an unclaimed listing.
+- A sponsor's job remains listed across restarts, but active worker assignments must be reaccepted after restart.
+
+This is source code, not a tested compiled JAR.
+
+## Hourly server-issued CHOAM jobs
+Edit `plugins/DuneRealms/server-jobs.yml` to configure job `title`, `spice-required`, `pay`, and `time-limit-minutes`. `offers-per-hour` controls how many are randomly selected. Listings rotate every hour at UTC hour boundaries. Existing accepted contracts persist through restarts, including their original deadlines; if a definition is removed while active, that contract expires without a fine.
+
+Commands: `/dune serverjobs` (list), `/dune serverjobs accept <id>` (accept), `/dune serverjobs reload` (admin; reload definitions). Harvesting spice with the stillsuit and axe advances the active server contract. Successful completion pays the configured amount. Failure after the deadline incurs a **5% fine on the configured pay**, rounded up. Fines can produce negative Solaris balances (debt). Contracts expire even while players are offline, checked every 10 seconds while the server is running.
+
+Server-issued contracts are separate from player-to-player exchange contracts. Harvesting can advance both simultaneously; server jobs pay their own fixed completion reward, and normal spice drops/player contract earnings remain unchanged.
+
+## Chest-style GUI
+`/dune` or `/dune gui` opens the native Minecraft chest inventory menu. It has navigation for guild travel, faction choice, harvesting kit, spice sales, balance, hourly server contracts, and player-to-player spice jobs. GUI clicks invoke the same permission-checked commands or existing travel logic. The exchange supports preset 100/500/1000-spice postings; arbitrary amounts remain available through `/dune job post <amount>`. No external ChestCommands plugin dependency is required.
+
+## Dune Navigator menu item
+Each joining player receives a persistent-data-tagged Nether Star named **Dune Navigator** (unless already present). Left-click or right-click while holding it in the main hand opens the main chest GUI. Interaction is cancelled to avoid accidentally hitting or activating blocks. `/dune menuitem` gives a replacement when missing; `/dune` and `/dune gui` still work. The menu item is recognized by its plugin tag, not its display name.
+
+## Fully configurable GUI (`gui.yml`)
+The GUI is now configured by `plugins/DuneRealms/gui.yml`, copied from resources on first startup. Every menu has an editable title, chest size (9–54 in multiples of 9), and items with icon, slot, name, lore, and action. Use `/dune guireload` (admin) after editing. Supported actions are `open:<menu-id>`, `dune:<subcommand>`, `close`, and `none`. Arbitrary console commands are intentionally not supported. Dynamic CHOAM jobs, factions, and planets use editable `dynamic` sections, including icon, starting slot, step, lore, and action. Placeholders: `%player%`, `%balance%`, `%travel_cost%`, `%active_job%`, `%id%` (dynamic). Menu opener item continues to work with either mouse button.
+
+NOTE: Player-to-player exchange listings can still be accepted through `/dune job accept <player>`; the configurable exchange menu currently includes configurable posting/cancel/leave controls but does not yet render dynamic player listings.
+
+## Faction-colored glass pane backgrounds
+The chest menus use configurable stained glass panes as the backdrop, based on the player's selected faction: Harkonnen red, Ordos/Fremen green, Atreides blue, Corrino purple. Unassigned players get gray. Interactive items overwrite background panes. On the faction selector, each faction choice is itself represented by its corresponding colored glass pane. Colors can be changed under `backgrounds:` in `gui.yml`, and individual menus can disable the backdrop with `faction-background: false`. `/dune choose ordos` is accepted as an alias for Fremen; this does not change existing saved faction data.
+
+## Faction-colored stillsuits
+`/dune kit` now grants four leather armor pieces dyed to match the player's faction GUI background: Harkonnen red, Ordos/Fremen green, Atreides blue, Corrino purple. The items keep their `stillsuit` persistent-data identifier, so full-set spice harvesting continues to work. Existing already-issued armor is not recolored automatically; use `/dune kit` to obtain a newly dyed set.
+
+## Expanded faction palette
+Fremen now have orange armor and orange glass; Ordos is a distinct green faction with green armor and green glass. Harkonnen remains red, Atreides blue, Corrino purple. Spacing Guild is reserved as a black visual/armor color (`spacing_guild`) but is not a selectable player faction, so no Guild armor is issued through `/dune kit` yet. Ordos currently shares Arrakis as a starting planet. Color values are hardcoded for dyed armor; GUI glass materials are configured in `gui.yml`.
+
+## Netherite-strength armor and winged stillsuit
+Each stillsuit armor piece has the same armor points (3/8/6/3), armor toughness (+3 per piece), and knockback resistance (+0.1 per piece) as vanilla netherite armor. Leather stillsuit pieces retain their faction dyes; vanilla leather durability is unchanged.
+
+`/dune elytra` or the main menu's **Winged Stillsuit Upgrade** merges the currently worn stillsuit chestplate with one Elytra from inventory for **1,000,000 Solaris**. The worn chestplate and Elytra are consumed and replaced with a real Elytra that has netherite chestplate defense and retains the `stillsuit` tag, allowing harvesting with the full suit. Elytra flight works normally. The winged chestpiece is an Elytra item and therefore cannot display the leather chestplate's faction dye without a resource pack. It uses a faction-colored display name instead. Existing armor needs reissuing with `/dune kit` to gain the new attributes.
+
+IMPORTANT: Code is source-only and not yet compiled or in-game tested.
+
+## Arrakis burning sun
+Players on Arrakis without all four stillsuit pieces (including a winged stillsuit Elytra chestpiece) ignite visually when standing in direct daytime sunlight. A 300-second continuous exposure timer kills them when it expires. Shade beneath a solid roof, caves, night, rain, wearing a full stillsuit, and leaving Arrakis stop exposure and reset the timer. Creative/spectator players are exempt. The burning effect is visual during the countdown: fire-tick damage is suppressed while exposed, so the countdown lasts the configured five minutes. The timer is in memory and resets on restart. Configure `arrakis-sun` in config.yml.
+
+## Contrasting faction armor trims and Ordos homeworld
+Each newly issued leather stillsuit piece receives a distinctive vanilla smithing armor trim, contrasting with its faction dye:
+
+| Faction | Base dye | Trim pattern | Trim material / visual color |
+|---|---|---|---|
+| Harkonnen | Red | Rib | Diamond / cyan |
+| Ordos | Green | Sentry | Redstone / red |
+| Atreides | Blue | Coast | Copper / orange |
+| Corrino | Purple | Spire | Gold / yellow |
+| Fremen | Orange | Dune | Lapis / blue |
+| Spacing Guild (reserved) | Black | Eye | Quartz / white |
+
+Ordos now starts and respawns on its own generated planet `sigma_draconis_iv` (Sigma Draconis IV), instead of Arrakis or Caladan. The world is automatically generated using the project's existing generic world generator; custom biome/terrain styling for Sigma Draconis IV is not yet implemented. The Spacing Guild remains a non-playable faction and does not receive its own kit through normal gameplay. Existing armor is not automatically upgraded; issue a fresh kit.
+
+The trims are Minecraft's built-in vanilla patterns, not custom resource-pack models. This source has not been compiled or tested on Paper.
+
+## Proxy mode
+See `NETWORK_SETUP.md` for the five-server Velocity topology, required per-server config, and critical shared-data limitations.

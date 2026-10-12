@@ -1,0 +1,34 @@
+# DuneRealms — proxy server deployment (prototype)
+
+Five separate Paper 1.21.x backend servers connect through a **Velocity** proxy. Each backend installs the same plugin JAR and uses a different `network.local-planet` value in its `config.yml`. Configure `network.servers` with the **exact Velocity server names**. The plugin now generates only its local planet when `network.enabled: true`.
+
+| Backend | `network.local-planet` | Velocity server name |
+|---|---|---|
+| Arrakis | `arrakis` | `arrakis` |
+| Giedi Prime | `giedi_prime` | `giedi-prime` |
+| Kaitain | `kaitain` | `kaitain` |
+| Caladan | `caladan` | `caladan` |
+| Sigma Draconis IV | `sigma_draconis_iv` | `sigma-draconis-iv` |
+
+Example Velocity `velocity.toml` excerpt:
+
+```toml
+[servers]
+arrakis = "127.0.0.1:25566"
+giedi-prime = "127.0.0.1:25567"
+kaitain = "127.0.0.1:25568"
+caladan = "127.0.0.1:25569"
+sigma-draconis-iv = "127.0.0.1:25570"
+try = ["arrakis"]
+
+[advanced]
+bungee-plugin-message-channel = true
+```
+
+Enable Velocity modern forwarding and configure each Paper backend for Velocity forwarding with the same forwarding secret. Block direct external access to backend ports. Players should connect only through the proxy. Check Velocity's current documentation for the exact forwarding options on your versions.
+
+The Spacing Guild menu uses the `BungeeCord` `Connect` plugin message to ask Velocity to switch servers. This is an asynchronous request **without delivery acknowledgment**. The current plugin deducts travel fare when requesting a transfer, even if the destination is offline.
+
+**Critical limitation — not production ready:** `players.yml`, hourly jobs, exchange listings, balances, and inventory are currently local to each backend. They do **not** synchronize across servers. A production network needs a shared authoritative database (e.g., MariaDB/PostgreSQL), transactional fare charges and payouts, cross-server inventory/player-data synchronization, and a proxy-side first-join/homeworld router. Without these, Solaris and contracts will differ between planets, and faction homeworld routing is not reliable. Do not deploy with a live economy until shared state and transfer confirmation are implemented.
+
+Sandworms and burning sun only activate in the world named `arrakis`. Server job definitions remain per-backend until centralized.

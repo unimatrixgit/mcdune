@@ -1,0 +1,5 @@
+# Unsanctioned travel to Arrakis
+
+All arrivals to Arrakis without a single-use Emperor permit are marked as smuggling. An Emperor-issued free-transport decree for the traveler’s faction causes a two-minute database permit to be created when using `/dune` travel; Arrakis consumes it upon arrival. Unpermitted arrivals trigger an Arrakis-wide alert and a one-time bounty claimable on PvP kill, equal to the configured one-bucket smuggler sale value (half the spice price, plus 45%).
+
+**Security and gameplay limitations:** This does not yet implement a proxy-side trusted arrival gate. Proxy redirects, server restarts, direct joins and returning Arrakis players without a fresh permit will be treated as smugglers. Only Emperor free-travel decrees count as sanctions; there is no separate imperial visa command. Alerts go to online players on Arrakis, not to offline users. The current bounty system has no expiry or anti-collusion protection. Permits are issued before transfer success is confirmed, and there is no refund/rollback handshake. The prior shared politics YAML still has race conditions. This is source-only and has not been compiled or tested.

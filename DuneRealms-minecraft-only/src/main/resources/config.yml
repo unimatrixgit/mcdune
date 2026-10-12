@@ -1,0 +1,48 @@
+spice-sell-price: 15
+travel-price: 100
+spice-respawn-seconds: 120
+
+# Sandworms spawn near players on Arrakis only.
+# Damage 30 and health 500 approximate Warden-level threat.
+sandworms:
+  enabled: true
+  health: 500.0
+  attack-damage: 30.0
+  max-per-world: 12
+  spawn-chance: 0.35
+
+# Arrakis solar exposure: 5 minutes of uninterrupted direct sunlight without a full stillsuit.
+arrakis-sun:
+  enabled: true
+  lethal-seconds: 300
+  warning-interval-seconds: 30
+
+# One Paper backend per planet, connected through Velocity's BungeeCord plugin messaging support.
+network:
+  enabled: true
+  local-planet: arrakis  # CHANGE for each backend
+  servers:
+    arrakis: arrakis
+    giedi_prime: giedi-prime
+    kaitain: kaitain
+    caladan: caladan
+    sigma_draconis_iv: sigma-draconis-iv
+
+# Prototype politics (state is LOCAL to each Paper server).
+# Do not enable multi-server elections/treasury until shared transactional storage is added.
+politics:
+  trust-levy: 0.0121
+  invasion-cost: 50000
+  invasion-minutes: 60
+  defenders-needed: 5
+  arrakis-edict-minutes: 60
+
+arrakis-water:
+  smuggler-retaliation-chance: 0.30
+  sietch-chunk-chance: 90
+
+database:
+  enabled: false
+  jdbc-url: "jdbc:postgresql://127.0.0.1:5432/dunerealms"
+  username: "dune"
+  password: "CHANGE_ME"
