@@ -1,7 +1,5 @@
 package com.example.dunerealms;
 
-import org.bukkit.block.Biome;
-import org.bukkit.generator.BiomeProvider;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.*;
@@ -34,6 +32,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.*;
+import org.bukkit.block.Biome;
+import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
 import org.bukkit.generator.LimitedRegion;
@@ -380,24 +380,14 @@ public final class DuneRealms extends JavaPlugin implements Listener, CommandExe
                 // Only the current Steward of Dune has legal spice travel privileges.
                 if(emperorSanctioned(p,planet)) {
                     if(sharedDatabase==null){p.sendMessage(ChatColor.RED+"Emperor-sanctioned travel requires shared database.");return;}
-                    
-try {
-    sharedDatabase.issueArrakisPermit(
-        p.getUniqueId(),
-        System.currentTimeMillis() + 120000L
-    );
-} catch (java.sql.SQLException e) {
-    getLogger().log(
-        java.util.logging.Level.SEVERE,
-        "Failed to issue Arrakis travel permit for " + p.getName(),
-        e
-    );
-    p.sendMessage(
-        ChatColor.RED + "Unable to authorize Arrakis travel. Please try again."
-    );
-    return true;
-}
-
+                    try {
+                        sharedDatabase.issueArrakisPermit(p.getUniqueId(), System.currentTimeMillis() + 120000L);
+                    } catch (java.sql.SQLException ex) {
+                        getLogger().log(java.util.logging.Level.SEVERE,
+                                "Failed to issue Arrakis travel permit for " + p.getName(), ex);
+                        p.sendMessage(ChatColor.RED + "Unable to authorize Arrakis travel. Please try again.");
+                        return;
+                    }
                 }
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                 DataOutputStream data = new DataOutputStream(bytes);
@@ -489,14 +479,7 @@ try {
         if (jobs.isEmpty()) { p.sendMessage("No jobs listed. Use /dune job post <spice quota>."); return; }
         for (Job j : jobs.values()) {
             String name = Bukkit.getOfflinePlayer(j.owner()).getName();
-           p.sendMessage(
-    ChatColor.YELLOW.toString()
-    + (name == null ? j.owner() : name)
-    + ": "
-    + (j.quota() - j.harvested())
-    + " spice remaining; /dune job accept "
-    + (name == null ? j.owner() : name)
-);
+            p.sendMessage(ChatColor.YELLOW.toString() + (name == null ? j.owner() : name) + ": " + (j.quota()-j.harvested()) + " spice remaining; /dune job accept " + (name == null ? j.owner() : name));
         }
     }
     private void jobCommand(Player p, String[] args) {
