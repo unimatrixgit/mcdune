@@ -584,15 +584,8 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             carveTunnel(region, x, hy - 3, z + 3, x, hy - 18, z + 7);
             carveRoom(region, x, hy - 21, z + 8, 5, 3, 5);
 
-            // A discreet surface entry descends into the central cavern; no ladder is used.
-            for (int step = 0; step <= 10; step++) {
-                int sx = x, sz = z - step / 3, sy = y - 1 - step;
-                carveRoom(region, sx, sy, sz, 1, 1, 1);
-            }
-            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
-                if (Math.abs(dx) + Math.abs(dz) > 3) continue;
-                set(region, x + dx, y, z + dz, (Math.abs(dx) == 2 || Math.abs(dz) == 2) ? Material.CUT_SANDSTONE : Material.AIR);
-            }
+            // A broad, rough cave mouth opens from the surface and slopes down into the hub.
+            carveCaveEntrance(region, x, z, hy);
 
             // A narrow waterfall drops from the hub into the deep reservoir.
             for (int dy = -4; dy >= -20; dy--) {
@@ -632,6 +625,37 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             }
         }
 
+        private static void carveCaveEntrance(LimitedRegion region, int x, int z, int hubY) {
+            int entryX = x + 6, entryZ = z - 7;
+            int outsideX = x + 11;
+            int surfaceY = region.getHighestBlockYAt(outsideX, entryZ);
+            int mouthY = Math.max(hubY + 4, surfaceY - 3);
+
+            // Hollow a rough chamber just behind the stone arch, then connect it to the hub.
+            carveRoom(region, entryX, mouthY, entryZ, 3, 2, 3);
+            carveCaveTunnel(region, outsideX, surfaceY - 1, entryZ, x + 6, mouthY, entryZ);
+            carveTunnel(region, x + 6, mouthY, entryZ, x, hubY + 1, z);
+
+            // Irregular stone and tuff form a visible cave arch around the entrance.
+            int faceX = x + 7;
+            for (int dy = -3; dy <= 3; dy++) for (int dz = -4; dz <= 4; dz++) {
+                double arch = dy * dy / 16.0 + dz * dz / 25.0;
+                if (arch > 1.35) continue;
+                if (arch < 0.72) {
+                    set(region, faceX, mouthY + dy, entryZ + dz, Material.AIR);
+                    continue;
+                }
+                long variation = mix64((long)(faceX + dz) * 341873128712L ^ (long)(mouthY + dy) * 132897987541L ^ 0x4341564541524348L);
+                Material rock = switch ((int)Math.floorMod(variation, 5)) {
+                    case 0 -> Material.TUFF;
+                    case 1 -> Material.ANDESITE;
+                    case 2 -> Material.COBBLED_DEEPSLATE;
+                    default -> Material.STONE;
+                };
+                set(region, faceX, mouthY + dy, entryZ + dz, rock);
+            }
+        }
+
         private static void carveTunnel(LimitedRegion region, double ax, double ay, double az, double bx, double by, double bz) {
             int steps = (int)Math.ceil(Math.sqrt((bx-ax)*(bx-ax) + (by-ay)*(by-ay) + (bz-az)*(bz-az)) * 1.5);
             for (int i = 0; i <= steps; i++) {
@@ -639,6 +663,16 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                 int cx = (int)Math.round(ax + (bx-ax)*t), cy = (int)Math.round(ay + (by-ay)*t), cz = (int)Math.round(az + (bz-az)*t);
                 for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++)
                     if (dx*dx + dy*dy + dz*dz <= 2) set(region, cx+dx, cy+dy, cz+dz, Material.AIR);
+            }
+        }
+
+        private static void carveCaveTunnel(LimitedRegion region, double ax, double ay, double az, double bx, double by, double bz) {
+            int steps = (int)Math.ceil(Math.sqrt((bx-ax)*(bx-ax) + (by-ay)*(by-ay) + (bz-az)*(bz-az)) * 1.5);
+            for (int i = 0; i <= steps; i++) {
+                double t = i / (double)Math.max(1, steps);
+                int cx = (int)Math.round(ax + (bx-ax)*t), cy = (int)Math.round(ay + (by-ay)*t), cz = (int)Math.round(az + (bz-az)*t);
+                for (int dx = -2; dx <= 2; dx++) for (int dy = -2; dy <= 2; dy++) for (int dz = -2; dz <= 2; dz++)
+                    if (dx*dx + dy*dy + dz*dz <= 4) set(region, cx+dx, cy+dy, cz+dz, Material.AIR);
             }
         }
 
