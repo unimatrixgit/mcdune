@@ -79,7 +79,7 @@ Each newly issued leather stillsuit piece receives a distinctive vanilla smithin
 
 Ordos starts and respawns on its own generated planet `sigma_draconis_iv` (Sigma Draconis IV). Its dark, snowy terrain profile is configured by DuneTerrain. The Spacing Guild remains a non-playable faction and does not receive its own kit through normal gameplay. Existing armor is not automatically upgraded; issue a fresh kit.
 
-Wearing a complete Ordos stillsuit and using an ender pearl activates Shadow Step: the player and armor are invisible for five seconds. The armor is returned after the effect, on logout, or when the plugin shuts down.
+Wearing a complete Ordos stillsuit and using an ender pearl activates Shadow Step: the player and armor are invisible for five seconds. The armor is returned after the effect, on logout, or when the plugin shuts down. The Ordos kit also includes a reusable Implosion Charge: its Wind Charge projectile primes TNT immediately on impact and replaces the charge in your inventory after launch.
 
 The trims are Minecraft's built-in vanilla patterns, not custom resource-pack models. This source has not been compiled or tested on Paper.
 

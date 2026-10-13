@@ -12,6 +12,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
@@ -31,6 +33,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.potion.*;
 import java.io.File;
@@ -270,6 +273,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         shovel.addUnsafeEnchantment(Enchantment.EFFICIENCY,5);
         shovel.addUnsafeEnchantment(Enchantment.UNBREAKING,3);
         p.getInventory().addItem(shovel);
+        if (faction.equalsIgnoreCase("Ordos"))
+            p.getInventory().addItem(custom(Material.WIND_CHARGE,"Ordos Implosion Charge","ordos_wind_charge"));
         for (Material m : new Material[]{Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE, Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS}) {
             ItemStack armor = custom(m, "Stillsuit " + m.name().toLowerCase(Locale.ROOT), "stillsuit");
             org.bukkit.inventory.meta.LeatherArmorMeta meta = (org.bukkit.inventory.meta.LeatherArmorMeta) armor.getItemMeta();
@@ -340,6 +345,37 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,100,0,true,false,true));
         ordosRevealTasks.put(id,Bukkit.getScheduler().runTaskLater(this,()->restoreOrdosArmor(id),100L));
         p.sendMessage(ChatColor.DARK_GREEN+"Shadow Step: invisible for five seconds.");
+    }
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void onOrdosChargeLaunch(ProjectileLaunchEvent event) {
+        Projectile projectile=event.getEntity();
+        if(!projectile.getType().name().equals("WIND_CHARGE")||!(projectile.getShooter() instanceof Player player))return;
+        if(!is(player.getInventory().getItemInMainHand(),"ordos_wind_charge")
+            &&!is(player.getInventory().getItemInOffHand(),"ordos_wind_charge"))return;
+        projectile.getPersistentDataContainer().set(itemKey,PersistentDataType.STRING,"ordos_wind_charge_projectile");
+        UUID playerId=player.getUniqueId();
+        Bukkit.getScheduler().runTaskLater(this,()->{
+            Player owner=Bukkit.getPlayer(playerId);
+            if(owner==null)return;
+            Map<Integer,ItemStack> leftovers=owner.getInventory().addItem(custom(Material.WIND_CHARGE,"Ordos Implosion Charge","ordos_wind_charge"));
+            for(ItemStack leftover:leftovers.values())owner.getWorld().dropItemNaturally(owner.getLocation(),leftover);
+        },1L);
+    }
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void onOrdosChargeHit(ProjectileHitEvent event) {
+        Projectile projectile=event.getEntity();
+        if(!"ordos_wind_charge_projectile".equals(projectile.getPersistentDataContainer().get(itemKey,PersistentDataType.STRING)))return;
+        Location impact=projectile.getLocation();
+        Block hit=event.getHitBlock();
+        if(hit!=null) {
+            Block target=hit.getRelative(event.getHitBlockFace()==null?org.bukkit.block.BlockFace.UP:event.getHitBlockFace());
+            if(target.isEmpty()||target.isPassable()) {
+                target.setType(Material.TNT);
+                impact=target.getLocation().add(0.5,0.5,0.5);
+                target.setType(Material.AIR);
+            }
+        }
+        ProjectileSource source=projectile.getShooter();
+        projectile.remove();
+        impact.getWorld().spawn(impact,TNTPrimed.class,tnt->{tnt.setFuseTicks(0);if(source instanceof Entity entity)tnt.setSource(entity);});
     }
     private void restoreOrdosArmor(UUID id) {
         BukkitTask task=ordosRevealTasks.remove(id);
