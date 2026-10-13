@@ -627,7 +627,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         Bukkit.getScheduler().runTask(this, () -> giveMenuItem(p));
         if (!selected.containsKey(p.getUniqueId()) || selected.get(p.getUniqueId()).isEmpty()) {
             p.sendMessage(ChatColor.GOLD + "Choose your faction with /dune choose <fremen|harkonnen|corrino|atreides>.");
-        });
+        }
         Bukkit.getScheduler().runTask(this, () -> {
             World localWorld = Bukkit.getWorld(localPlanet());
             if (p.isOnline() && localWorld != null && p.getWorld().getName().equalsIgnoreCase("world")) {
