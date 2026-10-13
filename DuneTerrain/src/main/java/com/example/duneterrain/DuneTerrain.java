@@ -7,6 +7,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.generator.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.io.File;
 import java.util.*;
 
 public final class DuneTerrain extends JavaPlugin {
@@ -27,6 +28,8 @@ public final class DuneTerrain extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        File worldFolder = new File(getServer().getWorldContainer(), planet);
+        boolean existingWorld = worldFolder.isDirectory();
         World world = Bukkit.createWorld(new WorldCreator(planet)
             .environment(World.Environment.NORMAL)
             .generator(new PlanetChunkGenerator(this, planet)));
@@ -38,7 +41,11 @@ public final class DuneTerrain extends JavaPlugin {
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, !planet.equals("arrakis"));
         world.setTime(planet.equals("giedi_prime") ? 18000 : 6000);
         setupPlanetSpawn(world, planet);
-        getLogger().info("DuneTerrain is generating " + planet + " on this Paper server.");
+        if (existingWorld) {
+            getLogger().warning("Loaded existing world '" + planet + "'. DuneTerrain only generates new chunks; existing terrain will remain unchanged. Back up and move the world folder, then restart, to regenerate it.");
+        } else {
+            getLogger().info("Created world '" + planet + "' with DuneTerrain.");
+        }
     }
 
     private void setupPlanetSpawn(World world, String planet) {
