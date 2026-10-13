@@ -11,7 +11,7 @@ A Dune-themed Minecraft Java plugin suite for **Paper 1.21.4 and Java 21**. Expl
 | Module | Version | Role |
 | --- | --- | --- |
 | DuneCore | 1.0.5 | Factions, stillsuits, sandworms, spice harvesting, sun exposure, water, politics, jobs, menus, and Guild announcements. |
-| DuneTerrain | 1.0.5 | Planet generation, Arrakis formations and landmarks, spice deposits, personal sietch caches, safe spawn, and the Guild navigator. |
+| DuneTerrain | 1.0.6 | Planet generation, Arrakis formations and landmarks, spice deposits, personal sietch caches, safe spawn, and the Guild navigator. |
 | DuneEss | 1.0.1 | Solaris economy through Vault, spice sales, Guild travel, help, and administrative travel/economy tools. |
 | DuneResourcePack.zip | Minecraft Java 1.21.4 | Desert Sniffer skin, haunted Fremen zombies, and spice-gold suspicious sand. |
 
@@ -28,7 +28,7 @@ For a planet used as Paper's primary world, configure its generator and biome pr
 ## What is implemented
 
 - Five playable factions: Fremen, Harkonnen, Corrino, Atreides, and Ordos, with homeworlds, passive abilities, faction-colored stillsuits, and a paid winged-stillsuit upgrade.
-- Arrakis dunes, sparse oasis trees, cave sietches with personal supplies, spice deposits, magma-marked blooms, and darkstone formations with **up to three flat plateaus and at most five blocks between levels**.
+- Arrakis dunes, sparse oasis trees, cave sietches with personal supplies, spice deposits, magma-marked blooms, and darkstone formations **about 100 blocks across, with up to three flat plateaus and at most five blocks between levels**. The old default sizes are automatically upgraded; already generated chunks keep their terrain.
 - Tagged spice harvesting and Solaris sales; CHOAM hourly quota contracts and a player-sponsored spice exchange with a 15% worker / 85% sponsor split.
 - Arrakis sun exposure, finite-water trading, imperial appointments, prototype politics and invasions, and optional PostgreSQL-backed permits and bounties.
 - **Visible Sniffer sandworms with native zombie AI**, provided by invisible Husk controllers. The Sniffer body can be fought and killed; its death produces a rich spice field and removes its controller.

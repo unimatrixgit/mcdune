@@ -267,6 +267,14 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
 
     @Override public void onEnable() {
         saveDefaultConfig();
+        String formations = "planets.arrakis.darkstone-islands.";
+        if (getConfig().getInt(formations + "min-radius") == 10
+            && getConfig().getInt(formations + "max-radius") == 18) {
+            getConfig().set(formations + "min-radius", 45);
+            getConfig().set(formations + "max-radius", 55);
+            saveConfig();
+            getLogger().info("Upgraded default Arrakis rock formations to about 100 blocks across in new chunks.");
+        }
         getServer().getPluginManager().registerEvents(this, this);
         guildKey = new NamespacedKey("dunerealms", "guild");
         sietchLootIdKey = new NamespacedKey(this, "sietch-loot-id");
@@ -454,8 +462,8 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             String path = "planets.arrakis.darkstone-islands.";
             if (!plugin.getConfig().getBoolean(path + "enabled", true)) return;
             int spacing = Math.max(128, plugin.getConfig().getInt(path + "spacing", 750));
-            int minRadius = Math.max(6, plugin.getConfig().getInt(path + "min-radius", 10));
-            int maxRadius = Math.max(minRadius, plugin.getConfig().getInt(path + "max-radius", 18));
+            int minRadius = Math.max(6, plugin.getConfig().getInt(path + "min-radius", 45));
+            int maxRadius = Math.max(minRadius, plugin.getConfig().getInt(path + "max-radius", 55));
             int maxRise = Math.max(1, plugin.getConfig().getInt(path + "max-height", 14));
             int baseHeight = plugin.getConfig().getInt("planets.arrakis.terrain.base-height", 70);
             double variation = plugin.getConfig().getDouble("planets.arrakis.terrain.height-variation", 11);

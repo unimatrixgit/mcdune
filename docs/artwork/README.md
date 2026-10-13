@@ -10,6 +10,16 @@ These assets were created with the built-in ImageGen tool for the Dune user manu
 | `sietch-panorama.png` | Wide sietch/reservoir chapter artwork. |
 | `item-icons-atlas.png` | 6x8 atlas: faction equipment, winged suits, core items, cache supplies and supporting objects. |
 | `menu-icons-atlas.png` | 4x4 atlas: Navigator and help-guide material icons. |
+| `expanded-formations.png` | Wide view of the new approximately 100-block-wide terraced formations. |
+| `spice-expedition.png` | Spice-bloom harvesting expedition panorama. |
+
+## Expanded formation prompt
+
+Premium Dune Minecraft field-manual panorama, 3:1 landscape with no text. A broad roughly circular dark basalt/blackstone mesa about 100 Minecraft blocks across but about 14 blocks tall, with exactly three sandy plateaus separated by four-to-five-block steps. Angular block geometry, sand caps, exposed darkstone walls, Arrakis dunes, a sparse oasis tree and a tiny orange-suited explorer for scale. Bird's-eye oblique view makes the footprint and levels clear. Warm sunrise ochre and charcoal, painted Minecraft concept art. No labels, UI, watermarks or invented buildings. The artwork is illustrative, not a terrain screenshot.
+
+## Spice expedition prompt
+
+Wide 3:1 Dune Minecraft panorama: an orange-suited Fremen with a dark netherite shovel beside a spice-gold suspicious-sand field. A magma cluster and glowstone center with modest spice dust suggest a newly erupted bloom. Distant desert-tan Sniffer-shaped worm and basalt formations, late-afternoon gold light, clear grounded perspective and painted block geometry. No typography, UI, watermarks, guns or invented cities. A manual illustration rather than a replacement game model.
 
 ## Cover prompt
 

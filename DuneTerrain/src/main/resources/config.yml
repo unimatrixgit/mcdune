@@ -40,7 +40,8 @@ planets:
     vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 0}
     oasis-trees: {enabled: true, spacing: 300, trunk-height: 7}
     # Nested flat terraces, hard capped at 3 levels and 5 blocks between levels.
-    darkstone-islands: {enabled: true, spacing: 750, min-radius: 10, max-radius: 18, max-height: 14, max-plateaus: 3, plateau-interval: 5}
+    # Radius 45-55 gives approximately 90-110 blocks across, including a rough edge.
+    darkstone-islands: {enabled: true, spacing: 750, min-radius: 45, max-radius: 55, max-height: 14, max-plateaus: 3, plateau-interval: 5}
     ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 2, IRON_ORE: 2, COPPER_ORE: 1}
   giedi_prime:
     enabled: true

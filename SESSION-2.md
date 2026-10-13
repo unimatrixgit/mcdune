@@ -4,6 +4,8 @@ The repository contains independent Gradle projects: `DuneTerrain` (world genera
 
 ## Rock formations
 
+DuneTerrain 1.0.6 enlarges the default radius to 45-55 blocks, giving formations about 90-110 blocks across. Existing configs using the old 10/18 defaults are automatically upgraded on enable. Customized radii and already generated chunks are preserved.
+
 New Arrakis darkstone formations have one to three concentric, sand-topped flat plateaus. Heights between plateaus are at most five blocks. The count and shape are deterministic across chunk boundaries. Configure `planets.arrakis.darkstone-islands.max-plateaus` and `plateau-interval` in DuneTerrain; the hard caps still apply to larger values. The existing `max-height` also limits total rise above the surrounding high ground. Existing generated chunks retain their terrain.
 
 ## Arrakis sightings

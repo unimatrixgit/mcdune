@@ -19,13 +19,13 @@ class RockPlateausTest {
     }
 
     @Test void terracesAreFlatAndStepDownTowardEdge() {
-        for (int count = 1; count <= 3; count++) {
-            assertEquals(count, RockPlateaus.level(0, 18, count));
-            assertEquals(0, RockPlateaus.level(18, 18, count));
+        for (double radius : new double[]{18, 45, 50, 55}) for (int count = 1; count <= 3; count++) {
+            assertEquals(count, RockPlateaus.level(0, radius, count));
+            assertEquals(0, RockPlateaus.level(radius, radius, count));
             int previous = count;
             java.util.Set<Integer> levels = new java.util.HashSet<>();
             for (int sample = 0; sample <= 1800; sample++) {
-                int level = RockPlateaus.level(sample / 100.0, 18, count);
+                int level = RockPlateaus.level(sample * radius / 1800.0, radius, count);
                 assertTrue(level <= previous && previous - level <= 1);
                 levels.add(level);
                 previous = level;
