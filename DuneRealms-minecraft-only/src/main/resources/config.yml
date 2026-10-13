@@ -60,3 +60,10 @@ database:
   jdbc-url: "jdbc:postgresql://127.0.0.1:5432/dunerealms"
   username: "dune"
   password: "CHANGE_ME"
+
+# Roaming Arrakis traders: native wandering-trader AI and local persistent delivery contracts.
+smugglers:
+  enabled: true
+  max-traders: 6
+  spice-amount: 64
+  water-amount: 4

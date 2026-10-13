@@ -102,3 +102,31 @@ give one test spice item, reload `gui.yml`, issue your selected faction kit, and
 Actions use the existing command checks. Both opening the menu and clicking a control require operator status;
 granting only `dune.admin` does not enable this menu. A deopped player cannot use a retained rod.
 The blaze rod has custom model data 1006, a gold name and enchantment glint; its current appearance uses the vanilla blaze rod texture.
+
+### Roaming smugglers and Imperial spice charter (DuneCore 1.0.7)
+Arrakis wandering traders become **Arrakis Smugglers**. Their vanilla AI roams toward new
+nearby destinations each minute; up to six are maintained in loaded chunks near players by default.
+Right-click a smuggler to select one active delivery contract:
+
+- **The Unmarked Spice Run**: carry 64 tagged spice to another smuggler, past the Imperial ledgers.
+- **Water for the Hidden Sietch**: carry four tagged finite-source Arrakis water buckets to supply a hidden sietch.
+
+The receiving trader must be a different entity and at least 64 horizontal blocks from the departure location.
+Deliver by clicking the active contract in its menu. Default rewards are 1,392 Solaris for spice and
+41 Solaris for water, before the existing Trust levy (45% above the commodity's normal base value, rounded).
+Only the required cargo is consumed; water deliveries return empty buckets. The existing smuggling bounty
+system is called after delivery and requires PostgreSQL to track bounties across servers.
+The lore is in-game mission dialogue; these contracts do not generate additional sietch structures.
+
+`/dune smuggle status` shows cargo, departure and reward; `/dune smuggle cancel` abandons a contract without taking cargo.
+Contracts save to `smuggling.yml` and survive restarts on the Arrakis backend; they do not transfer between backends.
+Appointments are checked when opening, accepting and delivering. Members of the Emperor-appointed Spice Steward
+or House of Water receive no smuggling offers. Their normal `/duneess sell` spice sales instead receive **+33% gross
+value before the Trust levy**, rounded to the nearest Solaris. An appointment gained mid-contract blocks delivery;
+the contract can still be cancelled. Expired appointments remove the bonus automatically.
+
+`smugglers.enabled`, `smugglers.max-traders`, `smugglers.spice-amount`, and `smugglers.water-amount` control this system.
+Existing config files use the defaults when these keys are missing. Restart after editing.
+Enable the updated resource pack for the sand-tan smuggler robes, face covering and leather equipment.
+Vanilla packs replace the texture of **all wandering traders**, including those on other planets; mission behavior is Arrakis-only.
+Without the pack the same missions work with the vanilla trader appearance.

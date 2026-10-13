@@ -59,6 +59,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private final Map<UUID, Integer> sunExposureSeconds = new HashMap<>();
     private ConfigurableGui gui;
     private AdminGui adminGui;
+    private Smugglers smugglers;
     private Politics politics;
     private SharedDatabase sharedDatabase;
     public SharedDatabase sharedDatabase(){return sharedDatabase;}
@@ -107,6 +108,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         duneCommand.setTabCompleter(this);
         Bukkit.getPluginManager().registerEvents(this, this);
         adminGui = new AdminGui(this);
+        smugglers = new Smugglers(this, economy, politics);
         announcements = new ArrakisAnnouncements(this);
         sandwormMobs = new SandwormMobs(this, wormKey);
         World loadedArrakis = Bukkit.getWorld("arrakis");
@@ -415,7 +417,16 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     }
     public int spiceSellPrice() { org.bukkit.plugin.Plugin p=Bukkit.getPluginManager().getPlugin("DuneEss"); return p instanceof JavaPlugin j ? Math.max(1,j.getConfig().getInt("currency.spice-price",15)) : 15; }
     public int travelPrice() { org.bukkit.plugin.Plugin p=Bukkit.getPluginManager().getPlugin("DuneEss"); return p instanceof JavaPlugin j ? Math.max(0,j.getConfig().getInt("currency.travel-price",100)) : 100; }
-    public int processSpiceSale(Player p,int gross) { if(!politics.isAuthorizedSpice(selected.getOrDefault(p.getUniqueId(),"")))reportSmuggling(p,"SPICE",gross); return Math.max(0,gross-politics.levy(p.getUniqueId(),gross)); }
+    public int processSpiceSale(Player p,int gross) {
+        String house = factionOf(p);
+        boolean sanctioned = politics.isAuthorizedSpice(house) || politics.isAuthorizedWater(house);
+        int adjusted = sanctionedSpiceGross(gross, sanctioned);
+        if (!sanctioned) reportSmuggling(p, "SPICE", adjusted);
+        return Math.max(0, adjusted - politics.levy(p.getUniqueId(), adjusted));
+    }
+    static int sanctionedSpiceGross(int gross, boolean sanctioned) {
+        return (int) Math.min(Integer.MAX_VALUE, Math.round(Math.max(0, gross) * (sanctioned ? 1.33 : 1.0)));
+    }
     public boolean hasFreeArrakisTravel(Player p) { return emperorSanctioned(p,"arrakis"); }
     public boolean authorizeArrakisTravel(Player p) { if(!emperorSanctioned(p,"arrakis"))return true; if(sharedDatabase==null)return false; try{sharedDatabase.issueArrakisPermit(p.getUniqueId(),System.currentTimeMillis()+120000L);return true;}catch(java.sql.SQLException ex){getLogger().warning("Could not issue Arrakis permit: "+ex.getMessage());return false;} }
     public void enforceArrakisArrival(Player player) { checkArrakisArrival(player); }
@@ -479,6 +490,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
                 selected.put(p.getUniqueId(), match); economy.createPlayerAccount(p); savePlayers(); kit(p); factionArrival(p, planets[Arrays.asList(factions).indexOf(match)]);
                 p.sendMessage(ChatColor.GREEN + "You joined " + match + "!");
             }
+            case "smuggle" -> smugglers.command(p, args);
             case "elytra" -> mergeElytra(p);
             case "kit" -> { if (!selected.containsKey(p.getUniqueId())) { p.sendMessage("Choose a faction first."); break; } kit(p); }
             case "politics", "trust" -> politics.command(p, args);
@@ -517,7 +529,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
 
         helpSection(sender, "Solaris and spice");
         helpLine(sender, "/duneess balance", "Check your Solaris balance.");
-        helpLine(sender, "/duneess sell", "Sell tagged spice from your inventory for Solaris.");
+        helpLine(sender, "/duneess sell", "Sell tagged spice; Imperial-sanctioned houses receive +33% before levy.");
+        helpLine(sender, "/dune smuggle status | cancel", "Check or abandon your roaming smuggler delivery contract.");
         helpLine(sender, "/dune exchange", "Open the player-posted spice job exchange.");
 
         helpSection(sender, "Politics");
@@ -573,7 +586,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         String root = args[0].toLowerCase(Locale.ROOT);
         if (args.length == 1) {
             List<String> commands = new ArrayList<>(List.of("help", "choose", "elytra", "kit", "politics", "trust", "water",
-                "menu", "gui", "menuitem", "exchange", "serverjobs", "job"));
+                "menu", "gui", "menuitem", "exchange", "serverjobs", "job", "smuggle"));
             if (sender.hasPermission("dune.admin")) commands.addAll(List.of("guireload", "guildnpc", "givespice", "summon", "admin", "adminitem"));
             return matching(commands, args[0]);
         }

@@ -1,6 +1,6 @@
 plugins { java }
 group = "com.example"
-version = "1.0.6"
+version = "1.0.7"
 repositories { mavenCentral(); maven("https://repo.papermc.io/repository/maven-public/"); maven("https://jitpack.io") }
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")

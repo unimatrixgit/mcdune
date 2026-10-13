@@ -54,9 +54,13 @@ public final class Politics {
     public synchronized int levy(UUID player,int gross) {
         refresh();
         if (gross<=0) return 0;
-        int fee=(int)Math.ceil(gross*plugin.getConfig().getDouble("politics.trust-levy",0.0121));
+        int fee=levyAmount(gross);
         state.set("trust",state.getLong("trust")+fee); save();
         return fee;
+    }
+    public int levyAmount(int gross) {
+        double rate = Math.max(0, Math.min(1, plugin.getConfig().getDouble("politics.trust-levy", 0.0121)));
+        return (int) Math.ceil(Math.max(0, gross) * rate);
     }
     /** The appointments expire automatically when a new election week or Emperor changes. */
     private boolean appointed(String key,String house) {
