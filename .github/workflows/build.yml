@@ -112,7 +112,8 @@ jobs:
           Contents: DuneCore, DuneEss, and DuneTerrain plugin JARs, plus DuneResourcePack.zip.
 
           Install all three JARs in the Paper server's plugins/ folder and restart the server.
-          Install the included resource pack on the client for sandworm, haunted Fremen, and spice textures.
+          Install the included resource pack on vanilla or Fabric 1.21.4 clients for sandworm, haunted Fremen, and spice textures.
+          On Fabric, put the ZIP in .minecraft/resourcepacks and enable it in Options > Resource Packs; do not put it in mods/.
           DuneEss provides the Vault economy service; install the Vault plugin as well.
 
           Compatible build target: Paper 1.21.4, Java 21.
