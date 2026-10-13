@@ -75,3 +75,12 @@ Decoded schema:
 Run `node --test tests/feed-api.test.mjs` for unconnected state, multipart assembly, author filtering, partial/stale rejection and malformed offer validation. Run the Core Gradle tests for publisher encoding and existing gameplay regressions. Live DiscordSRV delivery requires a running server and configured channels.
 
 Primary references: [DiscordSRV broadcast command](https://docs.discordsrv.com/commands/), [Discord Get Channel Messages](https://github.com/discord/discord-api-docs/blob/main/developers/resources/message.mdx), [Discord permissions](https://github.com/discord/discord-api-docs/blob/main/developers/topics/permissions.mdx).
+
+
+## Diplomacy register (DuneCore 1.0.10)
+
+Set `website.discord.diplomacy-channel-id` to a dedicated Discord channel and configure the matching secret `DISCORD_DIPLOMACY_CHANNEL_ID` in Sites. Retain the existing server-side bot token and publisher ID. The same bot must have View Channel and Read Message History on that channel. No bot token belongs in browser files. The opt-in `website.discord.enabled` switch remains required. The Arrakis backend publishes a snapshot every 60 seconds via DiscordSRV.
+
+`DUNE_DIPLOMACY <snapshot-id> <part>/<total> <base64>` uses the same gzip multipart format as exchange. The JSON type is `dune_diplomacy` with `updatedAt`, `electionWeek`, `leaders` (five faction/name pairs), `emperor`, `spiceSteward`, `houseOfWater`. Unelected/unappointed offices are null. Appointments are factions, not individual players. Expired appointments are excluded. Ballots, voter identities and UUIDs are not exported.
+
+The website verifies publisher identity, full multipart delivery, supported faction names and snapshot freshness (five minutes). Missing configuration displays Server not connected; absent fresh records display awaiting snapshot. It does not guess current offices from chat messages. This is a read-only view: voting, appointments and diplomatic actions remain in Minecraft. The existing local/shared politics prototype limitations still apply.

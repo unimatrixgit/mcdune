@@ -4,7 +4,7 @@
 
 A Dune-themed Minecraft Java plugin suite for **Paper 1.21.4 and Java 21**. Explore Arrakis, harvest melange, join a faction, trade through the Spacing Guild, and encounter Shai-Hulud.
 
-**[Project Dune website](https://project-dune.bonnystoat9.chatgpt.site)** — illustrated landing page, searchable online manual, Races & Houses, Exchange and News. The Site currently requires owner access through ChatGPT. Live feeds show “server not connected” until configured; see [DiscordSRV integration](website/DISCORD-FEEDS.md).
+**[Project Dune website](https://project-dune.bonnystoat9.chatgpt.site)** — illustrated landing page, searchable online manual, Races & Houses, Exchange and News. The website is public; profiles and private support tickets require sign-in. Live feeds show “server not connected” until configured; see [DiscordSRV integration](website/DISCORD-FEEDS.md).
 
 **[Read the illustrated user manual](docs/Dune-User-Manual.pdf)** for the complete player and administrator guide, command reference, default configuration, 77 pages, 68 illustrated item and interface icons, ornate Minecraft-inspired House and spice backgrounds, and reserved chapters for the other planets.
 
@@ -175,3 +175,6 @@ and links back to the Dune admin menu. `/dunenpc smuggle status|cancel` is avail
 All missions last **30 real minutes**, including offline/server downtime. Older contracts receive
 one 30-minute deadline on migration. Remaining time appears in the contract menu and status command.
 Expiry pays nothing, keeps cargo, and clears the camp once its last contract ends.
+
+Sietch Armoury now has its own page with all 68 item entries and full suit abilities. Diplomacy displays current leaders, Emperor, Spice Steward and House of Water through the opt-in DuneCore 1.0.10 DiscordSRV snapshot bridge. Configure the dedicated diplomacy channel as described in website/DISCORD-FEEDS.md.
+

@@ -24,7 +24,7 @@ final class DiscordWebFeed implements Listener {
     DiscordWebFeed(DuneCore plugin) { this.plugin = plugin; }
     void start() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        Bukkit.getScheduler().runTaskTimer(plugin, this::exchange, 200L, 1200L);
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> { exchange(); diplomacy(); }, 200L, 1200L);
     }
     boolean enabled() { return plugin.getConfig().getBoolean("website.discord.enabled", false)
         && Bukkit.getPluginManager().isPluginEnabled("DiscordSRV"); }
@@ -58,6 +58,21 @@ final class DiscordWebFeed implements Listener {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "discordsrv broadcast #" + channel + " " + content);
     }
     static List<String> encode(String json) throws IOException {
+        return encode(json, "DUNE_EXCHANGE");
+    }
+    private void diplomacy() {
+        if (!enabled() || plugin.politics() == null) return;
+        if (!plugin.getConfig().getString("network.local-planet", "arrakis").equalsIgnoreCase("arrakis")) return;
+        try {
+            for (String part : encode(gson.toJson(plugin.politics().websiteSnapshot()), "DUNE_DIPLOMACY"))
+                send("diplomacy-channel-id", part);
+        } catch (IOException | IllegalArgumentException ex) {
+            plugin.getLogger().warning("Website diplomacy snapshot skipped: " + ex.getMessage());
+        }
+    }
+    static List<String> encode(String json, String prefix) throws IOException {
+        if (!prefix.equals("DUNE_EXCHANGE") && !prefix.equals("DUNE_DIPLOMACY"))
+            throw new IllegalArgumentException("Unsupported website snapshot type");
         byte[] raw = json.getBytes(StandardCharsets.UTF_8);
         if (raw.length > 2_000_000) throw new IllegalArgumentException("Market exceeds the supported 2 MB snapshot limit");
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -67,7 +82,7 @@ final class DiscordWebFeed implements Listener {
         if (parts > 90) throw new IllegalArgumentException("Market exceeds 90 Discord snapshot parts");
         String id = UUID.randomUUID().toString();
         List<String> messages = new ArrayList<>();
-        for (int i = 0; i < parts; i++) messages.add("DUNE_EXCHANGE " + id + " " + (i + 1) + "/" + parts + " "
+        for (int i = 0; i < parts; i++) messages.add(prefix + " " + id + " " + (i + 1) + "/" + parts + " "
             + payload.substring(i * 1700, Math.min((i + 1) * 1700, payload.length())));
         return messages;
     }

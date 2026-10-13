@@ -67,3 +67,4 @@ website:
     enabled: false
     exchange-channel-id: ""
     news-channel-id: ""
+    diplomacy-channel-id: ""

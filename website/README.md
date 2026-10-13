@@ -14,3 +14,5 @@ Art is reused from the Project Dune manual and optimized into WebP. Concept-art 
 
 See [Forums and player support](FORUMS-PORTAL.md) for independent forums, the YouSMP Discord page and private profile-based tickets.
 
+
+The standalone [Sietch Armoury](https://project-dune.bonnystoat9.chatgpt.site/armoury.html) contains all 68 illustrated item entries and full suit abilities. [Diplomacy](https://project-dune.bonnystoat9.chatgpt.site/diplomacy.html) reads the DuneCore 1.0.10 current-office snapshot via a dedicated DiscordSRV channel.

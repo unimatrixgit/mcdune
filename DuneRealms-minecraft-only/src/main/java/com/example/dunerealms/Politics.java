@@ -180,4 +180,51 @@ public final class Politics {
     }
     public String leader(String house) {refresh();return winnerName("votes.house."+week()+"."+house);}
     public String emperor() {refresh();return winnerName("votes.emperor."+week());}
+    /** Public current offices only: never export UUIDs, ballot records or expired appointments. */
+    public synchronized Map<String,Object> websiteSnapshot() {
+        refresh();
+        return publicSnapshot(state, week());
+    }
+    static Map<String,Object> publicSnapshot(YamlConfiguration record, long bucket) {
+        Map<String,Object> snapshot = new LinkedHashMap<>();
+        snapshot.put("type", "dune_diplomacy");
+        snapshot.put("updatedAt", Instant.now().toString());
+        snapshot.put("electionWeek", bucket);
+        List<Map<String,Object>> leaders = new ArrayList<>();
+        for (String house : HOUSES) {
+            Map<String,Object> office = new LinkedHashMap<>();
+            office.put("faction", house);
+            office.put("leader", publicWinnerName(record, "votes.house."+bucket+"."+house));
+            leaders.add(office);
+        }
+        snapshot.put("leaders", leaders);
+        String emperorPrefix = "votes.emperor."+bucket;
+        String emperorId = recordWinnerId(record, emperorPrefix);
+        snapshot.put("emperor", publicWinnerName(record, emperorPrefix));
+        for (String key : new String[]{"steward", "water"}) {
+            String root = "appointments."+key;
+            String appointedHouse = record.getString(root+".house", "");
+            boolean valid = !emperorId.isBlank() && record.getLong(root+".week", -1)==bucket
+                && emperorId.equals(record.getString(root+".emperor", ""))
+                && Arrays.asList(HOUSES).contains(appointedHouse);
+            snapshot.put(key.equals("steward")?"spiceSteward":"houseOfWater", valid?appointedHouse:null);
+        }
+        return snapshot;
+    }
+    private static String recordWinnerId(YamlConfiguration record, String prefix) {
+        var tally = record.getConfigurationSection(prefix+".tally");
+        if (tally == null) return "";
+        String best=""; int score=0;
+        for (String id : tally.getKeys(false)) {
+            int n=tally.getInt(id);
+            if(n>score || (n==score && id.compareTo(best)<0)){best=id;score=n;}
+        }
+        return best;
+    }
+    private static String publicWinnerName(YamlConfiguration record, String prefix) {
+        String id=recordWinnerId(record,prefix);
+        if(id.isBlank()) return null;
+        String name=record.getString(prefix+".names."+id, "Unknown player");
+        return name.matches("[A-Za-z0-9_]{1,32}")?name:"Unknown player";
+    }
 }
