@@ -1,1 +1,1 @@
-rootProject.name = "DuneRealms"
+rootProject.name = "DuneCore"

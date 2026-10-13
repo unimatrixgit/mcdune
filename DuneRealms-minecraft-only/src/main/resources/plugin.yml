@@ -1,8 +1,9 @@
-name: DuneRealms
+name: DuneCore
 version: 1.0.0
-main: com.example.dunerealms.DuneRealms
+main: com.example.dunerealms.DuneCore
 api-version: '1.21'
-description: Dune-inspired factions, spice, planets and Guild travel
+softdepend: [DuneTerrain]
+description: Dune-inspired factions, spice economy, politics and Guild travel
 commands:
   dune:
     description: Dune realms commands

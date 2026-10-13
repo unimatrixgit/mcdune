@@ -7,6 +7,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.4")
 }
 tasks.jar {
+    archiveBaseName.set("DuneCore")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(configurations.runtimeClasspath.get().map { if(it.isDirectory) it else zipTree(it) })
 }

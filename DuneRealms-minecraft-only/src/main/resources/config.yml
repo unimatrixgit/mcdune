@@ -19,8 +19,8 @@ arrakis-sun:
 
 # One Paper backend per planet, connected through Velocity's BungeeCord plugin messaging support.
 network:
-  enabled: false
-  local-planet: arrakis  # CHANGE for each backend
+  enabled: true
+  local-planet: arrakis  # Match server.planet in DuneTerrain on this backend
   servers:
     arrakis: arrakis
     giedi_prime: giedi-prime

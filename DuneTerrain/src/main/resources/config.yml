@@ -1,0 +1,62 @@
+# Set this separately on each Paper backend.
+# Accepted values: arrakis, giedi_prime, kaitain, caladan, sigma_draconis_iv
+server:
+  planet: arrakis
+
+guild-npc:
+  enabled: true
+
+spice-deposits:
+  per-chunk: 2
+
+planets:
+  arrakis:
+    enabled: true
+    spawn: {x: 0, z: 0}
+    terrain: {base-height: 70, height-variation: 11, noise-scale: 0.02}
+    biome: DESERT
+    surface: SAND
+    filler: RED_SAND
+    water: {level: 63, swamp-pools: false, coverage: 0.18}
+    vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 0}
+    ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 2, IRON_ORE: 2, COPPER_ORE: 1}
+  giedi_prime:
+    enabled: true
+    spawn: {x: 0, z: 0}
+    terrain: {base-height: 61, height-variation: 5, noise-scale: 0.02}
+    biome: SWAMP
+    surface: BLACKSTONE
+    filler: DEEPSLATE
+    water: {level: 63, swamp-pools: true, coverage: 0.18}
+    vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 0}
+    ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 14, IRON_ORE: 12, COPPER_ORE: 9, GOLD_ORE: 7, REDSTONE_ORE: 8, LAPIS_ORE: 5, DIAMOND_ORE: 4, EMERALD_ORE: 2}
+  kaitain:
+    enabled: true
+    spawn: {x: 0, z: 0}
+    terrain: {base-height: 70, height-variation: 3, noise-scale: 0.02}
+    biome: PLAINS
+    surface: GRASS_BLOCK
+    filler: DIRT
+    water: {level: 0, swamp-pools: false, coverage: 0.18}
+    vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 64}
+    ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 4, IRON_ORE: 5, GOLD_ORE: 15, DIAMOND_ORE: 18, EMERALD_ORE: 3}
+  caladan:
+    enabled: true
+    spawn: {x: 0, z: 0}
+    terrain: {base-height: 67, height-variation: 10, noise-scale: 0.02}
+    biome: JUNGLE
+    surface: GRASS_BLOCK
+    filler: DIRT
+    water: {level: 72, swamp-pools: true, coverage: 0.55}
+    vegetation: {trees: true, tree-chance: 0.035, flowers-per-chunk: 0}
+    ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 4, IRON_ORE: 5, COPPER_ORE: 5, DIAMOND_ORE: 2}
+  sigma_draconis_iv:
+    enabled: true
+    spawn: {x: 0, z: 0}
+    terrain: {base-height: 72, height-variation: 14, noise-scale: 0.02}
+    biome: SNOWY_PLAINS
+    surface: SNOW_BLOCK
+    filler: DEEPSLATE
+    water: {level: 0, swamp-pools: false, coverage: 0.18}
+    vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 0}
+    ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 5, IRON_ORE: 5, COPPER_ORE: 2, DIAMOND_ORE: 2}

@@ -15,15 +15,15 @@ import java.util.*;
 
 /** Finite, naturally generated Arrakis water caches and two water-trading careers. */
 public final class ArrakisWater implements Listener {
-    private final DuneRealms plugin;
+    private final DuneCore plugin;
     private final NamespacedKey waterKey;
     private final Map<UUID, String> careers = new HashMap<>();
     private final Map<UUID,Integer> money;
     private final Runnable save;
     private final Politics politics;
-    ArrakisWater(DuneRealms plugin,Map<UUID,Integer> money,Runnable save,Politics politics) {
+    ArrakisWater(DuneCore plugin,Map<UUID,Integer> money,Runnable save,Politics politics) {
         this.plugin=plugin;this.money=money;this.save=save;this.politics=politics;
-        waterKey=new NamespacedKey(plugin,"finite_arrakis_water");
+        waterKey=new NamespacedKey("dunerealms","finite_arrakis_water");
     }
     private boolean arrakis(World w){return w.getName().equalsIgnoreCase("arrakis");}
     public static final class SietchPopulator extends BlockPopulator {

@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-core:
     runs-on: ubuntu-latest
 
     defaults:
@@ -35,6 +35,32 @@ jobs:
       - name: Upload compiled JAR
         uses: actions/upload-artifact@v4
         with:
-          name: DuneRealms-Plugin
+          name: DuneCore-Plugin
           path: DuneRealms-minecraft-only/build/libs/*.jar
+          if-no-files-found: error
+
+  build-terrain:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: DuneTerrain
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
+      - name: Compile DuneTerrain
+        run: gradle clean build
+      - name: Upload compiled JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuneTerrain-Plugin
+          path: DuneTerrain/build/libs/*.jar
           if-no-files-found: error

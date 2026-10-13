@@ -14,7 +14,7 @@ import java.util.*;
 
 /** Data-driven chest GUI with allowlisted actions; never executes arbitrary console commands. */
 final class ConfigurableGui {
-    private final DuneRealms plugin;
+    private final DuneCore plugin;
     private final ServerJobs serverJobs;
     private final Map<UUID,Integer> money;
     private final Map<UUID,?> jobs;
@@ -24,7 +24,7 @@ final class ConfigurableGui {
     private final Map<UUID, String> opened = new HashMap<>();
     private final Map<UUID, Map<Integer,String>> actions = new HashMap<>();
 
-    ConfigurableGui(DuneRealms plugin, ServerJobs serverJobs, Map<UUID,Integer> money,
+    ConfigurableGui(DuneCore plugin, ServerJobs serverJobs, Map<UUID,Integer> money,
                     Map<UUID,?> jobs, String[] planets, String[] factions, Map<UUID,String> selected) {
         this.plugin=plugin; this.serverJobs=serverJobs; this.money=money; this.jobs=jobs;
         this.planets=planets; this.factions=factions; this.selected=selected;
