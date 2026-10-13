@@ -90,3 +90,38 @@ jobs:
           name: DuneEss-Plugin
           path: DuneEss/build/libs/*.jar
           if-no-files-found: error
+
+  package-server:
+    runs-on: ubuntu-latest
+    needs: [build-core, build-ess, build-terrain]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Download all plugin JARs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Dune*-Plugin
+          path: DuneRealms-Server-Package
+          merge-multiple: true
+      - name: Add resource pack and install instructions
+        run: |
+          cp DuneResourcePack.zip DuneRealms-Server-Package/
+          cat > DuneRealms-Server-Package/README.txt <<'EOF'
+          DuneRealms Paper server package
+
+          Contents: DuneCore, DuneEss, and DuneTerrain plugin JARs, plus DuneResourcePack.zip.
+
+          Install all three JARs in the Paper server's plugins/ folder and restart the server.
+          Install the included resource pack on the client for sandworm, haunted Fremen, and spice textures.
+          DuneEss provides the Vault economy service; install the Vault plugin as well.
+
+          Compatible build target: Paper 1.21.4, Java 21.
+          See https://github.com/unimatrixgit/mcdune for setup and configuration details.
+          EOF
+      - name: Upload one downloadable server package
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuneRealms-Server-Package
+          path: DuneRealms-Server-Package/
+          if-no-files-found: error
+          retention-days: 90
