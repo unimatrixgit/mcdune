@@ -7,6 +7,30 @@ on:
     branches: [main]
 
 jobs:
+  build-website:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the illustrated website and API
+        run: node scripts/build.mjs
+      - name: Test feeds and compiled pages
+        run: node --test tests/*.test.mjs
+      - name: Upload website build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Project-Dune-Website
+          path: website/dist/
+          include-hidden-files: true
+          if-no-files-found: error
+
   build-core:
     runs-on: ubuntu-latest
 
@@ -143,6 +167,7 @@ jobs:
           cp docs/Dune-Complete-Illustrated-Manual.pdf DuneRealms-Server-Package/
           cp docs/posters/*.png DuneRealms-Server-Package/
           cp README.md DuneRealms-Server-Package/Project-README.md
+          cp website/DISCORD-FEEDS.md DuneRealms-Server-Package/DiscordSRV-Website-Setup.md
           cat > DuneRealms-Server-Package/README.txt <<'EOF'
           DuneRealms Paper server package
 

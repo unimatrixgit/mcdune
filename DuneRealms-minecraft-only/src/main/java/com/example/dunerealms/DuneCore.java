@@ -69,6 +69,29 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private ArrakisWater arrakisWater;
     private ArrakisAnnouncements announcements;
     private SandwormMobs sandwormMobs;
+    private DiscordWebFeed discordWebFeed;
+    void websiteNews(String message) { if (discordWebFeed != null) discordWebFeed.news(message); }
+    Map<String, Object> websiteExchangeSnapshot() {
+        List<Map<String, Object>> offers = new ArrayList<>();
+        for (Job job : jobs.values()) {
+            String name = Bukkit.getOfflinePlayer(job.owner()).getName();
+            Map<String, Object> offer = new LinkedHashMap<>();
+            offer.put("id", job.owner().toString()); offer.put("type", "contract"); offer.put("item", "Melange Spice");
+            offer.put("owner", name == null ? job.owner().toString() : name);
+            offer.put("quantity", Math.max(0, job.quota() - job.harvested())); offer.put("price", null);
+            offer.put("status", activeWorkers.containsValue(job.owner()) ? "claimed" : "open");
+            offer.put("description", "Player-sponsored harvesting contract. 15% worker / 85% sponsor. Accept in Minecraft.");
+            offers.add(offer);
+        }
+        org.bukkit.plugin.Plugin ess = Bukkit.getPluginManager().getPlugin("DuneEss");
+        double basePrice = ess instanceof JavaPlugin javaPlugin ? javaPlugin.getConfig().getDouble("currency.spice-price", 15) : 15;
+        Map<String, Object> sale = new LinkedHashMap<>();
+        sale.put("id", "standing-spice-sale"); sale.put("type", "sell"); sale.put("item", "Melange Spice");
+        sale.put("owner", "Solaris economy"); sale.put("quantity", null); sale.put("price", basePrice); sale.put("status", "standing");
+        sale.put("description", "Sell tagged spice with /duneess sell. Base price before Imperial bonuses and Trust levy.");
+        offers.add(sale);
+        return Map.of("type", "dune_exchange", "updatedAt", java.time.Instant.now().toString(), "offers", offers);
+    }
 
     public void announceArrakisEvent(String kind, Location location, String identity) {
         if (announcements != null) announcements.announce(kind, location, identity);
@@ -97,6 +120,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             catch(Exception ex){getLogger().severe("Shared database required but unavailable: "+ex.getMessage());getServer().getPluginManager().disablePlugin(this);return;}
         }
         politics = new Politics(this, selected, economy, sharedDatabase);
+        discordWebFeed = new DiscordWebFeed(this);
+        discordWebFeed.start();
         arrakisWater = new ArrakisWater(this,economy,politics);
         Bukkit.getPluginManager().registerEvents(arrakisWater,this);
         serverJobs = new ServerJobs(this, economy);

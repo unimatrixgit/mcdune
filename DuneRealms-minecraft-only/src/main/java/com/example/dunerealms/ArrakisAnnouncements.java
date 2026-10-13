@@ -48,6 +48,7 @@ final class ArrakisAnnouncements {
                     DataOutputStream out = new DataOutputStream(bytes);
                     out.writeUTF("Message"); out.writeUTF("ALL"); out.writeUTF(message);
                     carrier.sendPluginMessage(plugin, "BungeeCord", bytes.toByteArray());
+                    plugin.websiteNews(message);
                 } catch (IOException ex) { plugin.getLogger().warning("Guild announcement failed: " + ex.getMessage()); continue; }
             } else Bukkit.broadcastMessage(message);
             state.set(key + ".sent", true);

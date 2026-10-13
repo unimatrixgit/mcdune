@@ -4,13 +4,15 @@
 
 A Dune-themed Minecraft Java plugin suite for **Paper 1.21.4 and Java 21**. Explore Arrakis, harvest melange, join a faction, trade through the Spacing Guild, and encounter Shai-Hulud.
 
+**[Project Dune website](https://project-dune.bonnystoat9.chatgpt.site)** — illustrated landing page, searchable online manual, Races & Houses, Exchange and News. The Site currently requires owner access through ChatGPT. Live feeds show “server not connected” until configured; see [DiscordSRV integration](website/DISCORD-FEEDS.md).
+
 **[Read the illustrated user manual](docs/Dune-User-Manual.pdf)** for the complete player and administrator guide, command reference, default configuration, 77 pages, 68 illustrated item and interface icons, ornate Minecraft-inspired House and spice backgrounds, and reserved chapters for the other planets.
 
 ## Current modules
 
 | Module | Version | Role |
 | --- | --- | --- |
-| DuneCore | 1.0.8 | Factions, stillsuits, sandworms, spice harvesting, sun exposure, water, politics, jobs, menus, and Guild announcements. |
+| DuneCore | 1.0.9 | Factions, stillsuits, sandworms, spice harvesting, sun exposure, water, politics, jobs, menus, Guild announcements, and optional DiscordSRV website feeds. |
 | DuneTerrain | 1.0.7 | Planet generation, Arrakis formations and landmarks, spice deposits, personal sietch caches, and safe spawn. |
 | DuneNPC | 1.0.0 | Guild Navigators, smuggler missions, stationary quest camps, timed deadlines, particles and NPC admin GUI. |
 | DuneEss | 1.0.1 | Solaris economy through Vault, spice sales, Guild travel, help, and administrative travel/economy tools. |
@@ -39,6 +41,7 @@ For a planet used as Paper's primary world, configure its generator and biome pr
 - Operator-only Imperial Admin Scepters, automatically supplied to ops, with linked DuneNPC management controls.
 - Roaming Arrakis smugglers with lore-based spice and water missions, a 30-minute real-time deadline, stationary illuminated quest camps and green/purple status particles.
 - A 33% gross spice-sale bonus for Imperial appointees; those appointees use basic spice sales instead of smuggler missions.
+- An opt-in DiscordSRV bridge for public announcements and read-only Arrakis exchange snapshots. Publication is disabled by default; the website never executes trades or accepts jobs.
 
 The other planet terrain profiles already exist: Giedi Prime, Kaitain, Caladan, and Sigma Draconis IV. Their dedicated manual chapters reserve space for future planet-specific gameplay rather than describing unreleased quests or cities.
 
@@ -92,6 +95,8 @@ The existing workflow builds all four project modules and produces the downloada
 - [Worlds and mechanics poster](docs/posters/Dune-Illustrated-Worlds-and-Mechanics-Poster.png)
 - [Editable manual sources](docs/manual-authoring/README.md)
 - [DuneNPC commands and mission mechanics](DuneNPC/README.md)
+- [Website source and build](website/README.md)
+- [DiscordSRV exchange/news feed setup](website/DISCORD-FEEDS.md)
 - [Session 2 changes](SESSION-2.md)
 - [DuneTerrain setup](DuneTerrain/README.md)
 - [DuneCore details](DuneRealms-minecraft-only/README.md)

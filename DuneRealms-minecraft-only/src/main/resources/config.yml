@@ -62,3 +62,8 @@ database:
   password: "CHANGE_ME"
 
 # NPC settings are now managed by DuneNPC/config.yml.
+website:
+  discord:
+    enabled: false
+    exchange-channel-id: ""
+    news-channel-id: ""
