@@ -2,7 +2,7 @@ spice-sell-price: 15
 travel-price: 100
 spice-respawn-seconds: 120
 
-# Sandworms spawn near players on Arrakis only.
+# Sandworms spawn near players on Arrakis only, at most once per interval serverwide.
 # Damage 30 and health 500 approximate Warden-level threat.
 sandworms:
   enabled: true
@@ -10,6 +10,7 @@ sandworms:
   attack-damage: 30.0
   max-per-world: 12
   spawn-chance: 0.35
+  spawn-interval-seconds: 3600
 
 # Arrakis solar exposure: 5 minutes of uninterrupted direct sunlight without a full stillsuit.
 arrakis-sun:

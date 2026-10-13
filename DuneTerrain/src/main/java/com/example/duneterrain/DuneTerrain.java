@@ -181,7 +181,10 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                 }
             }
             if (planet.equals("arrakis")) placeOasisTree(data, chunkX, chunkZ, heights, minY, maxY);
-            if (planet.equals("arrakis")) placeSpiceDeposits(data, heights, random, minY, maxY);
+            if (planet.equals("arrakis")) {
+                placeSpiceDeposits(data, heights, random, minY, maxY);
+                placeRandomSpicePatch(data, chunkX, chunkZ, heights);
+            }
             placeOres(data, random, path, minY, maxY);
         }
         @Override public BiomeProvider getDefaultBiomeProvider(WorldInfo worldInfo) {
@@ -232,6 +235,39 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                 if (y + 1 < maxY && y > minY) data.setBlock(x, y, z, Material.SUSPICIOUS_SAND);
             }
         }
+        private void placeRandomSpicePatch(ChunkData data, int chunkX, int chunkZ, int[][] heights) {
+            String path = "spice-deposits.patches.";
+            if (!plugin.getConfig().getBoolean(path + "enabled", true)) return;
+            int spacing = Math.max(128, plugin.getConfig().getInt(path + "region-spacing", 600));
+            int radius = Math.max(2, plugin.getConfig().getInt(path + "radius", 12));
+            int targetValue = Math.max(1, plugin.getConfig().getInt(path + "target-value", 5000));
+            int unitPrice = Math.max(1, plugin.getConfig().getInt(path + "unit-price", 15));
+            double density = Math.min(1.0, Math.ceil(targetValue / (double) unitPrice) / (Math.PI * radius * radius));
+            double chance = Math.max(0, Math.min(1, plugin.getConfig().getDouble(path + "chance-per-region", 0.35)));
+            int worldMinX = chunkX * 16, worldMinZ = chunkZ * 16;
+            int firstCellX = Math.floorDiv(worldMinX - radius, spacing), lastCellX = Math.floorDiv(worldMinX + 15 + radius, spacing);
+            int firstCellZ = Math.floorDiv(worldMinZ - radius, spacing), lastCellZ = Math.floorDiv(worldMinZ + 15 + radius, spacing);
+            long salt = 0x5350494345504154L;
+            for (int cellX = firstCellX; cellX <= lastCellX; cellX++) for (int cellZ = firstCellZ; cellZ <= lastCellZ; cellZ++) {
+                long cellSeed = mix64((long) cellX * 0x9E3779B97F4A7C15L ^ (long) cellZ * 0xC2B2AE3D27D4EB4FL ^ salt);
+                if (hashUnit(cellSeed) >= chance) continue;
+                long offsetX = Math.floorMod(mix64(cellSeed ^ 0x165667B19E3779F9L), spacing - radius * 2L);
+                long offsetZ = Math.floorMod(mix64(cellSeed ^ 0x85EBCA77C2B2AE63L), spacing - radius * 2L);
+                long centerX = (long) cellX * spacing + radius + offsetX;
+                long centerZ = (long) cellZ * spacing + radius + offsetZ;
+                for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+                    long gx = (long) worldMinX + x, gz = (long) worldMinZ + z;
+                    long dx = gx - centerX, dz = gz - centerZ;
+                    if (dx * dx + dz * dz > (long) radius * radius) continue;
+                    long blockSeed = mix64(gx * 0x9E3779B97F4A7C15L ^ gz * 0xC2B2AE3D27D4EB4FL ^ salt);
+                    if (hashUnit(blockSeed) >= density) continue;
+                    int y = heights[x][z];
+                    if (data.getType(x, y, z) == Material.SAND || data.getType(x, y, z) == Material.RED_SAND)
+                        data.setBlock(x, y, z, Material.SUSPICIOUS_SAND);
+                }
+            }
+        }
+        private static double hashUnit(long hash) { return (hash >>> 11) * 0x1.0p-53; }
         private void placeOres(ChunkData data, Random random, String path, int minWorldY, int maxWorldY) {
             org.bukkit.configuration.ConfigurationSection ores = plugin.getConfig().getConfigurationSection(path + "ores");
             if (ores == null) return;
@@ -296,10 +332,10 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             long cellX = Math.floorDiv(centerX, spacing), cellZ = Math.floorDiv(centerZ, spacing);
             long h1 = mix64(cellX * 0x9E3779B97F4A7C15L ^ cellZ * 0xC2B2AE3D27D4EB4FL ^ 0x534945544348L);
             long h2 = mix64(cellZ * 0x165667B19E3779F9L ^ cellX * 0x85EBCA77C2B2AE63L ^ ~0x534945544348L);
-            long ax = cellX * spacing + 8 + Math.floorMod(h1, spacing - 16);
-            long az = cellZ * spacing + 8 + Math.floorMod(h2, spacing - 16);
-            if (Math.floorDiv(ax, 16) != cx || Math.floorDiv(az, 16) != cz) return;
-            int x = (int) ax, z = (int) az;
+            long anchorX = cellX * spacing + 8 + Math.floorMod(h1, spacing - 16);
+            long anchorZ = cellZ * spacing + 8 + Math.floorMod(h2, spacing - 16);
+            if (Math.floorDiv(anchorX, 16) != cx || Math.floorDiv(anchorZ, 16) != cz) return;
+            int x = (int) anchorX, z = (int) anchorZ;
             int y = region.getHighestBlockYAt(x, z);
             if (y < 65 || y > world.getMaxHeight() - 12 || y - 12 < world.getMinHeight()) return;
             for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -10; dy <= 3; dy++) {

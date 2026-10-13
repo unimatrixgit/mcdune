@@ -1,6 +1,6 @@
 # DuneCore for Paper 1.21.4
 
-Requires Java 21 and Gradle 8+. Run `gradle build` and copy `build/libs/DuneCore-1.0.0.jar` into your Paper server's `plugins/` directory. DuneCore provides factions, spice gameplay, politics, jobs, and Guild travel. Install the separate `DuneTerrain` plugin to generate the server's planet world. Remove the old `DuneRealms.jar` from the Paper `plugins/` folder when upgrading to `DuneCore.jar`.
+Requires Java 21 and Gradle 8+. Run `gradle build` and copy `build/libs/DuneCore-1.0.1.jar` into your Paper server's `plugins/` directory. DuneCore provides factions, spice gameplay, politics, jobs, and Guild travel. Install the separate `DuneTerrain` plugin to generate the server's planet world. Remove the old `DuneRealms.jar` from the Paper `plugins/` folder when upgrading to `DuneCore.jar`.
 
 Commands: `/dune choose fremen|harkonnen|corrino|atreides`, `/dune kit`, `/dune balance`, `/dune sell`, `/dune travel`, `/dune guildnpc` (OP), `/dune givespice` (OP).
 
@@ -14,7 +14,7 @@ Admins with `dune.admin` can force a local teleport to the loaded Arrakis world 
 
 ## Sandworms (Shai-Hulud)
 
-Hostile, oversized husks representing sandworms spawn on sandy surfaces near players **only on Arrakis**, roughly every 10 seconds with a configurable chance. They target players, have 500 health and 30 base melee attack damage (Warden-level values), and play a Warden roar when emerging. They cannot teleport to other worlds. Settings are under `sandworms` in `config.yml`. The worm is represented by a scaled vanilla husk; a true animated worm model would require a resource pack or model plugin.
+Hostile, oversized husks representing sandworms spawn on sandy surfaces near players **only on Arrakis**, at most once per hour serverwide by default. The successful spawn time is saved in the plugin config, so a restart does not reset the cooldown. They target players, have 500 health and 30 base melee attack damage (Warden-level values), and play a Warden roar when emerging. They cannot teleport to other worlds. Settings are under `sandworms` in `config.yml`. The worm is represented by a scaled vanilla husk; a true animated worm model would require a resource pack or model plugin.
 
 ## Spice contracts and sandworm blooms
 - On Arrakis, defeating a sandworm generates a broad patch of suspicious-sand spice deposits with a target base harvest value of 100,000 Solaris (actual value depends on available sandy terrain and faction bonuses).
@@ -78,6 +78,8 @@ Each newly issued leather stillsuit piece receives a distinctive vanilla smithin
 | Spacing Guild (reserved) | Black | Eye | Quartz / white |
 
 Ordos starts and respawns on its own generated planet `sigma_draconis_iv` (Sigma Draconis IV). Its dark, snowy terrain profile is configured by DuneTerrain. The Spacing Guild remains a non-playable faction and does not receive its own kit through normal gameplay. Existing armor is not automatically upgraded; issue a fresh kit.
+
+Wearing a complete Ordos stillsuit and using an ender pearl activates Shadow Step: the player and armor are invisible for five seconds. The armor is returned after the effect, on logout, or when the plugin shuts down.
 
 The trims are Minecraft's built-in vanilla patterns, not custom resource-pack models. This source has not been compiled or tested on Paper.
 

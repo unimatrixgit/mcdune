@@ -31,6 +31,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.potion.*;
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +48,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private File dataFile;
     private final Map<UUID, Job> jobs = new HashMap<>();
     private final Map<UUID, UUID> activeWorkers = new HashMap<>();
+    private final Map<UUID, ItemStack[]> ordosCloakedArmor = new HashMap<>();
+    private final Map<UUID, BukkitTask> ordosRevealTasks = new HashMap<>();
     private record Job(UUID owner, int quota, int harvested) {}
     private YamlConfiguration data;
     private ServerJobs serverJobs;
@@ -95,7 +98,10 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         Bukkit.getScheduler().runTaskTimer(this, this::spawnSandworms, 200L, 200L);
         getLogger().info("DuneCore enabled. Gameplay, faction travel, and Arrakis sandworms ready.");
     }
-    @Override public void onDisable() { if(serverJobs!=null)serverJobs.save(); savePlayers(); }
+    @Override public void onDisable() {
+        for (UUID playerId : new ArrayList<>(ordosCloakedArmor.keySet())) restoreOrdosArmor(playerId);
+        if(serverJobs!=null)serverJobs.save(); savePlayers();
+    }
     private void savePlayers() {
         if(sharedDatabase!=null){
             for(Player player:Bukkit.getOnlinePlayers())try{sharedDatabase.savePlayer(player,selected,money);}
@@ -321,9 +327,37 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if(e.getAction()!=Action.RIGHT_CLICK_AIR && e.getAction()!=Action.RIGHT_CLICK_BLOCK)return;
         ItemStack held=e.getItem();
         if(held==null||held.getType()!=Material.ENDER_PEARL)return;
-        // Trigger on activation; vanilla pearl throw remains intact.
+        UUID id=p.getUniqueId();
+        if (!ordosCloakedArmor.containsKey(id)) {
+            ItemStack[] armor=p.getInventory().getArmorContents();
+            ItemStack[] saved=new ItemStack[armor.length];
+            for (int i=0;i<armor.length;i++) saved[i]=armor[i]==null?null:armor[i].clone();
+            ordosCloakedArmor.put(id,saved);
+            p.getInventory().setArmorContents(new ItemStack[armor.length]);
+        }
+        BukkitTask previous=ordosRevealTasks.remove(id);
+        if(previous!=null)previous.cancel();
         p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,100,0,true,false,true));
+        ordosRevealTasks.put(id,Bukkit.getScheduler().runTaskLater(this,()->restoreOrdosArmor(id),100L));
         p.sendMessage(ChatColor.DARK_GREEN+"Shadow Step: invisible for five seconds.");
+    }
+    private void restoreOrdosArmor(UUID id) {
+        BukkitTask task=ordosRevealTasks.remove(id);
+        if(task!=null)task.cancel();
+        ItemStack[] saved=ordosCloakedArmor.remove(id);
+        Player player=Bukkit.getPlayer(id);
+        if(saved==null||player==null)return;
+        ItemStack[] current=player.getInventory().getArmorContents();
+        for(int i=0;i<saved.length;i++) {
+            ItemStack piece=saved[i];
+            if(piece==null||piece.getType()==Material.AIR)continue;
+            if(current[i]==null||current[i].getType()==Material.AIR)current[i]=piece;
+            else {
+                Map<Integer,ItemStack> leftovers=player.getInventory().addItem(piece);
+                for(ItemStack leftover:leftovers.values())player.getWorld().dropItemNaturally(player.getLocation(),leftover);
+            }
+        }
+        player.getInventory().setArmorContents(current);
     }
     private boolean wearingStillsuit(Player p) {
         for (ItemStack armor : p.getInventory().getArmorContents()) if (!is(armor, "stillsuit")) return false;
@@ -539,6 +573,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         catch(Exception ex){getLogger().severe("Shared player load failed: "+ex.getMessage());e.getPlayer().kickPlayer("Your network profile could not be loaded.");}
     }
     @EventHandler public void onNetworkQuit(org.bukkit.event.player.PlayerQuitEvent e) {
+        restoreOrdosArmor(e.getPlayer().getUniqueId());
         if(sharedDatabase!=null)try{sharedDatabase.savePlayer(e.getPlayer(),selected,money);}
         catch(Exception ex){getLogger().severe("Shared player save failed: "+ex.getMessage());}
     }
@@ -556,7 +591,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         Bukkit.getScheduler().runTask(this, () -> giveMenuItem(p));
         if (!selected.containsKey(p.getUniqueId()) || selected.get(p.getUniqueId()).isEmpty()) {
             p.sendMessage(ChatColor.GOLD + "Choose your faction with /dune choose <fremen|harkonnen|corrino|atreides>.");
-        }
+        });
         Bukkit.getScheduler().runTask(this, () -> {
             World localWorld = Bukkit.getWorld(localPlanet());
             if (p.isOnline() && localWorld != null && p.getWorld().getName().equalsIgnoreCase("world")) {
@@ -669,6 +704,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     }
     private void spawnSandworms() {
         if (!getConfig().getBoolean("sandworms.enabled", true)) return;
+        long now = System.currentTimeMillis();
+        if (now < getConfig().getLong("sandworms.next-spawn-at", 0L)) return;
         World world = Bukkit.getWorld("arrakis");
         if (world == null) return;
         int max = Math.max(0, getConfig().getInt("sandworms.max-per-world", 12));
@@ -703,7 +740,10 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             });
             world.spawnParticle(Particle.CLOUD, location, 45, 2, 1, 2, 0.1);
             world.playSound(location, Sound.ENTITY_WARDEN_ROAR, 2f, 0.6f);
-            count++;
+            long interval = Math.max(60L, getConfig().getLong("sandworms.spawn-interval-seconds", 3600L));
+            getConfig().set("sandworms.next-spawn-at", now + interval * 1000L);
+            saveConfig();
+            return;
         }
     }
     @EventHandler public void onWormTarget(EntityTargetLivingEntityEvent e) {

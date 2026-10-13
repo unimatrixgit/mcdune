@@ -9,6 +9,13 @@ guild-npc:
 
 spice-deposits:
   per-chunk: 2
+  patches:
+    enabled: true
+    region-spacing: 600
+    chance-per-region: 0.35
+    radius: 12
+    target-value: 5000
+    unit-price: 15
 
 planets:
   arrakis:
