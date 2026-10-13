@@ -1,0 +1,15 @@
+/* Dune-inspired architectural borders, spice gold and Fremen water tones. */
+body{background-color:#111d1d;background-image:linear-gradient(#111d1def,#111d1def),url('assets/ornament.webp');background-size:auto,700px}
+header{background:linear-gradient(100deg,#132c2aed,#1f3330f2),url('assets/ornament.webp') center/650px;border-bottom-color:#b9934e}
+header:after{content:'';position:absolute;bottom:-7px;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,#d4b77b 0 18px,#584932 18px 24px,#91aaa1 24px 30px,#584932 30px 48px);pointer-events:none}
+header nav>a{border-top-color:#b7b083;border-left-color:#b7b083;background:linear-gradient(#3f5145,#243b32)}
+.banner-menu{background:linear-gradient(#20382eea,#1b3029ee),url('assets/ornament.webp') center/650px;border-top-color:#ba9652;border-bottom-color:#ba9652}
+.banner-menu a{background:linear-gradient(110deg,#374c36f2,#2b402ff2),url('assets/ornament.webp') center/250px}
+.page-intro:after{content:'';display:block;width:190px;height:8px;margin-top:28px;background:linear-gradient(90deg,#d2ab5d 0 30%,transparent 30% 34%,#7eaaa5 34% 47%,transparent 47% 51%,#d2ab5d 51% 100%);clip-path:polygon(0 0,96% 0,100% 50%,96% 100%,0 100%,4% 50%)}
+.lore-frieze{margin:0;border-top:3px solid #b38b49;border-bottom:3px solid #b38b49;background:#162b28;position:relative;overflow:hidden}
+.lore-frieze img{display:block;width:100%;height:190px;object-fit:cover}
+.lore-frieze figcaption{display:flex;justify-content:center;gap:36px;padding:13px 5%;font:20px VT323,monospace;letter-spacing:.1em;color:#d8bb7f;background:linear-gradient(#22362d,#142923);border-top:1px solid #a88c4655;text-align:center}
+.lore-frieze figcaption span:nth-child(2){color:#9fc1bb}
+footer{background:linear-gradient(#122723ec,#0b1c19f5),url('assets/ornament.webp') center/700px;border-bottom-color:#b6914c}footer small{color:#d1b06c}
+.portal-tabs a,.ticket-status{border-top-color:#bcab79}.private-ticket{border-color:#b59860}.portal-support-card{border-color:#bca267}
+@media(max-width:600px){.lore-frieze img{height:155px;object-position:48% center}.lore-frieze figcaption{gap:7px 17px;flex-wrap:wrap;font-size:17px;padding:13px 7%}}
