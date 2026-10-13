@@ -556,14 +556,12 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         Bukkit.getScheduler().runTask(this, () -> giveMenuItem(p));
         if (!selected.containsKey(p.getUniqueId()) || selected.get(p.getUniqueId()).isEmpty()) {
             p.sendMessage(ChatColor.GOLD + "Choose your faction with /dune choose <fremen|harkonnen|corrino|atreides>.");
-            if (p.getWorld().getName().equals("world")) Bukkit.getScheduler().runTask(this, () -> {
-                World localWorld = Bukkit.getWorld(localPlanet());
-                if (p.isOnline() && localWorld != null && p.getWorld().getName().equals("world")) {
-                    p.teleport(localWorld.getSpawnLocation());
-                }
-            });
-        } else Bukkit.getScheduler().runTask(this, () -> {
-            if (p.getWorld().getName().equals("world")) teleport(p, planets[Arrays.asList(factions).indexOf(selected.get(p.getUniqueId()))]);
+        }
+        Bukkit.getScheduler().runTask(this, () -> {
+            World localWorld = Bukkit.getWorld(localPlanet());
+            if (p.isOnline() && localWorld != null && p.getWorld().getName().equalsIgnoreCase("world")) {
+                p.teleport(localWorld.getSpawnLocation());
+            }
         });
     }
     @EventHandler public void onRespawn(PlayerRespawnEvent e) {

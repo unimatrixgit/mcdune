@@ -1,4 +1,6 @@
-# Set this separately on each Paper backend.
+# Set this separately on each Paper backend. Keep server.properties level-name
+# different from this planet so Paper does not load the world before this plugin
+# can assign its custom generator.
 # Accepted values: arrakis, giedi_prime, kaitain, caladan, sigma_draconis_iv
 server:
   planet: arrakis

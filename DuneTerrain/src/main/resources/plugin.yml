@@ -2,4 +2,5 @@ name: DuneTerrain
 version: 1.0.0
 main: com.example.duneterrain.DuneTerrain
 api-version: '1.21'
+load: STARTUP
 description: Configurable Dune planet terrain and spawn generator for Paper

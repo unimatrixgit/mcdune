@@ -8,11 +8,28 @@ import org.bukkit.generator.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
+import java.io.File;
 import java.util.*;
 
 public final class DuneTerrain extends JavaPlugin {
     private static final String[] PLANETS = {"arrakis", "giedi_prime", "kaitain", "caladan", "sigma_draconis_iv"};
     private NamespacedKey guildKey;
+
+    @Override public ChunkGenerator getDefaultWorldGenerator(String worldName, String id) {
+        String planet = id == null || id.isBlank()
+            ? getConfig().getString("server.planet", "arrakis")
+            : id;
+        planet = planet.toLowerCase(Locale.ROOT);
+        if (!Arrays.asList(PLANETS).contains(planet)) {
+            getLogger().severe("Invalid generator planet '" + planet + "' for world '" + worldName + "'.");
+            return null;
+        }
+        if (!getConfig().getBoolean("planets." + planet + ".enabled", true)) {
+            getLogger().severe("Generator planet '" + planet + "' is disabled in config.yml.");
+            return null;
+        }
+        return new PlanetChunkGenerator(this, planet);
+    }
 
     @Override public void onEnable() {
         saveDefaultConfig();
@@ -28,6 +45,7 @@ public final class DuneTerrain extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        World preloadedWorld = Bukkit.getWorld(planet);
         File worldFolder = new File(getServer().getWorldContainer(), planet);
         boolean existingWorld = worldFolder.isDirectory();
         World world = Bukkit.createWorld(new WorldCreator(planet)
@@ -41,7 +59,11 @@ public final class DuneTerrain extends JavaPlugin {
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, !planet.equals("arrakis"));
         world.setTime(planet.equals("giedi_prime") ? 18000 : 6000);
         setupPlanetSpawn(world, planet);
-        if (existingWorld) {
+        if (preloadedWorld != null && !(preloadedWorld.getGenerator() instanceof PlanetChunkGenerator)) {
+            getLogger().severe("World '" + planet + "' was loaded without DuneTerrain's generator. To use Arrakis as the primary Paper world, configure bukkit.yml with worlds." + planet + ".generator: DuneTerrain:" + planet + ", then back up and move the existing world folder so its chunks regenerate.");
+        } else if (preloadedWorld != null) {
+            getLogger().info("World '" + planet + "' was loaded with DuneTerrain's configured generator.");
+        } else if (existingWorld) {
             getLogger().warning("Loaded existing world '" + planet + "'. DuneTerrain only generates new chunks; existing terrain will remain unchanged. Back up and move the world folder, then restart, to regenerate it.");
         } else {
             getLogger().info("Created world '" + planet + "' with DuneTerrain.");
