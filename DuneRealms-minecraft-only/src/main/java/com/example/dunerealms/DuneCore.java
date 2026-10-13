@@ -11,6 +11,7 @@ import org.bukkit.event.*;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -46,7 +47,6 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private final String[] factions = {"Fremen", "Harkonnen", "Corrino", "Atreides", "Ordos"};
     private final Map<UUID, String> selected = new HashMap<>();
     private Economy economy;
-    private final Map<UUID, Long> wormAttackAt = new HashMap<>();
     private NamespacedKey itemKey, npcKey, wormKey, armorFactionKey, raiderKey;
     private File dataFile;
     private final Map<UUID, Job> jobs = new HashMap<>();
@@ -100,8 +100,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         duneCommand.setTabCompleter(this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getScheduler().runTaskTimer(this, this::spawnSandworms, 200L, 200L);
-        Bukkit.getScheduler().runTaskTimer(this, this::updateSandworms, 20L, 10L);
-        Bukkit.getScheduler().runTaskTimer(this, this::spawnSpiceRaiders, 200L, 200L);
+                Bukkit.getScheduler().runTaskTimer(this, this::spawnSpiceRaiders, 200L, 200L);
         getLogger().info("DuneCore enabled. Gameplay, faction travel, Arrakis threats, and spice raiders ready.");
     }
     @Override public void onDisable() {
@@ -772,7 +771,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         World world = Bukkit.getWorld("arrakis");
         if (world == null) return;
         int max = Math.max(0, getConfig().getInt("spice-raiders.max-per-world", 12));
-        int count = (int)world.getEntitiesByClass(Husk.class).stream().filter(this::isSpiceRaider).count();
+        int count = (int)world.getEntitiesByClass(Zombie.class).stream().filter(this::isSpiceRaider).count();
         if (count >= max) return;
         Random random = java.util.concurrent.ThreadLocalRandom.current();
         for (Player player : world.getPlayers()) {
@@ -801,7 +800,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         }
         return false;
     }
-    private Husk spawnSpiceRaiderNear(Player target, Random random) {
+    private Zombie spawnSpiceRaiderNear(Player target, Random random) {
         World world = target.getWorld();
         for (int attempt = 0; attempt < 12; attempt++) {
             double angle = random.nextDouble() * Math.PI * 2;
@@ -812,12 +811,14 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             if (world.getBlockAt(x, y, z).getType() != Material.SAND && world.getBlockAt(x, y, z).getType() != Material.RED_SAND) continue;
             if (!world.getBlockAt(x, y + 1, z).isPassable() || !world.getBlockAt(x, y + 2, z).isPassable()) continue;
             Location spawn = new Location(world, x + 0.5, y + 1, z + 0.5);
-            return world.spawn(spawn, Husk.class, raider -> {
+            return world.spawn(spawn, Zombie.class, raider -> {
                 raider.getPersistentDataContainer().set(raiderKey, PersistentDataType.BYTE, (byte)1);
                 raider.setCustomName(ChatColor.DARK_RED + "Haunted Fremen");
                 raider.setCustomNameVisible(true);
                 raider.setRemoveWhenFarAway(true);
                 raider.setCanPickupItems(false);
+                raider.getEquipment().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+                raider.getEquipment().setHelmetDropChance(0.0f);
                 raider.getAttribute(Attribute.MAX_HEALTH).setBaseValue(getConfig().getDouble("spice-raiders.health", 36.0));
                 raider.setHealth(raider.getAttribute(Attribute.MAX_HEALTH).getValue());
                 raider.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(getConfig().getDouble("spice-raiders.attack-damage", 6.0));
@@ -836,7 +837,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         World world = Bukkit.getWorld("arrakis");
         if (world == null) return;
         int max = Math.max(0, getConfig().getInt("sandworms.max-per-world", 12));
-        int count = (int) world.getEntitiesByClass(Sniffer.class).stream().filter(this::isWorm).count();
+        int count = (int) world.getEntitiesByClass(Husk.class).stream().filter(this::isWorm).count();
         Random rng = java.util.concurrent.ThreadLocalRandom.current();
         for (Player player : world.getPlayers()) {
             if (count >= max) break;
@@ -851,12 +852,14 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             Material surface = world.getBlockAt(x, y, z).getType();
             if (surface != Material.SAND && surface != Material.RED_SAND) continue;
             Location location = new Location(world, x + 0.5, y + 1, z + 0.5);
-            Sniffer worm = world.spawn(location, Sniffer.class, h -> {
+            Husk worm = world.spawn(location, Husk.class, h -> {
                 h.getPersistentDataContainer().set(wormKey, PersistentDataType.BYTE, (byte)1);
-                h.setCustomName(ChatColor.GOLD + "Shai-Hulud | Sandworm"); h.setCustomNameVisible(true); h.setRemoveWhenFarAway(true); h.setAware(true);
+                h.setCustomName(ChatColor.GOLD + "Shai-Hulud | Sandworm"); h.setCustomNameVisible(true); h.setRemoveWhenFarAway(true); h.setAdult(); h.setCanPickupItems(false);
                 h.getAttribute(Attribute.MAX_HEALTH).setBaseValue(getConfig().getDouble("sandworms.health", 500.0)); h.setHealth(h.getAttribute(Attribute.MAX_HEALTH).getValue());
-                h.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(getConfig().getDouble("sandworms.movement-speed", 0.12));
-                h.getAttribute(Attribute.SCALE).setBaseValue(getConfig().getDouble("sandworms.scale", 2.8));
+                h.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(getConfig().getDouble("sandworms.attack-damage", 8.0));
+                h.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(getConfig().getDouble("sandworms.movement-speed", 0.33));
+                h.getAttribute(Attribute.SCALE).setBaseValue(getConfig().getDouble("sandworms.scale", 3.5));
+                h.setTarget(player);
             });
             world.spawnParticle(Particle.CLOUD, location, 45, 2, 1, 2, 0.1);
             world.playSound(location, Sound.ENTITY_WARDEN_ROAR, 2f, 0.6f);
@@ -866,18 +869,9 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             return;
         }
     }
-    private void updateSandworms() {
-        World world=Bukkit.getWorld("arrakis");if(world==null)return;
-        double speed=Math.max(0.55,Math.min(1.15,getConfig().getDouble("sandworms.path-speed",1.0)));
-        double damage=Math.max(1.0,getConfig().getDouble("sandworms.attack-damage",8.0));long cooldown=Math.max(1000L,getConfig().getLong("sandworms.attack-cooldown-ms",2200L));long now=System.currentTimeMillis();
-        for(Sniffer worm:world.getEntitiesByClass(Sniffer.class)){if(!isWorm(worm)||worm.isDead())continue;
-            Player target=world.getPlayers().stream().filter(Player::isOnline).min(Comparator.comparingDouble(p->p.getLocation().distanceSquared(worm.getLocation()))).orElse(null);
-            if(target==null||target.getLocation().distanceSquared(worm.getLocation())>64*64){worm.getPathfinder().stopPathfinding();continue;}
-            if(target.getLocation().distanceSquared(worm.getLocation())<=3.5*3.5){worm.getPathfinder().stopPathfinding();if(now>=wormAttackAt.getOrDefault(worm.getUniqueId(),0L)){target.damage(damage,worm);wormAttackAt.put(worm.getUniqueId(),now+cooldown);}}
-            else worm.getPathfinder().moveTo(target.getLocation(),speed);
-        }
+    @EventHandler public void onRaiderCombust(EntityCombustEvent e) {
+        if (isSpiceRaider(e.getEntity())) e.setCancelled(true);
     }
-
     @EventHandler public void onWormTarget(EntityTargetLivingEntityEvent e) {
         if (isWorm(e.getEntity()) && (!(e.getTarget() instanceof Player) || !e.getEntity().getWorld().getName().equals("arrakis"))) e.setCancelled(true);
     }
@@ -886,7 +880,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     }
     @EventHandler public void onWormDeath(EntityDeathEvent e) {
         if (isWorm(e.getEntity())) {
-            wormAttackAt.remove(e.getEntity().getUniqueId()); e.getDrops().clear(); e.setDroppedExp(0);
+            e.getDrops().clear(); e.setDroppedExp(0);
             generateWormSpiceField(e.getEntity().getLocation());
         }
     }

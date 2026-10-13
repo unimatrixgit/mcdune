@@ -1,20 +1,18 @@
 spice-respawn-seconds: 120
 
 # Sandworms spawn near players on Arrakis only, at most once per interval serverwide.
-# Sniffer-based worm: a little faster than walking, but slower than a sprinting player.
+# Husk-based sandworm uses its built-in hostile target and chase AI.
 sandworms:
   enabled: true
   health: 500.0
   attack-damage: 8.0
-  attack-cooldown-ms: 2200
-  movement-speed: 0.12
-  path-speed: 1.0
-  scale: 2.8
+  movement-speed: 0.33
+  scale: 3.5
   max-per-world: 3
   spawn-chance: 0.35
   spawn-interval-seconds: 3600
 
-# Hostile husk raiders appear around Arrakis players and are more common near
+# Hostile Fremen raiders appear around Arrakis players and are more common near
 # spice fields worth over this many Solaris at the base selling price.
 spice-raiders:
   enabled: true
