@@ -327,7 +327,8 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
         private final String planet;
         PlanetChunkGenerator(DuneTerrain plugin, String planet) { this.plugin = plugin; this.planet = planet; }
         @Override public List<BlockPopulator> getDefaultPopulators(World world) {
-            return planet.equals("arrakis") ? List.of(new SietchPopulator(plugin), new SpiceBlowPopulator(plugin)) : List.of();
+            return planet.equals("arrakis") && world.getName().equalsIgnoreCase("arrakis")
+                ? List.of(new SietchPopulator(plugin), new SpiceBlowPopulator(plugin)) : List.of();
         }
         @Override public void generateNoise(WorldInfo world, Random random, int chunkX, int chunkZ, ChunkData data) {
             String path = "planets." + planet + ".";
@@ -370,8 +371,9 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                     placeJungleTree(data, x, h + 1, z, random, maxY);
                 }
             }
-            if (planet.equals("arrakis")) placeOasisTree(data, chunkX, chunkZ, heights, minY, maxY);
-            if (planet.equals("arrakis")) {
+            boolean arrakisWorld = planet.equals("arrakis") && world.getName().equalsIgnoreCase("arrakis");
+            if (arrakisWorld) placeOasisTree(data, chunkX, chunkZ, heights, minY, maxY);
+            if (arrakisWorld) {
                 placeDarkstoneIsland(data, chunkX, chunkZ, heights, minY, maxY);
                 placeSpiceDeposits(data, heights, random, minY, maxY);
                 placeRandomSpicePatch(data, chunkX, chunkZ, heights);
