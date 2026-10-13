@@ -1,0 +1,20 @@
+currency:
+  singular: Solaris
+  plural: Solaris
+  spice-price: 15
+  travel-price: 100
+  starting-balance: 0
+  allow-negative-balances: true
+
+# DuneEss automatically reuses DuneCore's existing PostgreSQL settings when enabled.
+# Set use-core-database to false to use local balances.yml storage instead.
+database:
+  use-core-database: true
+
+network:
+  use-core-settings: true
+  enabled: true
+  local-planet: arrakis
+  servers: {}
+
+worlds: [arrakis, giedi_prime, kaitain, caladan, sigma_draconis_iv]

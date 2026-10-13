@@ -1,6 +1,7 @@
 package com.example.dunerealms;
 
 import org.bukkit.ChatColor;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -18,15 +19,14 @@ import java.util.*;
 public final class Politics {
     private final JavaPlugin plugin;
     private final Map<UUID,String> factions;
-    private final Map<UUID,Integer> wallets;
-    private final Runnable saveWallets;
+    private final Economy economy;
     private final File file;
     private final SharedDatabase database;
     private final YamlConfiguration state;
     private static final String[] HOUSES={"Fremen","Harkonnen","Corrino","Atreides","Ordos"};
 
-    public Politics(JavaPlugin plugin, Map<UUID,String> factions, Map<UUID,Integer> wallets, Runnable saveWallets, SharedDatabase database) {
-        this.plugin=plugin; this.factions=factions; this.wallets=wallets; this.saveWallets=saveWallets;this.database=database;
+    public Politics(JavaPlugin plugin, Map<UUID,String> factions, Economy economy, SharedDatabase database) {
+        this.plugin=plugin; this.factions=factions; this.economy=economy;this.database=database;
         file=new File(plugin.getDataFolder(),"politics.yml");
         state=YamlConfiguration.loadConfiguration(file);
         refresh();
@@ -92,8 +92,8 @@ public final class Politics {
             if(args.length<3) {msg(p,"Usage: /dune politics deposit <solaris>");return true;}
             int amount;
             try {amount=Integer.parseInt(args[2]);} catch(NumberFormatException e){msg(p,"Invalid amount.");return true;}
-            if(amount<=0 || wallets.getOrDefault(p.getUniqueId(),0)<amount){msg(p,"Insufficient Solaris.");return true;}
-            wallets.merge(p.getUniqueId(),-amount,Integer::sum); saveWallets.run();
+            if(amount<=0 || !economy.has(p,amount)){msg(p,"Insufficient Solaris.");return true;}
+            economy.withdrawPlayer(p,amount);
             state.set("trust",state.getLong("trust")+amount); save();
             msg(p,"Deposited "+amount+" Solaris into the Spacing Trust.");return true;
         }

@@ -1,6 +1,7 @@
 package com.example.dunerealms;
 
 import org.bukkit.*;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -16,7 +17,7 @@ import java.util.*;
 final class ConfigurableGui {
     private final DuneCore plugin;
     private final ServerJobs serverJobs;
-    private final Map<UUID,Integer> money;
+    private final Economy economy;
     private final Map<UUID,?> jobs;
     private final String[] planets, factions;
     private final Map<UUID,String> selected;
@@ -24,9 +25,9 @@ final class ConfigurableGui {
     private final Map<UUID, String> opened = new HashMap<>();
     private final Map<UUID, Map<Integer,String>> actions = new HashMap<>();
 
-    ConfigurableGui(DuneCore plugin, ServerJobs serverJobs, Map<UUID,Integer> money,
+    ConfigurableGui(DuneCore plugin, ServerJobs serverJobs, Economy economy,
                     Map<UUID,?> jobs, String[] planets, String[] factions, Map<UUID,String> selected) {
-        this.plugin=plugin; this.serverJobs=serverJobs; this.money=money; this.jobs=jobs;
+        this.plugin=plugin; this.serverJobs=serverJobs; this.economy=economy; this.jobs=jobs;
         this.planets=planets; this.factions=factions; this.selected=selected;
         if(!new File(plugin.getDataFolder(),"gui.yml").exists()) plugin.saveResource("gui.yml",false);
         reload();
@@ -35,8 +36,8 @@ final class ConfigurableGui {
     private String color(String input) { return ChatColor.translateAlternateColorCodes('&',input); }
     private String replace(String text, Player p) {
         return color(text.replace("%player%",p.getName())
-            .replace("%balance%",String.valueOf(money.getOrDefault(p.getUniqueId(),0)))
-            .replace("%travel_cost%",String.valueOf(plugin.getConfig().getInt("travel-price",100)))
+            .replace("%balance%",String.valueOf((int)economy.getBalance(p)))
+            .replace("%travel_cost%",String.valueOf(plugin.travelPrice()))
             .replace("%active_job%",serverJobs.activeDescription(p)));
     }
     private ItemStack item(Player p, String icon, String title, List<String> lore) {

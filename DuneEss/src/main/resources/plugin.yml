@@ -1,0 +1,15 @@
+name: DuneEss
+version: 1.0.0
+main: com.example.duneess.DuneEss
+api-version: '1.21'
+depend: [Vault]
+softdepend: [DuneCore, DuneTerrain]
+description: Dune Solaris economy, Vault provider, spice sales, and Arrakis travel
+commands:
+  duneess:
+    description: Solaris, travel, and Arrakis administration
+    usage: /duneess help
+    aliases: [dess]
+permissions:
+  dune.admin:
+    default: op

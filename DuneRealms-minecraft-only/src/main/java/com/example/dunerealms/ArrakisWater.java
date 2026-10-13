@@ -1,6 +1,7 @@
 package com.example.dunerealms;
 
 import org.bukkit.*;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
@@ -18,11 +19,10 @@ public final class ArrakisWater implements Listener {
     private final DuneCore plugin;
     private final NamespacedKey waterKey;
     private final Map<UUID, String> careers = new HashMap<>();
-    private final Map<UUID,Integer> money;
-    private final Runnable save;
+    private final Economy economy;
     private final Politics politics;
-    ArrakisWater(DuneCore plugin,Map<UUID,Integer> money,Runnable save,Politics politics) {
-        this.plugin=plugin;this.money=money;this.save=save;this.politics=politics;
+    ArrakisWater(DuneCore plugin,Economy economy,Politics politics) {
+        this.plugin=plugin;this.economy=economy;this.politics=politics;
         waterKey=new NamespacedKey("dunerealms","finite_arrakis_water");
     }
     private boolean arrakis(World w){return w.getName().equalsIgnoreCase("arrakis");}
@@ -81,7 +81,7 @@ public final class ArrakisWater implements Listener {
         int count=0;
         for(ItemStack item:p.getInventory().getStorageContents())if(tagged(item))count+=item.getAmount();
         if(count==0){p.sendMessage(ChatColor.RED+"You have no collected Arrakis water buckets.");return;}
-        int spice=plugin.getConfig().getInt("spice-sell-price",100);
+        int spice=plugin.spiceSellPrice();
         int base=Math.max(1,spice/2);
         boolean appointed=politics.isAuthorizedWater(plugin.factionOf(p));
         boolean smuggler=!appointed;
@@ -92,7 +92,7 @@ public final class ArrakisWater implements Listener {
             ItemStack item=p.getInventory().getItem(i);
             if(tagged(item))p.getInventory().setItem(i,null);
         }
-        money.merge(p.getUniqueId(),gross-levy,Integer::sum);save.run();
+        economy.depositPlayer(p,gross-levy);
         p.sendMessage(ChatColor.GOLD+"Sold "+count+" water buckets for "+(gross-levy)+" Solaris (Trust levy "+levy+").");
     }
     @EventHandler public void onCollect(PlayerBucketFillEvent e) {
@@ -100,7 +100,7 @@ public final class ArrakisWater implements Listener {
         if(politics.isAuthorizedWater(plugin.factionOf(p)))return;
         if(e.getBlockClicked().getRelative(e.getBlockFace()).getType()!=Material.WATER)return;
         if(Math.random()>=plugin.getConfig().getDouble("arrakis-water.smuggler-retaliation-chance",0.30))return;
-        int spice=plugin.getConfig().getInt("spice-sell-price",100);
+        int spice=plugin.spiceSellPrice();
         int profit=(int)Math.round(Math.max(1,spice/2)*1.45);
         String world=p.getWorld().getName();
         try{

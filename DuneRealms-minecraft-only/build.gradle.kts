@@ -1,9 +1,10 @@
 plugins { java }
 group = "com.example"
 version = "1.0.3"
-repositories { mavenCentral(); maven("https://repo.papermc.io/repository/maven-public/") }
+repositories { mavenCentral(); maven("https://repo.papermc.io/repository/maven-public/"); maven("https://jitpack.io") }
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     implementation("org.postgresql:postgresql:42.7.4")
 }
 tasks.jar {

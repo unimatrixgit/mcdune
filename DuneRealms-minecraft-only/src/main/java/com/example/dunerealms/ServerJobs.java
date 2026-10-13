@@ -17,8 +17,7 @@ final class ServerJobs {
     private record Template(String id, String title, int spiceRequired, int pay, long limitSeconds) {}
     private record Active(String id, long acceptedAt, int harvested) {}
     private final JavaPlugin plugin;
-    private final Map<UUID,Integer> balances;
-    private final Runnable saveBalances;
+    private final Economy economy;
     private final Map<String,Template> templates = new LinkedHashMap<>();
     private final Map<UUID,Active> active = new HashMap<>();
     private final File stateFile;
@@ -26,8 +25,8 @@ final class ServerJobs {
     private long rotationStart;
     private List<String> offers = new ArrayList<>();
 
-    ServerJobs(JavaPlugin plugin, Map<UUID,Integer> balances, Runnable saveBalances) {
-        this.plugin=plugin; this.balances=balances; this.saveBalances=saveBalances;
+    ServerJobs(JavaPlugin plugin, Economy economy) {
+        this.plugin=plugin; this.economy=economy;
         stateFile=new File(plugin.getDataFolder(),"server-jobs-state.yml");
         jobsFile=new File(plugin.getDataFolder(),"server-jobs.yml");
     }
@@ -87,8 +86,7 @@ final class ServerJobs {
         active.remove(player);
         if(t==null) return;
         int fine=(int)Math.ceil(t.pay()*0.05);
-        balances.merge(player,-fine,Integer::sum); // Negative balances represent debt.
-        saveBalances.run();
+        economy.withdrawPlayer(Bukkit.getOfflinePlayer(player),fine); // DuneEss permits contract debt.
         Player online=Bukkit.getPlayer(player);
         if(online!=null) online.sendMessage(ChatColor.RED+"CHOAM contract failed: "+t.title()+". Fine: "+fine+" Solaris (5% of pay).");
     }
@@ -102,8 +100,7 @@ final class ServerJobs {
         int progress=Math.min(t.spiceRequired(),a.harvested()+amount);
         if(progress>=t.spiceRequired()) {
             active.remove(p.getUniqueId());
-            balances.merge(p.getUniqueId(),t.pay(),Integer::sum);
-            saveBalances.run();
+            economy.depositPlayer(p,t.pay());
             p.sendMessage(ChatColor.GREEN+"CHOAM contract complete: "+t.title()+"! Paid "+t.pay()+" Solaris.");
         } else active.put(p.getUniqueId(),new Active(a.id(),a.acceptedAt(),progress));
         save();

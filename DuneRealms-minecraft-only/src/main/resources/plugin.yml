@@ -2,8 +2,9 @@ name: DuneCore
 version: 1.0.3
 main: com.example.dunerealms.DuneCore
 api-version: '1.21'
+depend: [Vault, DuneEss]
 softdepend: [DuneTerrain]
-description: Dune-inspired factions, spice economy, politics and Guild travel
+description: Dune factions, Arrakis gameplay, politics, and server mechanics
 commands:
   dune:
     description: Dune realms commands

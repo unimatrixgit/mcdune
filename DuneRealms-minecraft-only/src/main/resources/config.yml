@@ -1,14 +1,16 @@
-spice-sell-price: 15
-travel-price: 100
 spice-respawn-seconds: 120
 
 # Sandworms spawn near players on Arrakis only, at most once per interval serverwide.
-# Damage 30 and health 500 approximate Warden-level threat.
+# Sniffer-based worm: a little faster than walking, but slower than a sprinting player.
 sandworms:
   enabled: true
   health: 500.0
-  attack-damage: 30.0
-  max-per-world: 12
+  attack-damage: 8.0
+  attack-cooldown-ms: 2200
+  movement-speed: 0.16
+  path-speed: 0.82
+  scale: 2.8
+  max-per-world: 3
   spawn-chance: 0.35
   spawn-interval-seconds: 3600
 

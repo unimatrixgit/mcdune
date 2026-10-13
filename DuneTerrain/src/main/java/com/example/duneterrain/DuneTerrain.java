@@ -95,9 +95,9 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
         String path = "spice-blow.";
         int targetValue = Math.max(1, getConfig().getInt(path + "target-value", 15000));
         int unitPrice = Math.max(1, getConfig().getInt(path + "unit-price", 15));
-        org.bukkit.plugin.Plugin core = Bukkit.getPluginManager().getPlugin("DuneCore");
-        if (core instanceof JavaPlugin corePlugin)
-            unitPrice = Math.max(1, corePlugin.getConfig().getInt("spice-sell-price", unitPrice));
+        org.bukkit.plugin.Plugin economy = Bukkit.getPluginManager().getPlugin("DuneEss");
+        if (economy instanceof JavaPlugin economyPlugin)
+            unitPrice = Math.max(1, economyPlugin.getConfig().getInt("currency.spice-price", unitPrice));
         int targetDeposits = (int)Math.ceil(targetValue / (double)unitPrice);
         int radius = Math.max(12, getConfig().getInt(path + "radius", 24));
         List<Block> candidates = new ArrayList<>();

@@ -42,8 +42,7 @@ public final class SharedDatabase {
 
     public void loadPlayer(
             Player p,
-            Map<UUID, String> factions,
-            Map<UUID, Integer> money
+            Map<UUID, String> factions
     ) throws Exception {
         try (Connection c = connect()) {
             try (PreparedStatement ins = c.prepareStatement(
@@ -53,15 +52,13 @@ public final class SharedDatabase {
             }
 
             try (PreparedStatement q = c.prepareStatement(
-                    "SELECT faction,solaris,inventory FROM dune_players WHERE uuid=?")) {
+                    "SELECT faction,inventory FROM dune_players WHERE uuid=?")) {
                 q.setObject(1, p.getUniqueId());
 
                 try (ResultSet r = q.executeQuery()) {
                     if (r.next()) {
                         factions.put(p.getUniqueId(), r.getString(1));
-                        money.put(p.getUniqueId(), r.getInt(2));
-
-                        String blob = r.getString(3);
+                        String blob = r.getString(2);
                         if (blob != null && !blob.isBlank()) {
                             ItemStack[] contents = decode(blob);
                             p.getInventory().setContents(contents);
@@ -74,20 +71,17 @@ public final class SharedDatabase {
 
     public void savePlayer(
             Player p,
-            Map<UUID, String> factions,
-            Map<UUID, Integer> money
+            Map<UUID, String> factions
     ) throws Exception {
         try (Connection c = connect(); PreparedStatement q = c.prepareStatement(
-                "INSERT INTO dune_players(uuid,faction,solaris,inventory) VALUES(?,?,?,?) "
+                "INSERT INTO dune_players(uuid,faction,inventory) VALUES(?,?,?) "
                 + "ON CONFLICT(uuid) DO UPDATE SET "
                 + "faction=EXCLUDED.faction,"
-                + "solaris=EXCLUDED.solaris,"
                 + "inventory=EXCLUDED.inventory")) {
 
             q.setObject(1, p.getUniqueId());
             q.setString(2, factions.getOrDefault(p.getUniqueId(), ""));
-            q.setInt(3, money.getOrDefault(p.getUniqueId(), 0));
-            q.setString(4, encode(p.getInventory().getContents()));
+            q.setString(3, encode(p.getInventory().getContents()));
             q.executeUpdate();
         }
     }
