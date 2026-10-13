@@ -7,11 +7,13 @@ import org.bukkit.entity.Villager;
 import org.bukkit.generator.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import java.io.File;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.ServerLoadEvent;
 import java.io.File;
 import java.util.*;
 
-public final class DuneTerrain extends JavaPlugin {
+public final class DuneTerrain extends JavaPlugin implements Listener {
     private static final String[] PLANETS = {"arrakis", "giedi_prime", "kaitain", "caladan", "sigma_draconis_iv"};
     private NamespacedKey guildKey;
 
@@ -31,8 +33,21 @@ public final class DuneTerrain extends JavaPlugin {
         return new PlanetChunkGenerator(this, planet);
     }
 
+    @Override public BiomeProvider getDefaultBiomeProvider(String worldName, String id) {
+        String planet = id == null || id.isBlank()
+            ? getConfig().getString("server.planet", "arrakis")
+            : id;
+        planet = planet.toLowerCase(Locale.ROOT);
+        if (!Arrays.asList(PLANETS).contains(planet)) {
+            getLogger().severe("Invalid biome-provider planet '" + planet + "' for world '" + worldName + "'.");
+            return null;
+        }
+        return new PlanetBiomeProvider(this, planet);
+    }
+
     @Override public void onEnable() {
         saveDefaultConfig();
+        getServer().getPluginManager().registerEvents(this, this);
         guildKey = new NamespacedKey("dunerealms", "guild");
         String planet = getConfig().getString("server.planet", "arrakis").toLowerCase(Locale.ROOT);
         if (!Arrays.asList(PLANETS).contains(planet)) {
@@ -45,29 +60,32 @@ public final class DuneTerrain extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        World preloadedWorld = Bukkit.getWorld(planet);
-        File worldFolder = new File(getServer().getWorldContainer(), planet);
-        boolean existingWorld = worldFolder.isDirectory();
-        World world = Bukkit.createWorld(new WorldCreator(planet)
-            .environment(World.Environment.NORMAL)
-            .generator(new PlanetChunkGenerator(this, planet)));
+        getLogger().info("DuneTerrain registered the " + planet + " generator. World setup will run after Paper finishes loading worlds.");
+    }
+
+    @EventHandler public void onServerLoad(ServerLoadEvent event) {
+        String planet = getConfig().getString("server.planet", "arrakis").toLowerCase(Locale.ROOT);
+        World world = Bukkit.getWorld(planet);
         if (world == null) {
-            getLogger().severe("Could not create or load world '" + planet + "'.");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
+            File worldFolder = new File(getServer().getWorldContainer(), planet);
+            boolean existingWorld = worldFolder.isDirectory();
+            world = Bukkit.createWorld(new WorldCreator(planet)
+                .environment(World.Environment.NORMAL)
+                .generator(new PlanetChunkGenerator(this, planet)));
+            if (world == null) {
+                getLogger().severe("Could not create or load world '" + planet + "'.");
+                return;
+            }
+            if (existingWorld) getLogger().warning("Loaded existing world '" + planet + "'. Existing chunks remain unchanged; move the world folder after backing it up to regenerate terrain.");
+            else getLogger().info("Created world '" + planet + "' with DuneTerrain.");
+        } else if (!(world.getGenerator() instanceof PlanetChunkGenerator)) {
+            getLogger().severe("World '" + planet + "' was loaded without DuneTerrain's generator. Configure bukkit.yml worlds." + planet + ".generator: DuneTerrain:" + planet + " and worlds." + planet + ".biome-provider: DuneTerrain:" + planet + ". Existing chunks remain unchanged.");
+        } else {
+            getLogger().info("World '" + planet + "' was loaded with DuneTerrain's configured generator.");
         }
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, !planet.equals("arrakis"));
         world.setTime(planet.equals("giedi_prime") ? 18000 : 6000);
         setupPlanetSpawn(world, planet);
-        if (preloadedWorld != null && !(preloadedWorld.getGenerator() instanceof PlanetChunkGenerator)) {
-            getLogger().severe("World '" + planet + "' was loaded without DuneTerrain's generator. To use Arrakis as the primary Paper world, configure bukkit.yml with worlds." + planet + ".generator: DuneTerrain:" + planet + ", then back up and move the existing world folder so its chunks regenerate.");
-        } else if (preloadedWorld != null) {
-            getLogger().info("World '" + planet + "' was loaded with DuneTerrain's configured generator.");
-        } else if (existingWorld) {
-            getLogger().warning("Loaded existing world '" + planet + "'. DuneTerrain only generates new chunks; existing terrain will remain unchanged. Back up and move the world folder, then restart, to regenerate it.");
-        } else {
-            getLogger().info("Created world '" + planet + "' with DuneTerrain.");
-        }
     }
 
     private void setupPlanetSpawn(World world, String planet) {
@@ -162,18 +180,45 @@ public final class DuneTerrain extends JavaPlugin {
                     placeJungleTree(data, x, h + 1, z, random, maxY);
                 }
             }
+            if (planet.equals("arrakis")) placeOasisTree(data, chunkX, chunkZ, heights, minY, maxY);
             if (planet.equals("arrakis")) placeSpiceDeposits(data, heights, random, minY, maxY);
             placeOres(data, random, path, minY, maxY);
         }
         @Override public BiomeProvider getDefaultBiomeProvider(WorldInfo worldInfo) {
-            return new BiomeProvider() {
-                @Override public Biome getBiome(WorldInfo info, int x, int y, int z) {
-                    String configured = plugin.getConfig().getString("planets." + planet + ".biome", "PLAINS");
-                    try { return Biome.valueOf(configured.toUpperCase(Locale.ROOT)); }
-                    catch (IllegalArgumentException ex) { return Biome.PLAINS; }
+            return new PlanetBiomeProvider(plugin, planet);
+        }
+        private void placeOasisTree(ChunkData data, int chunkX, int chunkZ, int[][] heights, int minY, int maxY) {
+            String path = "planets.arrakis.oasis-trees.";
+            if (!plugin.getConfig().getBoolean(path + "enabled", true)) return;
+            int spacing = Math.max(64, plugin.getConfig().getInt(path + "spacing", 300));
+            long[] anchor = gridAnchor(chunkX, chunkZ, spacing, 0x4f41534953545245L);
+            if (Math.floorDiv(anchor[0], 16) != chunkX || Math.floorDiv(anchor[1], 16) != chunkZ) return;
+            int x = Math.floorMod(anchor[0], 16), z = Math.floorMod(anchor[1], 16);
+            int y = heights[x][z] + 1;
+            int height = Math.max(4, plugin.getConfig().getInt(path + "trunk-height", 7));
+            if (y + height + 3 >= maxY || data.getType(x, y - 1, z) != Material.SAND) return;
+            for (int dy = 0; dy < height; dy++) data.setBlock(x, y + dy, z, Material.OAK_LOG);
+            for (int dy = height - 3; dy <= height + 2; dy++) {
+                int radius = dy >= height + 1 ? 2 : 3;
+                for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+                    if (Math.abs(dx) == radius && Math.abs(dz) == radius && Math.floorMod(dx * 31 + dz * 17, 3) == 0) continue;
+                    int lx = x + dx, lz = z + dz, ly = y + dy;
+                    if (lx < 0 || lx >= 16 || lz < 0 || lz >= 16 || ly >= maxY || !data.getType(lx, ly, lz).isAir()) continue;
+                    org.bukkit.block.data.type.Leaves leaves = (org.bukkit.block.data.type.Leaves) Bukkit.createBlockData(Material.OAK_LEAVES);
+                    leaves.setPersistent(true);
+                    data.setBlock(lx, ly, lz, leaves);
                 }
-                @Override public List<Biome> getBiomes(WorldInfo info) { return List.of(getBiome(info, 0, 64, 0)); }
-            };
+            }
+        }
+        private long[] gridAnchor(int chunkX, int chunkZ, int spacing, long salt) {
+            int centerX = chunkX * 16 + 8, centerZ = chunkZ * 16 + 8;
+            long cellX = Math.floorDiv(centerX, spacing), cellZ = Math.floorDiv(centerZ, spacing);
+            long h1 = mix64(cellX * 0x9E3779B97F4A7C15L ^ cellZ * 0xC2B2AE3D27D4EB4FL ^ salt);
+            long h2 = mix64(cellZ * 0x165667B19E3779F9L ^ cellX * 0x85EBCA77C2B2AE63L ^ ~salt);
+            long x = cellX * spacing + 8 + Math.floorMod(h1, spacing - 16);
+            long z = cellZ * spacing + 8 + Math.floorMod(h2, spacing - 16);
+            if (Math.floorDiv(x, spacing) != cellX || Math.floorDiv(z, spacing) != cellZ) return new long[]{Long.MIN_VALUE, Long.MIN_VALUE};
+            return new long[]{x, z};
         }
         private Material configuredMaterial(String path, Material fallback) {
             String name = plugin.getConfig().getString(path, fallback.name());
@@ -224,10 +269,37 @@ public final class DuneTerrain extends JavaPlugin {
             }
         }
     }
+    private static final class PlanetBiomeProvider extends BiomeProvider {
+        private final Biome biome;
+        PlanetBiomeProvider(DuneTerrain plugin, String planet) {
+            String configured = planet.equals("arrakis") ? "DESERT" : plugin.getConfig().getString("planets." + planet + ".biome", "PLAINS");
+            Biome selected;
+            try { selected = Biome.valueOf(configured.toUpperCase(Locale.ROOT)); }
+            catch (IllegalArgumentException ex) { selected = Biome.DESERT; }
+            this.biome = selected;
+        }
+        @Override public Biome getBiome(WorldInfo info, int x, int y, int z) { return biome; }
+        @Override public List<Biome> getBiomes(WorldInfo info) { return List.of(biome); }
+    }
+
+    private static long mix64(long value) {
+        value = (value ^ (value >>> 30)) * 0xBF58476D1CE4E5B9L;
+        value = (value ^ (value >>> 27)) * 0x94D049BB133111EBL;
+        return value ^ (value >>> 31);
+    }
+
     private static final class SietchPopulator extends BlockPopulator {
         @Override public void populate(WorldInfo world, Random random, int cx, int cz, LimitedRegion region) {
-            if (!world.getName().equalsIgnoreCase("arrakis") || random.nextInt(90) != 0) return;
-            int x = cx * 16 + 4 + random.nextInt(8), z = cz * 16 + 4 + random.nextInt(8);
+            if (!world.getName().equalsIgnoreCase("arrakis")) return;
+            int spacing = 300;
+            int centerX = cx * 16 + 8, centerZ = cz * 16 + 8;
+            long cellX = Math.floorDiv(centerX, spacing), cellZ = Math.floorDiv(centerZ, spacing);
+            long h1 = mix64(cellX * 0x9E3779B97F4A7C15L ^ cellZ * 0xC2B2AE3D27D4EB4FL ^ 0x534945544348L);
+            long h2 = mix64(cellZ * 0x165667B19E3779F9L ^ cellX * 0x85EBCA77C2B2AE63L ^ ~0x534945544348L);
+            long ax = cellX * spacing + 8 + Math.floorMod(h1, spacing - 16);
+            long az = cellZ * spacing + 8 + Math.floorMod(h2, spacing - 16);
+            if (Math.floorDiv(ax, 16) != cx || Math.floorDiv(az, 16) != cz) return;
+            int x = (int) ax, z = (int) az;
             int y = region.getHighestBlockYAt(x, z);
             if (y < 65 || y > world.getMaxHeight() - 12 || y - 12 < world.getMinHeight()) return;
             for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -10; dy <= 3; dy++) {

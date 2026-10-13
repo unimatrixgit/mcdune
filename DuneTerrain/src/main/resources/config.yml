@@ -1,6 +1,5 @@
-# Set this separately on each Paper backend. Keep server.properties level-name
-# different from this planet so Paper does not load the world before this plugin
-# can assign its custom generator.
+# Set this separately on each Paper backend. When this is the primary world,
+# register both its generator and biome-provider in bukkit.yml as documented.
 # Accepted values: arrakis, giedi_prime, kaitain, caladan, sigma_draconis_iv
 server:
   planet: arrakis
@@ -21,6 +20,7 @@ planets:
     filler: RED_SAND
     water: {level: 63, swamp-pools: false, coverage: 0.18}
     vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 0}
+    oasis-trees: {enabled: true, spacing: 300, trunk-height: 7}
     ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 2, IRON_ORE: 2, COPPER_ORE: 1}
   giedi_prime:
     enabled: true
