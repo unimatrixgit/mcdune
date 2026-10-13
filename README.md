@@ -10,16 +10,17 @@ A Dune-themed Minecraft Java plugin suite for **Paper 1.21.4 and Java 21**. Expl
 
 | Module | Version | Role |
 | --- | --- | --- |
-| DuneCore | 1.0.5 | Factions, stillsuits, sandworms, spice harvesting, sun exposure, water, politics, jobs, menus, and Guild announcements. |
-| DuneTerrain | 1.0.6 | Planet generation, Arrakis formations and landmarks, spice deposits, personal sietch caches, safe spawn, and the Guild navigator. |
+| DuneCore | 1.0.8 | Factions, stillsuits, sandworms, spice harvesting, sun exposure, water, politics, jobs, menus, and Guild announcements. |
+| DuneTerrain | 1.0.7 | Planet generation, Arrakis formations and landmarks, spice deposits, personal sietch caches, and safe spawn. |
+| DuneNPC | 1.0.0 | Guild Navigators, smuggler missions, stationary quest camps, timed deadlines, particles and NPC admin GUI. |
 | DuneEss | 1.0.1 | Solaris economy through Vault, spice sales, Guild travel, help, and administrative travel/economy tools. |
 | DuneResourcePack.zip | Minecraft Java 1.21.4 | Desert Sniffer skin, haunted Fremen zombies, and spice-gold suspicious sand. |
 
 ## Download and install
 
-1. Open the latest successful [GitHub Actions build](https://github.com/unimatrixgit/mcdune/actions) and download **DuneRealms-Server-Package** from its artifacts. The server package includes Vault, all three plugin JARs, the resource pack, and the manual. GitHub artifact downloads may require sign-in.
+1. Open the latest successful [GitHub Actions build](https://github.com/unimatrixgit/mcdune/actions) and download **DuneRealms-Server-Package** from its artifacts. The server package includes Vault, all four project plugin JARs, the resource pack, and the manual. GitHub artifact downloads may require sign-in.
 2. Stop the Paper server and back up its worlds, plugin data, and any shared database before replacing an existing release.
-3. Put Vault, DuneCore, DuneEss, and DuneTerrain JARs in `plugins/`. Keep only one JAR per plugin. Remove the legacy `DuneRealms.jar` if upgrading from that plugin.
+3. Put Vault, DuneCore, DuneNPC, DuneEss, and DuneTerrain JARs in `plugins/`. Keep only one JAR per plugin. Remove the legacy `DuneRealms.jar` if upgrading from that plugin.
 4. Start once to create configuration files. Set the backend's `server.planet` in DuneTerrain and matching `network.local-planet` in DuneCore, then restart after edits.
 5. Put `DuneResourcePack.zip` in the client's `.minecraft/resourcepacks` directory and enable it. Vanilla and Fabric clients use the same resource pack; it does not belong in `mods/`.
 
@@ -75,9 +76,10 @@ Use **Java 21 and Gradle 8.14**. Run `gradle clean build` separately in:
 DuneRealms-minecraft-only/
 DuneTerrain/
 DuneEss/
+DuneNPC/
 ```
 
-The existing workflow builds all three modules and produces the downloadable server package. Automated tests cover plateau limits and boundaries, Guild deadlines/restart persistence/deduplication/offline retry, admin argument and permission checks, and sandworm pairing/following/damage routing/cleanup. The current plugin build passes; actual Minecraft rendering and live Paper/Velocity behavior still require staging-server verification.
+The existing workflow builds all four project modules and produces the downloadable server package. Automated tests cover plateau limits and boundaries, Guild deadlines/restart persistence/deduplication/offline retry, admin argument and permission checks, and sandworm pairing/following/damage routing/cleanup. The current plugin build passes; actual Minecraft rendering and live Paper/Velocity behavior still require staging-server verification.
 
 ## Documentation and artwork
 
@@ -103,7 +105,7 @@ Actions use the existing command checks. Both opening the menu and clicking a co
 granting only `dune.admin` does not enable this menu. A deopped player cannot use a retained rod.
 The blaze rod has custom model data 1006, a gold name and enchantment glint; its current appearance uses the vanilla blaze rod texture.
 
-### Roaming smugglers and Imperial spice charter (DuneCore 1.0.7)
+### Roaming smugglers and Imperial spice charter (DuneNPC 1.0.0 / DuneCore 1.0.8)
 Arrakis wandering traders become **Arrakis Smugglers**. Their vanilla AI roams toward new
 nearby destinations each minute; up to six are maintained in loaded chunks near players by default.
 Right-click a smuggler to select one active delivery contract:
@@ -119,7 +121,7 @@ system is called after delivery and requires PostgreSQL to track bounties across
 The lore is in-game mission dialogue; these contracts do not generate additional sietch structures.
 
 `/dune smuggle status` shows cargo, departure and reward; `/dune smuggle cancel` abandons a contract without taking cargo.
-Contracts save to `smuggling.yml` and survive restarts on the Arrakis backend; they do not transfer between backends.
+Contracts save to `plugins/DuneNPC/smuggling.yml` and survive restarts on the Arrakis backend; they do not transfer between backends.
 Appointments are checked when opening, accepting and delivering. Members of the Emperor-appointed Spice Steward
 or House of Water receive no smuggling offers. Their normal `/duneess sell` spice sales instead receive **+33% gross
 value before the Trust levy**, rounded to the nearest Solaris. An appointment gained mid-contract blocks delivery;
@@ -130,3 +132,33 @@ Existing config files use the defaults when these keys are missing. Restart afte
 Enable the updated resource pack for the sand-tan smuggler robes, face covering and leather equipment.
 Vanilla packs replace the texture of **all wandering traders**, including those on other planets; mission behavior is Arrakis-only.
 Without the pack the same missions work with the vanilla trader appearance.
+
+### Smuggler quest camps (DuneNPC 1.0.0)
+A smuggler who issued an active contract stops moving, cannot be pushed or harmed,
+and cannot naturally despawn while waiting. Invisible level-15 light blocks illuminate
+its camp. Completing or cancelling the last contract restores the NPC's previous AI,
+gravity, collision, vulnerability and despawn timer, and removes the temporary lights.
+If several players use the same smuggler, its camp stays active until every contract ends.
+
+Green dust particles mean no active contracts; purple particles mean at least one open contract
+issued by that NPC. Delivery still goes to a different smuggler as described above.
+Lighting replaces only air, preserves existing terrain and lights, and journals its original
+block data to `smuggler-camps.yml`. Overlapping camps share light ownership. Restart recovery
+and unloaded-chunk cleanup run automatically when the chunks are available, without forcing
+chunks to load. Normal shutdown restores loaded camps; restarting reactivates outstanding contracts.
+
+### DuneNPC installation and management
+Install **DuneNPC-1.0.0.jar**, **DuneCore-1.0.8.jar** and **DuneTerrain-1.0.7.jar** together, alongside DuneEss and Vault.
+DuneNPC now owns all Guild Navigator and smuggler NPC behavior; DuneTerrain only sets up terrain and safe world spawn.
+Existing tagged NPCs are recognized. On first installation, DuneNPC copies `smuggling.yml` and
+`smuggler-camps.yml` from DuneCore when its own copies are absent, leaving the originals as backups.
+Old smuggler settings and the terrain's Guild NPC enabled setting are imported into `plugins/DuneNPC/config.yml` once.
+Edit NPC settings there after migration. Do not downgrade to a Core version that still runs smuggler logic alongside DuneNPC.
+
+Open the glowing admin rod, then **DuneNPC Management**, or run `/dunenpc admin`.
+The operator GUI places Guild Navigators and Arrakis smugglers, displays NPC/contract counts,
+and links back to the Dune admin menu. `/dunenpc smuggle status|cancel` is available to ordinary players;
+`/dune smuggle status|cancel` remains an alias. `/dune guildnpc` remains an alias for the existing `dune.admin` command.
+All missions last **30 real minutes**, including offline/server downtime. Older contracts receive
+one 30-minute deadline on migration. Remaining time appears in the contract menu and status command.
+Expiry pays nothing, keeps cargo, and clears the camp once its last contract ends.

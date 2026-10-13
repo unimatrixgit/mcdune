@@ -18,7 +18,7 @@ final class AdminGui implements Listener {
     private final NamespacedKey rodKey;
     private static final Map<Integer, String> COMMANDS = Map.of(
         10, "summon sandworm", 12, "guildnpc", 14, "givespice",
-        16, "guireload", 20, "kit", 24, "politics status");
+        16, "guireload", 20, "kit", 22, "npcadmin", 24, "politics status");
 
     private static final class Menu implements InventoryHolder {
         private Inventory inventory;
@@ -68,6 +68,7 @@ final class AdminGui implements Listener {
         holder.inventory.setItem(14, icon(Material.ORANGE_DYE, "Give Test Spice", "Receive one tagged spice item."));
         holder.inventory.setItem(16, icon(Material.COMPARATOR, "Reload Menus", "Reload gui.yml from disk."));
         holder.inventory.setItem(20, icon(Material.NETHERITE_CHESTPLATE, "Receive Faction Kit", "Receive your selected faction's kit."));
+        holder.inventory.setItem(22, icon(Material.WANDERING_TRADER_SPAWN_EGG, "DuneNPC Management", "Open NPC spawning and mission status controls."));
         holder.inventory.setItem(24, icon(Material.WRITABLE_BOOK, "Imperial Status", "View politics, appointments and Trust status."));
         holder.inventory.setItem(31, icon(Material.BARRIER, "Close"));
         player.openInventory(holder.inventory);

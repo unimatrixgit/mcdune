@@ -47,7 +47,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private final String[] factions = {"Fremen", "Harkonnen", "Corrino", "Atreides", "Ordos"};
     private final Map<UUID, String> selected = new HashMap<>();
     private Economy economy;
-    private NamespacedKey itemKey, npcKey, wormKey, armorFactionKey, raiderKey;
+    private NamespacedKey itemKey, wormKey, armorFactionKey, raiderKey;
     private File dataFile;
     private final Map<UUID, Job> jobs = new HashMap<>();
     private final Map<UUID, UUID> activeWorkers = new HashMap<>();
@@ -59,10 +59,11 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private final Map<UUID, Integer> sunExposureSeconds = new HashMap<>();
     private ConfigurableGui gui;
     private AdminGui adminGui;
-    private Smugglers smugglers;
+
     private Politics politics;
     private SharedDatabase sharedDatabase;
     public SharedDatabase sharedDatabase(){return sharedDatabase;}
+    public Politics politics(){return politics;}
     public String factionOf(Player player){return selected.getOrDefault(player.getUniqueId(),"");}
     public void persistPlayers(){savePlayers();}
     private ArrakisWater arrakisWater;
@@ -75,7 +76,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
 
     @Override public void onEnable() {
         migrateLegacyData();
-        saveDefaultConfig(); itemKey = new NamespacedKey("dunerealms", "item"); npcKey = new NamespacedKey("dunerealms", "guild"); wormKey = new NamespacedKey("dunerealms", "sandworm"); armorFactionKey = new NamespacedKey("dunerealms", "armor_faction"); raiderKey = new NamespacedKey("dunerealms", "spice_raider");
+        saveDefaultConfig(); itemKey = new NamespacedKey("dunerealms", "item"); wormKey = new NamespacedKey("dunerealms", "sandworm"); armorFactionKey = new NamespacedKey("dunerealms", "armor_faction"); raiderKey = new NamespacedKey("dunerealms", "spice_raider");
         dataFile = new File(getDataFolder(), "players.yml"); data = YamlConfiguration.loadConfiguration(dataFile);
         for (String key : data.getKeys(false)) try {
             UUID id = UUID.fromString(key); selected.put(id, data.getString(key + ".faction", ""));
@@ -108,7 +109,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         duneCommand.setTabCompleter(this);
         Bukkit.getPluginManager().registerEvents(this, this);
         adminGui = new AdminGui(this);
-        smugglers = new Smugglers(this, economy, politics);
+
         announcements = new ArrakisAnnouncements(this);
         sandwormMobs = new SandwormMobs(this, wormKey);
         World loadedArrakis = Bukkit.getWorld("arrakis");
@@ -119,6 +120,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         getLogger().info("DuneCore enabled. Gameplay, faction travel, Arrakis threats, and spice raiders ready.");
     }
     @Override public void onDisable() {
+
         for (UUID playerId : new ArrayList<>(ordosCloakedArmor.keySet())) restoreOrdosArmor(playerId);
         if(serverJobs!=null)serverJobs.save(); savePlayers();
     }
@@ -490,7 +492,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
                 selected.put(p.getUniqueId(), match); economy.createPlayerAccount(p); savePlayers(); kit(p); factionArrival(p, planets[Arrays.asList(factions).indexOf(match)]);
                 p.sendMessage(ChatColor.GREEN + "You joined " + match + "!");
             }
-            case "smuggle" -> smugglers.command(p, args);
+            case "smuggle" -> forwardNpc(p, "smuggle " + String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+            case "npcadmin" -> forwardNpc(p, "admin");
             case "elytra" -> mergeElytra(p);
             case "kit" -> { if (!selected.containsKey(p.getUniqueId())) { p.sendMessage("Choose a faction first."); break; } kit(p); }
             case "politics", "trust" -> politics.command(p, args);
@@ -502,17 +505,18 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             case "exchange" -> gui.open(p, "exchange");
             case "serverjobs" -> serverJobs.command(p, args);
             case "job" -> jobCommand(p, args);
-            case "guildnpc" -> {
-                if (!p.hasPermission("dune.admin")) { p.sendMessage("Admin only."); break; }
-                Villager v = p.getWorld().spawn(p.getLocation(), Villager.class); v.setCustomName(ChatColor.LIGHT_PURPLE + "Spacing Guild Navigator"); v.setCustomNameVisible(true);
-                v.setProfession(Villager.Profession.CLERIC); v.setAI(false); v.getPersistentDataContainer().set(npcKey, PersistentDataType.BYTE, (byte)1);
-            }
+            case "guildnpc" -> forwardNpc(p, "guildnpc");
             case "givespice" -> { if (p.hasPermission("dune.admin")) p.getInventory().addItem(spiceDrop(p, 1)); }
             default -> p.sendMessage("Use /dune help");
         }
         return true;
     }
 
+    private void forwardNpc(Player player, String command) {
+        org.bukkit.plugin.Plugin npc = Bukkit.getPluginManager().getPlugin("DuneNPC");
+        if (npc == null || !npc.isEnabled()) { player.sendMessage(ChatColor.RED + "Install and enable DuneNPC for NPC controls and smuggling missions."); return; }
+        Bukkit.dispatchCommand(player, "dunenpc " + command.trim());
+    }
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.GOLD + "=== DuneCore command guide ===");
         helpSection(sender, "General");
@@ -719,9 +723,6 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if (index < 0) return;
         World w = Bukkit.getWorld(planets[index]);
         if (w != null) e.setRespawnLocation(w.getSpawnLocation().clone());
-    }
-    @EventHandler public void onNpc(PlayerInteractEntityEvent e) {
-        if (e.getRightClicked().getPersistentDataContainer().has(npcKey, PersistentDataType.BYTE)) { e.setCancelled(true); Bukkit.dispatchCommand(e.getPlayer(), "duneess travel"); }
     }
     @EventHandler public void onSpice(BlockBreakEvent e) {
         Block block = e.getBlock();

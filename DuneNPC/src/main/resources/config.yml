@@ -1,0 +1,7 @@
+guild-npc:
+  enabled: true
+smugglers:
+  enabled: true
+  max-traders: 6
+  spice-amount: 64
+  water-amount: 4

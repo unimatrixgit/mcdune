@@ -4,8 +4,7 @@
 server:
   planet: arrakis
 
-guild-npc:
-  enabled: true
+# Guild Navigator settings are now managed by DuneNPC/config.yml.
 
 sietches:
   enabled: true

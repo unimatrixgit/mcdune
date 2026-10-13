@@ -10,7 +10,7 @@ import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Trident;
-import org.bukkit.entity.Villager;
+
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -35,7 +35,7 @@ import java.util.*;
 
 public final class DuneTerrain extends JavaPlugin implements Listener {
     private static final String[] PLANETS = {"arrakis", "giedi_prime", "kaitain", "caladan", "sigma_draconis_iv"};
-    private NamespacedKey guildKey;
+
     private NamespacedKey sietchLootIdKey;
     private final Map<UUID, PersonalLoot> openSietchLoot = new HashMap<>();
     private record PersonalLoot(Inventory inventory, String id) {}
@@ -276,7 +276,7 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             getLogger().info("Upgraded default Arrakis rock formations to about 100 blocks across in new chunks.");
         }
         getServer().getPluginManager().registerEvents(this, this);
-        guildKey = new NamespacedKey("dunerealms", "guild");
+
         sietchLootIdKey = new NamespacedKey(this, "sietch-loot-id");
         String planet = getConfig().getString("server.planet", "arrakis").toLowerCase(Locale.ROOT);
         if (!Arrays.asList(PLANETS).contains(planet)) {
@@ -326,7 +326,7 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
         world.getChunkAt(x >> 4, z >> 4).load(true);
         Location spawn = findSafeSpawn(world, x, z);
         world.setSpawnLocation(spawn);
-        if (getConfig().getBoolean("guild-npc.enabled", true)) ensureGuildNpc(world, spawn);
+
     }
 
     private Location findSafeSpawn(World world, int x, int z) {
@@ -343,25 +343,6 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
         }
         int y = Math.max(world.getMinHeight() + 2, world.getHighestBlockYAt(x, z) + 1);
         return new Location(world, x + 0.5, y, z + 0.5);
-    }
-
-    private void ensureGuildNpc(World world, Location spawn) {
-        Location at = findSafeSpawn(world, spawn.getBlockX() + 2, spawn.getBlockZ());
-        for (Entity entity : world.getNearbyEntities(at, 8, 5, 8)) {
-            if (entity instanceof Villager villager && villager.getPersistentDataContainer().has(guildKey, PersistentDataType.BYTE)) {
-                villager.teleport(at);
-                return;
-            }
-        }
-        Villager villager = world.spawn(at, Villager.class);
-        villager.setCustomName(ChatColor.LIGHT_PURPLE + "Spacing Guild Navigator");
-        villager.setCustomNameVisible(true);
-        villager.setProfession(Villager.Profession.CLERIC);
-        villager.setAI(false);
-        villager.setInvulnerable(true);
-        villager.setSilent(true);
-        villager.setPersistent(true);
-        villager.getPersistentDataContainer().set(guildKey, PersistentDataType.BYTE, (byte) 1);
     }
 
     private static class PlanetChunkGenerator extends ChunkGenerator {

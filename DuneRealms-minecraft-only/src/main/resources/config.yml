@@ -61,9 +61,4 @@ database:
   username: "dune"
   password: "CHANGE_ME"
 
-# Roaming Arrakis traders: native wandering-trader AI and local persistent delivery contracts.
-smugglers:
-  enabled: true
-  max-traders: 6
-  spice-amount: 64
-  water-amount: 4
+# NPC settings are now managed by DuneNPC/config.yml.

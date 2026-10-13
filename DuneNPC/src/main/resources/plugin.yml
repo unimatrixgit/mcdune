@@ -1,0 +1,11 @@
+name: DuneNPC
+version: 1.0.0
+main: com.example.dunenpc.DuneNPC
+api-version: '1.21'
+depend: [DuneCore, DuneEss, Vault]
+softdepend: [DuneTerrain]
+description: Guild Navigators, roaming smugglers, timed missions and quest camps
+commands:
+  dunenpc:
+    description: NPC administration and smuggling mission status
+    usage: /dunenpc admin | smuggle status | smuggle cancel

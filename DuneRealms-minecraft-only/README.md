@@ -2,7 +2,7 @@
 
 The detailed [player and administrator manual](../docs/Dune-User-Manual.pdf) includes the complete Arrakis guide, command reference, configuration defaults, and reserved chapters for all other planets. DuneCore 1.0.5 renders sandworms as Sniffers while retaining native zombie AI through invisible Husk controllers; `/dune summon sandworm [x y z]` is available to admins.
 
-Requires Java 21 and Gradle 8+. Build each project folder separately. Install Vault, then `DuneEss`, `DuneCore`, and `DuneTerrain` into Paper's `plugins/` directory. The downloadable server package includes Vault 2.5.0. DuneEss owns Solaris and Guild/admin travel and registers its economy through Vault; DuneCore provides factions, spice gameplay, politics, and jobs; DuneTerrain generates the planet worlds. Remove the old `DuneRealms.jar` when upgrading.
+Requires Java 21 and Gradle 8+. Build each project folder separately. Install Vault, then `DuneEss`, `DuneCore`, `DuneNPC`, and `DuneTerrain` into Paper's `plugins/` directory. The downloadable server package includes Vault 2.5.0. DuneEss owns Solaris and Guild/admin travel and registers its economy through Vault; DuneCore provides factions, spice gameplay, politics, and jobs; DuneTerrain generates the planet worlds. Remove the old `DuneRealms.jar` when upgrading.
 
 Commands: `/dune choose fremen|harkonnen|corrino|atreides|ordos`, `/dune kit`, `/dune guildnpc` (OP), `/dune givespice` (OP), `/duneess balance`, `/duneess sell`, `/duneess travel [planet]`, and `/duneess admin ...`. Use `/dune help` or `/duneess help` for the spaced, boxed chat guide with clickable Previous/Next links. `/duneess help <page>` opens a page directly and `/duneess help menu` opens the inventory guide.
 
@@ -87,3 +87,10 @@ The trims are Minecraft's built-in vanilla patterns, not custom resource-pack mo
 
 ## Proxy mode
 See `NETWORK_SETUP.md` for the five-server Velocity topology, required per-server config, and critical shared-data limitations.
+
+Contracts now have a **30-minute real-time deadline**, including offline time and server downtime.
+The remaining time appears in the mission menu and `/dune smuggle status`.
+Expired missions consume no cargo and pay no reward. When the last mission expires, the source
+smuggler returns to green particles and normal roaming, and its temporary lighting is removed.
+Contracts created before 1.0.8 receive one initial 30-minute window when first upgraded; subsequent
+restarts preserve their saved deadline.
