@@ -1,0 +1,3 @@
+const prophecyCards=[...document.querySelectorAll('.prophecy-card')],prophecyBook=document.querySelector('#prophecy-book'),prophecySearch=document.querySelector('#prophecy-search');
+function filterProphecy(){let count=0;const book=prophecyBook.value,q=prophecySearch.value.trim().toLowerCase();for(const card of prophecyCards){const matches=(book==='all'||card.dataset.book===book)&&card.dataset.search.includes(q);card.hidden=!matches;if(matches)count++}document.querySelector('#prophecy-count').textContent=count+' '+(count===1?'chronicle':'chronicles');document.querySelector('#prophecy-empty').hidden=count!==0}
+prophecyBook.addEventListener('change',filterProphecy);prophecySearch.addEventListener('input',filterProphecy);

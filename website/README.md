@@ -16,3 +16,7 @@ See [Forums and player support](FORUMS-PORTAL.md) for independent forums, the Yo
 
 
 The standalone [Sietch Armoury](https://project-dune.bonnystoat9.chatgpt.site/armoury.html) contains all 68 illustrated item entries and full suit abilities. [Diplomacy](https://project-dune.bonnystoat9.chatgpt.site/diplomacy.html) reads the DuneCore 1.0.10 current-office snapshot via a dedicated DiscordSRV channel.
+
+## The Prophecy blog
+
+The top menu links to `prophecy.html`, a book-focused Paul Atreides journal with six illustrated posts covering Dune, Dune Messiah and Children of Dune. Each article has a spoiler gate, source notes and previous/next links. The index supports book filters and search. Original commentary is separated from plot context. Posts live in `web/prophecy-data.json`; the build regenerates their static pages with `scripts/build-prophecy.mjs`.
