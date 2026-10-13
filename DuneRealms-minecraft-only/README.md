@@ -10,6 +10,8 @@ Suspicious sand on Arrakis is harvestable spice. Use the tagged netherite spice 
 
 Limitations: this is a gameplay prototype, not a fully polished mod. Custom equipment uses vanilla items and colored names, not resource-pack models. Worlds have themed terrain, but no cities, unique buildings, or detailed biome decorations. Guild NPCs are placed by operators. No permissions-based faction change for ordinary players. The plugin has not been compiled or tested against a running Paper server in this environment.
 
+Admins with `dune.admin` can force a local teleport to the loaded Arrakis world with `/dune admin arrakis [player]`. Omit the player name to teleport yourself. From console, specify an online player. This bypasses normal faction and proxy travel routing and requires Arrakis to be loaded on that backend.
+
 ## Sandworms (Shai-Hulud)
 
 Hostile, oversized husks representing sandworms spawn on sandy surfaces near players **only on Arrakis**, roughly every 10 seconds with a configurable chance. They target players, have 500 health and 30 base melee attack damage (Warden-level values), and play a Warden roar when emerging. They cannot teleport to other worlds. Settings are under `sandworms` in `config.yml`. The worm is represented by a scaled vanilla husk; a true animated worm model would require a resource pack or model plugin.

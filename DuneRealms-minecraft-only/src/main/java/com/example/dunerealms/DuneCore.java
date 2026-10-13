@@ -404,10 +404,29 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         p.openInventory(inv);
     }
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("admin")) {
+            if (!sender.hasPermission("dune.admin")) { sender.sendMessage(ChatColor.RED + "Admin only."); return true; }
+            if (args.length < 2 || !args[1].equalsIgnoreCase("arrakis")) {
+                sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin arrakis [player]"); return true;
+            }
+            Player target;
+            if (args.length >= 3) {
+                target = Bukkit.getPlayerExact(args[2]);
+                if (target == null) { sender.sendMessage(ChatColor.RED + "That player is not online."); return true; }
+            } else if (sender instanceof Player player) target = player;
+            else { sender.sendMessage(ChatColor.YELLOW + "From console, specify an online player: /dune admin arrakis <player>"); return true; }
+            World arrakis = Bukkit.getWorld("arrakis");
+            if (arrakis == null) { sender.sendMessage(ChatColor.RED + "Arrakis is not loaded on this server. Set DuneTerrain's server.planet to arrakis and restart this backend."); return true; }
+            if (target.teleport(arrakis.getSpawnLocation())) {
+                target.sendMessage(ChatColor.AQUA + "An admin sent you to Arrakis.");
+                sender.sendMessage(ChatColor.GREEN + "Teleported " + target.getName() + " to Arrakis.");
+            } else sender.sendMessage(ChatColor.RED + "Teleport to Arrakis failed.");
+            return true;
+        }
         if (!(sender instanceof Player p)) { sender.sendMessage("Run this command in-game."); return true; }
         if (args.length == 0) { gui.open(p, "main"); return true; }
         if (args[0].equalsIgnoreCase("help")) {
-            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, guildnpc (admin)"); return true;
+            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, guildnpc (admin), admin arrakis [player]"); return true;
         }
         switch (args[0].toLowerCase(Locale.ROOT)) {
             case "choose" -> {
