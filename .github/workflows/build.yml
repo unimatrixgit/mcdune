@@ -113,10 +113,13 @@ jobs:
             https://raw.githubusercontent.com/Foulest/Vault/2.5.0/LICENSE \
             --output DuneRealms-Server-Package/Vault-LICENSE.txt
           cp DuneResourcePack.zip DuneRealms-Server-Package/
+          cp docs/Dune-User-Manual.pdf DuneRealms-Server-Package/
+          cp README.md DuneRealms-Server-Package/Project-README.md
           cat > DuneRealms-Server-Package/README.txt <<'EOF'
           DuneRealms Paper server package
 
           Contents: Vault 2.5.0, DuneCore, DuneEss, and DuneTerrain plugin JARs, plus DuneResourcePack.zip.
+          The illustrated user manual and Project-README.md are included for players and administrators.
 
           Install all four plugin JARs in the Paper server's plugins/ folder and restart the server.
           Install the included resource pack on vanilla or Fabric 1.21.4 clients for sandworm, haunted Fremen, and spice textures.
