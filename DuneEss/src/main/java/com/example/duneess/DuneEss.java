@@ -62,7 +62,7 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
             new HelpEntry("/dune exchange", "Open the spice exchange menu.", Material.CHEST)
         ),
         List.of(
-            new HelpEntry("/duneess admin solari <player> <amount>", "Grant Solaris to an online player.", Material.GOLD_INGOT),
+            new HelpEntry("/duneess admin solari player amount", "Grant Solaris to an online player.", Material.GOLD_INGOT),
             new HelpEntry("/duneess admin teleport arrakis", "Force yourself to Arrakis spawn.", Material.COMPASS),
             new HelpEntry("/duneess admin teleport sietch", "Teleport yourself to a generated sietch.", Material.CHEST),
             new HelpEntry("/duneess admin teleport spiceblow", "Teleport yourself to a generated spice blow.", Material.MAGMA_BLOCK),
@@ -174,29 +174,30 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
 
     private void help(CommandSender sender, int page) {
         int index = Math.max(0, Math.min(HELP_PAGES.size() - 1, page - 1));
-        sender.sendMessage(ChatColor.DARK_RED + "╔" + "═".repeat(58) + "╗");
-        sendBoxLine(sender, ChatColor.GOLD + "DUNE FIELD GUIDE" + ChatColor.DARK_GRAY + "  •  " + ChatColor.GRAY + "PAGE " + (index + 1) + " / " + HELP_PAGES.size());
-        sender.sendMessage(ChatColor.DARK_RED + "╠" + "═".repeat(58) + "╣");
+        sender.sendMessage(ChatColor.DARK_RED + "+" + "-".repeat(58) + "+");
+        sendBoxLine(sender, ChatColor.GOLD + "DUNE FIELD GUIDE" + ChatColor.GRAY + "        PAGE " + (index + 1) + " OF " + HELP_PAGES.size());
+        sender.sendMessage(ChatColor.DARK_RED + "+" + "-".repeat(58) + "+");
         for (HelpEntry entry : HELP_PAGES.get(index)) {
             sendBoxLine(sender, ChatColor.YELLOW + entry.command());
             for (String descriptionLine : wrap(entry.description(), 50))
                 sendBoxLine(sender, ChatColor.GRAY + "  " + descriptionLine);
             sendBoxLine(sender, " ");
         }
-        sender.sendMessage(ChatColor.DARK_RED + "╠" + "═".repeat(58) + "╣");
+        sender.sendMessage(ChatColor.DARK_RED + "+" + "-".repeat(58) + "+");
         sendBoxLine(sender, ChatColor.GRAY + "Use /duneess help menu for the visual guide.");
-        sendBoxLine(sender, ChatColor.GRAY + "DuneEss: Solaris & Guild travel  •  DuneCore: factions & Arrakis");
-        sender.sendMessage(ChatColor.DARK_RED + "╚" + "═".repeat(58) + "╝");
+        sendBoxLine(sender, ChatColor.GRAY + "DuneEss: Solaris and Guild travel");
+        sendBoxLine(sender, ChatColor.GRAY + "DuneCore: factions and Arrakis");
+        sender.sendMessage(ChatColor.DARK_RED + "+" + "-".repeat(58) + "+");
         if (sender instanceof Player player) {
             helpPageByPlayer.put(player.getUniqueId(), index + 1);
-            TextComponent nav = new TextComponent("§8[ " + (index == 0 ? "§8◀ Previous" : "§e◀ Previous") + " §8]     ");
+            TextComponent nav = new TextComponent("§8[ " + (index == 0 ? "§8Previous Page" : "§ePrevious Page") + " §8]     ");
             if (index > 0) nav.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duneess help previous"));
-            TextComponent next = new TextComponent("§8[ " + (index == HELP_PAGES.size() - 1 ? "§8Next ▶" : "§eNext ▶") + " §8]");
+            TextComponent next = new TextComponent("§8[ " + (index == HELP_PAGES.size() - 1 ? "§8Next Page" : "§eNext Page") + " §8]");
             if (index < HELP_PAGES.size() - 1) next.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duneess help next"));
             TextComponent pages = new TextComponent("§7   (page " + (index + 1) + "/" + HELP_PAGES.size() + ")");
             player.spigot().sendMessage(nav, next, pages);
         } else {
-            sender.sendMessage(ChatColor.GRAY + "Page " + (index + 1) + "/" + HELP_PAGES.size() + "  •  /duneess help previous | next");
+            sender.sendMessage(ChatColor.GRAY + "Page " + (index + 1) + " of " + HELP_PAGES.size() + " - /duneess help previous or next");
         }
     }
 
@@ -207,9 +208,9 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
 
     private void sendBoxLine(CommandSender sender, String text) {
         String plain = ChatColor.stripColor(text);
-        if (plain.length() > 56) plain = plain.substring(0, 55) + "…";
+        if (plain.length() > 56) plain = plain.substring(0, 53) + "...";
         String padding = " ".repeat(Math.max(0, 56 - plain.length()));
-        sender.sendMessage(ChatColor.DARK_RED + "║ " + text + padding + " " + ChatColor.DARK_RED + "║");
+        sender.sendMessage(ChatColor.DARK_RED + "| " + text + padding + " " + ChatColor.DARK_RED + "|");
     }
 
     private List<String> wrap(String text, int width) {
@@ -229,7 +230,7 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
 
     private void openHelpMenu(Player player, int page) {
         int index = Math.max(0, Math.min(HELP_PAGES.size() - 1, page - 1));
-        Inventory menu = Bukkit.createInventory(null, 54, HELP_TITLE + ChatColor.DARK_GRAY + "  " + (index + 1) + "/" + HELP_PAGES.size());
+        Inventory menu = Bukkit.createInventory(null, 54, HELP_TITLE + ChatColor.DARK_GRAY + "  Page " + (index + 1) + " of " + HELP_PAGES.size());
         ItemStack frame = helpItem(Material.BLACK_STAINED_GLASS_PANE, ChatColor.DARK_GRAY + " ", null);
         for (int slot = 0; slot < 9; slot++) { menu.setItem(slot, frame); menu.setItem(45 + slot, frame); }
         for (int row = 1; row <= 4; row++) { menu.setItem(row * 9, frame); menu.setItem(row * 9 + 8, frame); }
@@ -242,19 +243,19 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
             ItemStack item = helpItem(entry.icon(), ChatColor.YELLOW + entry.command(),
                 List.of(ChatColor.GRAY + entry.description(), ChatColor.GREEN + "Click to run"));
             ItemMeta itemMeta = item.getItemMeta();
-            if (!entry.command().contains("<") && !entry.command().contains("["))
+            if (!entry.command().endsWith(" player amount") && !entry.command().contains("["))
                 itemMeta.getPersistentDataContainer().set(helpActionKey, PersistentDataType.STRING, entry.command());
             item.setItemMeta(itemMeta);
             menu.setItem(slots[n++], item);
         }
-        ItemStack previous = helpItem(index == 0 ? Material.GRAY_STAINED_GLASS_PANE : Material.ARROW,
+        ItemStack previous = helpItem(index == 0 ? Material.GRAY_STAINED_GLASS_PANE : Material.BOOK,
             ChatColor.YELLOW + "Previous page", List.of(ChatColor.GRAY + (index == 0 ? "You are on the first page." : "Go to page " + index)));
         ItemMeta previousMeta = previous.getItemMeta();
         previousMeta.getPersistentDataContainer().set(helpPageKey, PersistentDataType.INTEGER, index);
         previous.setItemMeta(previousMeta);
         menu.setItem(45, previous);
         menu.setItem(49, helpItem(Material.BARRIER, ChatColor.RED + "Close", List.of(ChatColor.GRAY + "Close this guide.")));
-        ItemStack next = helpItem(index == HELP_PAGES.size() - 1 ? Material.GRAY_STAINED_GLASS_PANE : Material.ARROW,
+        ItemStack next = helpItem(index == HELP_PAGES.size() - 1 ? Material.GRAY_STAINED_GLASS_PANE : Material.WRITABLE_BOOK,
             ChatColor.YELLOW + "Next page", List.of(ChatColor.GRAY + (index == HELP_PAGES.size() - 1 ? "You are on the last page." : "Go to page " + (index + 2))));
         ItemMeta nextMeta = next.getItemMeta();
         nextMeta.getPersistentDataContainer().set(helpPageKey, PersistentDataType.INTEGER, index + 2);
