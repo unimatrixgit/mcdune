@@ -47,7 +47,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private final String[] factions = {"Fremen", "Harkonnen", "Corrino", "Atreides", "Ordos"};
     private final Map<UUID, String> selected = new HashMap<>();
     private final Map<UUID, Integer> money = new HashMap<>();
-    private NamespacedKey itemKey, npcKey, wormKey, armorFactionKey;
+    private NamespacedKey itemKey, npcKey, wormKey, armorFactionKey, raiderKey;
     private File dataFile;
     private final Map<UUID, Job> jobs = new HashMap<>();
     private final Map<UUID, UUID> activeWorkers = new HashMap<>();
@@ -68,7 +68,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
 
     @Override public void onEnable() {
         migrateLegacyData();
-        saveDefaultConfig(); itemKey = new NamespacedKey("dunerealms", "item"); npcKey = new NamespacedKey("dunerealms", "guild"); wormKey = new NamespacedKey("dunerealms", "sandworm"); armorFactionKey = new NamespacedKey("dunerealms", "armor_faction");
+        saveDefaultConfig(); itemKey = new NamespacedKey("dunerealms", "item"); npcKey = new NamespacedKey("dunerealms", "guild"); wormKey = new NamespacedKey("dunerealms", "sandworm"); armorFactionKey = new NamespacedKey("dunerealms", "armor_faction"); raiderKey = new NamespacedKey("dunerealms", "spice_raider");
         dataFile = new File(getDataFolder(), "players.yml"); data = YamlConfiguration.loadConfiguration(dataFile);
         for (String key : data.getKeys(false)) try {
             UUID id = UUID.fromString(key); selected.put(id, data.getString(key + ".faction", "")); money.put(id, data.getInt(key + ".solaris", 0));
@@ -99,7 +99,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         Objects.requireNonNull(getCommand("dune")).setExecutor(this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getScheduler().runTaskTimer(this, this::spawnSandworms, 200L, 200L);
-        getLogger().info("DuneCore enabled. Gameplay, faction travel, and Arrakis sandworms ready.");
+        Bukkit.getScheduler().runTaskTimer(this, this::spawnSpiceRaiders, 200L, 200L);
+        getLogger().info("DuneCore enabled. Gameplay, faction travel, Arrakis threats, and spice raiders ready.");
     }
     @Override public void onDisable() {
         for (UUID playerId : new ArrayList<>(ordosCloakedArmor.keySet())) restoreOrdosArmor(playerId);
@@ -476,8 +477,9 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length > 0 && args[0].equalsIgnoreCase("admin")) {
             if (!sender.hasPermission("dune.admin")) { sender.sendMessage(ChatColor.RED + "Admin only."); return true; }
-            if (args.length < 2 || (!args[1].equalsIgnoreCase("arrakis") && !args[1].equalsIgnoreCase("sietch") && !args[1].equalsIgnoreCase("solari"))) {
-                sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin <arrakis|sietch> [player] | solari <player> <amount>"); return true;
+            if (args.length < 2 || (!args[1].equalsIgnoreCase("arrakis") && !args[1].equalsIgnoreCase("sietch")
+                && !args[1].equalsIgnoreCase("spiceblow") && !args[1].equalsIgnoreCase("solari"))) {
+                sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin <arrakis|sietch|spiceblow> [player] | solari <player> <amount>"); return true;
             }
             if (args[1].equalsIgnoreCase("solari")) {
                 if (args.length != 4) { sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin solari <player> <amount>"); return true; }
@@ -500,11 +502,15 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
                 target = Bukkit.getPlayerExact(args[2]);
                 if (target == null) { sender.sendMessage(ChatColor.RED + "That player is not online."); return true; }
             } else if (sender instanceof Player player) target = player;
-            else { sender.sendMessage(ChatColor.YELLOW + "From console, specify an online player: /dune admin <arrakis|sietch> <player>"); return true; }
+            else { sender.sendMessage(ChatColor.YELLOW + "From console, specify an online player: /dune admin <arrakis|sietch|spiceblow> <player>"); return true; }
             World arrakis = Bukkit.getWorld("arrakis");
             if (arrakis == null) { sender.sendMessage(ChatColor.RED + "Arrakis is not loaded on this server. Set DuneTerrain's server.planet to arrakis and restart this backend."); return true; }
             if (args[1].equalsIgnoreCase("sietch")) {
                 teleportToNearestSietch(sender, target, arrakis);
+                return true;
+            }
+            if (args[1].equalsIgnoreCase("spiceblow")) {
+                teleportToNearestSpiceBlow(sender, target, arrakis);
                 return true;
             }
             if (target.teleport(arrakis.getSpawnLocation())) {
@@ -516,7 +522,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if (!(sender instanceof Player p)) { sender.sendMessage("Run this command in-game."); return true; }
         if (args.length == 0) { gui.open(p, "main"); return true; }
         if (args[0].equalsIgnoreCase("help")) {
-            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, admin arrakis|sietch [player], admin solari <player> <amount>"); return true;
+            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, admin arrakis|sietch|spiceblow [player], admin solari <player> <amount>"); return true;
         }
         switch (args[0].toLowerCase(Locale.ROOT)) {
             case "choose" -> {
@@ -601,6 +607,39 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         value = (value ^ (value >>> 27)) * 0x94D049BB133111EBL;
         return value ^ (value >>> 31);
     }
+
+    private void teleportToNearestSpiceBlow(CommandSender sender, Player target, World arrakis) {
+        Location origin = target.getWorld().equals(arrakis) ? target.getLocation() : arrakis.getSpawnLocation();
+        int spacing = 2000;
+        long cellX = Math.floorDiv(origin.getBlockX(), spacing), cellZ = Math.floorDiv(origin.getBlockZ(), spacing);
+        List<long[]> candidates = new ArrayList<>();
+        long salt = 0x5350494345424c4fL;
+        for (long gx = cellX - 2; gx <= cellX + 2; gx++) for (long gz = cellZ - 2; gz <= cellZ + 2; gz++) {
+            long h1 = sietchMix64(gx * 0x9E3779B97F4A7C15L ^ gz * 0xC2B2AE3D27D4EB4FL ^ salt);
+            long h2 = sietchMix64(gz * 0x165667B19E3779F9L ^ gx * 0x85EBCA77C2B2AE63L ^ ~salt);
+            long x = gx * spacing + 8 + Math.floorMod(h1, spacing - 16);
+            long z = gz * spacing + 8 + Math.floorMod(h2, spacing - 16);
+            long dx = x - origin.getBlockX(), dz = z - origin.getBlockZ();
+            candidates.add(new long[]{x, z, dx * dx + dz * dz});
+        }
+        candidates.sort(Comparator.comparingLong(candidate -> candidate[2]));
+        for (long[] candidate : candidates) {
+            int x = (int)candidate[0], z = (int)candidate[1];
+            arrakis.getChunkAt(x >> 4, z >> 4).load(true);
+            int top = arrakis.getHighestBlockYAt(x, z);
+            Material marker = arrakis.getBlockAt(x, top, z).getType();
+            if (marker != Material.MAGMA_BLOCK && marker != Material.GLOWSTONE) continue;
+            int safeX = x + 4, safeZ = z + 4;
+            int safeY = arrakis.getHighestBlockYAt(safeX, safeZ) + 1;
+            if (target.teleport(new Location(arrakis, safeX + 0.5, safeY, safeZ + 0.5))) {
+                target.sendMessage(ChatColor.AQUA + "An admin sent you to a spice blow on Arrakis.");
+                sender.sendMessage(ChatColor.GREEN + "Teleported " + target.getName() + " to the nearest spice blow at " + x + ", " + z + ".");
+            } else sender.sendMessage(ChatColor.RED + "Teleport to the spice blow failed.");
+            return;
+        }
+        sender.sendMessage(ChatColor.RED + "No spice blow was found nearby. Explore new Arrakis terrain with DuneTerrain enabled, then try again.");
+    }
+
     void runGuiCommand(Player p, String command) {
         String[] args = command.trim().split("\\s+");
         if (args.length == 0 || args[0].isEmpty()) return;
@@ -799,6 +838,71 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     }
     private boolean isWorm(Entity entity) {
         return entity.getPersistentDataContainer().has(wormKey, PersistentDataType.BYTE);
+    }
+    private boolean isSpiceRaider(Entity entity) {
+        return entity.getPersistentDataContainer().has(raiderKey, PersistentDataType.BYTE);
+    }
+    private void spawnSpiceRaiders() {
+        if (!getConfig().getBoolean("spice-raiders.enabled", true)) return;
+        World world = Bukkit.getWorld("arrakis");
+        if (world == null) return;
+        int max = Math.max(0, getConfig().getInt("spice-raiders.max-per-world", 12));
+        int count = (int)world.getEntitiesByClass(Husk.class).stream().filter(this::isSpiceRaider).count();
+        if (count >= max) return;
+        Random random = java.util.concurrent.ThreadLocalRandom.current();
+        for (Player player : world.getPlayers()) {
+            if (count >= max) break;
+            boolean nearRichField = nearHighValueSpice(player);
+            double chance = getConfig().getDouble(nearRichField ? "spice-raiders.chance-near-rich-field" : "spice-raiders.chance-per-player-check", nearRichField ? 0.45 : 0.08);
+            if (random.nextDouble() >= Math.max(0, Math.min(1, chance))) continue;
+            if (world.getNearbyEntities(player.getLocation(), 32, 24, 32).stream().anyMatch(this::isSpiceRaider)) continue;
+            Husk raider = spawnSpiceRaiderNear(player, random);
+            if (raider != null) count++;
+        }
+    }
+    private boolean nearHighValueSpice(Player player) {
+        String path = "spice-raiders.";
+        int radius = Math.max(8, getConfig().getInt(path + "field-radius", 24));
+        int valueThreshold = Math.max(1, getConfig().getInt(path + "field-value-threshold", 5000));
+        int price = Math.max(1, getConfig().getInt("spice-sell-price", 15));
+        int required = valueThreshold / price + 1;
+        World world = player.getWorld();
+        int centerX = player.getLocation().getBlockX(), centerZ = player.getLocation().getBlockZ();
+        int deposits = 0;
+        for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+            if (dx * dx + dz * dz > radius * radius) continue;
+            int x = centerX + dx, z = centerZ + dz, y = world.getHighestBlockYAt(x, z);
+            if (world.getBlockAt(x, y, z).getType() == Material.SUSPICIOUS_SAND && ++deposits >= required) return true;
+        }
+        return false;
+    }
+    private Husk spawnSpiceRaiderNear(Player target, Random random) {
+        World world = target.getWorld();
+        for (int attempt = 0; attempt < 12; attempt++) {
+            double angle = random.nextDouble() * Math.PI * 2;
+            int distance = 16 + random.nextInt(17);
+            int x = target.getLocation().getBlockX() + (int)Math.round(Math.cos(angle) * distance);
+            int z = target.getLocation().getBlockZ() + (int)Math.round(Math.sin(angle) * distance);
+            int y = world.getHighestBlockYAt(x, z);
+            if (world.getBlockAt(x, y, z).getType() != Material.SAND && world.getBlockAt(x, y, z).getType() != Material.RED_SAND) continue;
+            if (!world.getBlockAt(x, y + 1, z).isPassable() || !world.getBlockAt(x, y + 2, z).isPassable()) continue;
+            Location spawn = new Location(world, x + 0.5, y + 1, z + 0.5);
+            return world.spawn(spawn, Husk.class, raider -> {
+                raider.getPersistentDataContainer().set(raiderKey, PersistentDataType.BYTE, (byte)1);
+                raider.setCustomName(ChatColor.DARK_RED + "Spice Raider");
+                raider.setCustomNameVisible(true);
+                raider.setRemoveWhenFarAway(true);
+                raider.setCanPickupItems(false);
+                raider.getAttribute(Attribute.MAX_HEALTH).setBaseValue(getConfig().getDouble("spice-raiders.health", 36.0));
+                raider.setHealth(raider.getAttribute(Attribute.MAX_HEALTH).getValue());
+                raider.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(getConfig().getDouble("spice-raiders.attack-damage", 6.0));
+                raider.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(getConfig().getDouble("spice-raiders.movement-speed", 0.28));
+                raider.getEquipment().setItemInMainHand(new ItemStack(Material.IRON_SWORD));
+                raider.getEquipment().setItemInMainHandDropChance(0.0f);
+                raider.setTarget(target);
+            });
+        }
+        return null;
     }
     private void spawnSandworms() {
         if (!getConfig().getBoolean("sandworms.enabled", true)) return;

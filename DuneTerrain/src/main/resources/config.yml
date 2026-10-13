@@ -11,6 +11,13 @@ sietches:
   enabled: true
   spacing: 2000
 
+spice-blow:
+  enabled: true
+  spacing: 2000
+  radius: 24
+  target-value: 15000
+  unit-price: 15
+
 spice-deposits:
   per-chunk: 2
   patches:

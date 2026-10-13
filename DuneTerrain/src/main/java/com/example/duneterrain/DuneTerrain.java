@@ -2,18 +2,24 @@ package com.example.duneterrain;
 
 import org.bukkit.*;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Trident;
 import org.bukkit.entity.Villager;
+import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.generator.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -32,6 +38,87 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
     private NamespacedKey sietchLootIdKey;
     private final Map<UUID, PersonalLoot> openSietchLoot = new HashMap<>();
     private record PersonalLoot(Inventory inventory, String id) {}
+
+    @EventHandler public void onSpiceBlowProjectile(ProjectileHitEvent event) {
+        if (!(event.getEntity() instanceof Arrow) && !(event.getEntity() instanceof Trident)) return;
+        if (event.getHitBlock() != null) triggerSpiceBlowAt(event.getHitBlock().getLocation());
+        else if (event.getHitEntity() != null) triggerSpiceBlowAt(event.getHitEntity().getLocation());
+    }
+
+    @EventHandler public void onSpiceBlowPlayerMove(PlayerMoveEvent event) {
+        if (event.getTo() == null || (event.getFrom().getBlockX() == event.getTo().getBlockX()
+            && event.getFrom().getBlockY() == event.getTo().getBlockY()
+            && event.getFrom().getBlockZ() == event.getTo().getBlockZ())) return;
+        triggerSpiceBlowAt(event.getTo());
+    }
+
+    @EventHandler public void onSpiceBlowEntityMove(EntityMoveEvent event) {
+        if (event.hasChangedBlock() && event.getTo() != null) triggerSpiceBlowAt(event.getTo());
+    }
+
+    private void triggerSpiceBlowAt(Location location) {
+        if (location == null || location.getWorld() == null || !location.getWorld().getName().equalsIgnoreCase("arrakis")) return;
+        int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
+        for (int dy = -1; dy <= 0; dy++) for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+            Block block = location.getWorld().getBlockAt(x + dx, y + dy, z + dz);
+            if (block.getType() != Material.MAGMA_BLOCK) continue;
+            Block center = findSpiceBlowCenter(block);
+            if (center != null) detonateSpiceBlow(center);
+        }
+    }
+
+    private Block findSpiceBlowCenter(Block touched) {
+        World world = touched.getWorld();
+        for (int cx = touched.getX() - 1; cx <= touched.getX() + 1; cx++)
+            for (int cz = touched.getZ() - 1; cz <= touched.getZ() + 1; cz++)
+                for (int topY = touched.getY() - 1; topY <= touched.getY() + 1; topY++) {
+                    if (world.getBlockAt(cx, topY, cz).getType() != Material.MAGMA_BLOCK
+                        || world.getBlockAt(cx, topY - 1, cz).getType() != Material.MAGMA_BLOCK) continue;
+                    boolean patch = true;
+                    for (int dx = -1; dx <= 1 && patch; dx++) for (int dz = -1; dz <= 1; dz++)
+                        if (world.getBlockAt(cx + dx, topY - 1, cz + dz).getType() != Material.MAGMA_BLOCK) { patch = false; break; }
+                    if (patch) return world.getBlockAt(cx, topY, cz);
+                }
+        return null;
+    }
+
+    private void detonateSpiceBlow(Block center) {
+        if (center.getType() != Material.MAGMA_BLOCK) return;
+        World world = center.getWorld();
+        int x = center.getX(), z = center.getZ(), baseY = center.getY() - 1;
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+            world.getBlockAt(x + dx, baseY, z + dz).setType(Material.AIR, false);
+        center.setType(Material.GLOWSTONE, false);
+        world.playSound(center.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.7f);
+        world.spawnParticle(Particle.EXPLOSION, center.getLocation().add(0.5, 0.5, 0.5), 1);
+
+        String path = "spice-blow.";
+        int targetValue = Math.max(1, getConfig().getInt(path + "target-value", 15000));
+        int unitPrice = Math.max(1, getConfig().getInt(path + "unit-price", 15));
+        org.bukkit.plugin.Plugin core = Bukkit.getPluginManager().getPlugin("DuneCore");
+        if (core instanceof JavaPlugin corePlugin)
+            unitPrice = Math.max(1, corePlugin.getConfig().getInt("spice-sell-price", unitPrice));
+        int targetDeposits = (int)Math.ceil(targetValue / (double)unitPrice);
+        int radius = Math.max(12, getConfig().getInt(path + "radius", 24));
+        List<Block> candidates = new ArrayList<>();
+        for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+            if (dx * dx + dz * dz > radius * radius) continue;
+            int bx = x + dx, bz = z + dz;
+            int surfaceY = world.getHighestBlockYAt(bx, bz);
+            Material surface = world.getBlockAt(bx, surfaceY, bz).getType();
+            if (surface == Material.SAND || surface == Material.RED_SAND) candidates.add(world.getBlockAt(bx, surfaceY, bz));
+        }
+        candidates.sort(Comparator.comparingLong(block -> mix64((long)block.getX() * 0x9E3779B97F4A7C15L
+            ^ (long)block.getZ() * 0xC2B2AE3D27D4EB4FL ^ world.getSeed() ^ 0x5350494345424c4fL)));
+        int placed = 0;
+        for (Block block : candidates) {
+            if (placed >= targetDeposits) break;
+            block.setType(Material.SUSPICIOUS_SAND, false);
+            placed++;
+        }
+        world.getPlayers().forEach(player -> player.sendMessage(ChatColor.GOLD + "A spice blow erupted on Arrakis! A rich field has surfaced nearby."));
+        getLogger().info("Spice blow at " + x + ", " + z + " deployed " + placed + " spice deposits (target value " + targetValue + " Solaris).");
+    }
 
     @EventHandler public void onSietchChestOpen(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
@@ -240,7 +327,7 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
         private final String planet;
         PlanetChunkGenerator(DuneTerrain plugin, String planet) { this.plugin = plugin; this.planet = planet; }
         @Override public List<BlockPopulator> getDefaultPopulators(World world) {
-            return planet.equals("arrakis") ? List.of(new SietchPopulator(plugin)) : List.of();
+            return planet.equals("arrakis") ? List.of(new SietchPopulator(plugin), new SpiceBlowPopulator(plugin)) : List.of();
         }
         @Override public void generateNoise(WorldInfo world, Random random, int chunkX, int chunkZ, ChunkData data) {
             String path = "planets." + planet + ".";
@@ -589,6 +676,30 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
 
         private static void set(LimitedRegion region, int x, int y, int z, Material material) {
             if (region.isInRegion(x, y, z)) region.setType(x, y, z, material);
+        }
+    }
+
+    private static final class SpiceBlowPopulator extends BlockPopulator {
+        private static final long SALT = 0x5350494345424c4fL;
+        private final DuneTerrain plugin;
+        private SpiceBlowPopulator(DuneTerrain plugin) { this.plugin = plugin; }
+
+        @Override public void populate(WorldInfo world, Random random, int chunkX, int chunkZ, LimitedRegion region) {
+            if (!world.getName().equalsIgnoreCase("arrakis") || !plugin.getConfig().getBoolean("spice-blow.enabled", true)) return;
+            int spacing = Math.max(256, plugin.getConfig().getInt("spice-blow.spacing", 2000));
+            long centerX = chunkX * 16L + 8, centerZ = chunkZ * 16L + 8;
+            long cellX = Math.floorDiv(centerX, spacing), cellZ = Math.floorDiv(centerZ, spacing);
+            long h1 = mix64(cellX * 0x9E3779B97F4A7C15L ^ cellZ * 0xC2B2AE3D27D4EB4FL ^ SALT);
+            long h2 = mix64(cellZ * 0x165667B19E3779F9L ^ cellX * 0x85EBCA77C2B2AE63L ^ ~SALT);
+            long anchorX = cellX * spacing + 8 + Math.floorMod(h1, spacing - 16);
+            long anchorZ = cellZ * spacing + 8 + Math.floorMod(h2, spacing - 16);
+            if (Math.floorDiv(anchorX, 16) != chunkX || Math.floorDiv(anchorZ, 16) != chunkZ) return;
+            int x = (int)anchorX, z = (int)anchorZ, y = region.getHighestBlockYAt(x, z);
+            if (y < world.getMinHeight() + 2 || y + 2 >= world.getMaxHeight()) return;
+            if (!region.isInRegion(x, y, z) || region.getType(x, y, z) != Material.SAND) return;
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                if (region.isInRegion(x + dx, y, z + dz)) region.setType(x + dx, y, z + dz, Material.MAGMA_BLOCK);
+            if (region.isInRegion(x, y + 1, z)) region.setType(x, y + 1, z, Material.MAGMA_BLOCK);
         }
     }
 }

@@ -1,5 +1,5 @@
 name: DuneTerrain
-version: 1.0.3
+version: 1.0.4
 main: com.example.duneterrain.DuneTerrain
 api-version: '1.21'
 load: STARTUP

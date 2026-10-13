@@ -12,6 +12,19 @@ sandworms:
   spawn-chance: 0.35
   spawn-interval-seconds: 3600
 
+# Hostile husk raiders appear around Arrakis players and are more common near
+# spice fields worth over this many Solaris at the base selling price.
+spice-raiders:
+  enabled: true
+  max-per-world: 12
+  chance-per-player-check: 0.08
+  chance-near-rich-field: 0.45
+  field-radius: 32
+  field-value-threshold: 5000
+  health: 36.0
+  attack-damage: 6.0
+  movement-speed: 0.28
+
 # Arrakis solar exposure: 5 minutes of uninterrupted direct sunlight without a full stillsuit.
 arrakis-sun:
   enabled: true
