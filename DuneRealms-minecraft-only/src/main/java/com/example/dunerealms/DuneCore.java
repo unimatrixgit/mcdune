@@ -476,17 +476,37 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length > 0 && args[0].equalsIgnoreCase("admin")) {
             if (!sender.hasPermission("dune.admin")) { sender.sendMessage(ChatColor.RED + "Admin only."); return true; }
-            if (args.length < 2 || !args[1].equalsIgnoreCase("arrakis")) {
-                sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin arrakis [player]"); return true;
+            if (args.length < 2 || (!args[1].equalsIgnoreCase("arrakis") && !args[1].equalsIgnoreCase("sietch") && !args[1].equalsIgnoreCase("solari"))) {
+                sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin <arrakis|sietch> [player] | solari <player> <amount>"); return true;
+            }
+            if (args[1].equalsIgnoreCase("solari")) {
+                if (args.length != 4) { sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin solari <player> <amount>"); return true; }
+                Player recipient = Bukkit.getPlayerExact(args[2]);
+                if (recipient == null) { sender.sendMessage(ChatColor.RED + "That player must be online."); return true; }
+                int amount;
+                try { amount = Integer.parseInt(args[3]); }
+                catch (NumberFormatException ex) { sender.sendMessage(ChatColor.RED + "Amount must be a positive whole number."); return true; }
+                if (amount <= 0 || (long)money.getOrDefault(recipient.getUniqueId(), 0) + amount > Integer.MAX_VALUE) {
+                    sender.sendMessage(ChatColor.RED + "Amount must be positive and the resulting balance cannot exceed the Solaris limit."); return true;
+                }
+                money.merge(recipient.getUniqueId(), amount, Integer::sum);
+                savePlayers();
+                recipient.sendMessage(ChatColor.GOLD + "An admin added " + amount + " Solaris to your balance. New balance: " + money.get(recipient.getUniqueId()) + ".");
+                sender.sendMessage(ChatColor.GREEN + "Added " + amount + " Solaris to " + recipient.getName() + ". Balance: " + money.get(recipient.getUniqueId()) + ".");
+                return true;
             }
             Player target;
             if (args.length >= 3) {
                 target = Bukkit.getPlayerExact(args[2]);
                 if (target == null) { sender.sendMessage(ChatColor.RED + "That player is not online."); return true; }
             } else if (sender instanceof Player player) target = player;
-            else { sender.sendMessage(ChatColor.YELLOW + "From console, specify an online player: /dune admin arrakis <player>"); return true; }
+            else { sender.sendMessage(ChatColor.YELLOW + "From console, specify an online player: /dune admin <arrakis|sietch> <player>"); return true; }
             World arrakis = Bukkit.getWorld("arrakis");
             if (arrakis == null) { sender.sendMessage(ChatColor.RED + "Arrakis is not loaded on this server. Set DuneTerrain's server.planet to arrakis and restart this backend."); return true; }
+            if (args[1].equalsIgnoreCase("sietch")) {
+                teleportToNearestSietch(sender, target, arrakis);
+                return true;
+            }
             if (target.teleport(arrakis.getSpawnLocation())) {
                 target.sendMessage(ChatColor.AQUA + "An admin sent you to Arrakis.");
                 sender.sendMessage(ChatColor.GREEN + "Teleported " + target.getName() + " to Arrakis.");
@@ -496,7 +516,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if (!(sender instanceof Player p)) { sender.sendMessage("Run this command in-game."); return true; }
         if (args.length == 0) { gui.open(p, "main"); return true; }
         if (args[0].equalsIgnoreCase("help")) {
-            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, guildnpc (admin), admin arrakis [player]"); return true;
+            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, admin arrakis|sietch [player], admin solari <player> <amount>"); return true;
         }
         switch (args[0].toLowerCase(Locale.ROOT)) {
             case "choose" -> {
@@ -538,6 +558,48 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             default -> p.sendMessage("Use /dune help");
         }
         return true;
+    }
+
+    private void teleportToNearestSietch(CommandSender sender, Player target, World arrakis) {
+        Location origin = target.getWorld().equals(arrakis) ? target.getLocation() : arrakis.getSpawnLocation();
+        int spacing = 2000;
+        long cellX = Math.floorDiv(origin.getBlockX(), spacing), cellZ = Math.floorDiv(origin.getBlockZ(), spacing);
+        List<long[]> candidates = new ArrayList<>();
+        for (long gx = cellX - 2; gx <= cellX + 2; gx++) for (long gz = cellZ - 2; gz <= cellZ + 2; gz++) {
+            long h1 = sietchMix64(gx * 0x9E3779B97F4A7C15L ^ gz * 0xC2B2AE3D27D4EB4FL ^ 0x534945544348L);
+            long h2 = sietchMix64(gz * 0x165667B19E3779F9L ^ gx * 0x85EBCA77C2B2AE63L ^ ~0x534945544348L);
+            long x = gx * spacing + 8 + Math.floorMod(h1, spacing - 16);
+            long z = gz * spacing + 8 + Math.floorMod(h2, spacing - 16);
+            long dx = x - origin.getBlockX(), dz = z - origin.getBlockZ();
+            candidates.add(new long[]{x, z, dx * dx + dz * dz});
+        }
+        candidates.sort(Comparator.comparingLong(candidate -> candidate[2]));
+        for (long[] candidate : candidates) {
+            int x = (int)candidate[0], z = (int)candidate[1], chestX = x, chestZ = z - 10;
+            arrakis.getChunkAt(x >> 4, z >> 4).load(true);
+            arrakis.getChunkAt(chestX >> 4, chestZ >> 4).load(true);
+            int estimate = arrakis.getHighestBlockYAt(x + 12, z + 12);
+            int low = Math.max(arrakis.getMinHeight() + 1, estimate - 80);
+            int high = Math.min(arrakis.getMaxHeight() - 1, estimate + 5);
+            for (int y = low; y <= high; y++) {
+                Block block = arrakis.getBlockAt(chestX, y, chestZ);
+                if (block.getType() != Material.CHEST || !(block.getState() instanceof org.bukkit.block.Chest chest)
+                    || !"Personal Sietch Cache".equals(chest.getCustomName())) continue;
+                Location destination = new Location(arrakis, x + 0.5, y + 14, z + 0.5);
+                if (target.teleport(destination)) {
+                    target.sendMessage(ChatColor.AQUA + "An admin sent you to a sietch on Arrakis.");
+                    sender.sendMessage(ChatColor.GREEN + "Teleported " + target.getName() + " to a sietch cache at " + x + ", " + z + ".");
+                } else sender.sendMessage(ChatColor.RED + "Teleport to the sietch failed.");
+                return;
+            }
+        }
+        sender.sendMessage(ChatColor.RED + "No generated sietch was found nearby. Explore new Arrakis terrain with DuneTerrain enabled, then try again.");
+    }
+
+    private static long sietchMix64(long value) {
+        value = (value ^ (value >>> 30)) * 0xBF58476D1CE4E5B9L;
+        value = (value ^ (value >>> 27)) * 0x94D049BB133111EBL;
+        return value ^ (value >>> 31);
     }
     void runGuiCommand(Player p, String command) {
         String[] args = command.trim().split("\\s+");

@@ -2,9 +2,22 @@ package com.example.duneterrain;
 
 import org.bukkit.*;
 import org.bukkit.block.Biome;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
+import org.bukkit.event.block.Action;
 import org.bukkit.generator.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.EventHandler;
@@ -16,6 +29,95 @@ import java.util.*;
 public final class DuneTerrain extends JavaPlugin implements Listener {
     private static final String[] PLANETS = {"arrakis", "giedi_prime", "kaitain", "caladan", "sigma_draconis_iv"};
     private NamespacedKey guildKey;
+    private NamespacedKey sietchLootIdKey;
+    private final Map<UUID, PersonalLoot> openSietchLoot = new HashMap<>();
+    private record PersonalLoot(Inventory inventory, String id) {}
+
+    @EventHandler public void onSietchChestOpen(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
+        if (event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
+        BlockState state = event.getClickedBlock().getState();
+        if (!(state instanceof Chest chest)) return;
+        String id = chest.getPersistentDataContainer().get(sietchLootIdKey, PersistentDataType.STRING);
+        if (id == null) return;
+        event.setCancelled(true);
+        org.bukkit.entity.Player player = event.getPlayer();
+        NamespacedKey claimedKey = new NamespacedKey(this, "sietch_claim_" + id);
+        if (player.getPersistentDataContainer().has(claimedKey, PersistentDataType.BYTE)) {
+            player.sendMessage(ChatColor.YELLOW + "You have already claimed this sietch cache.");
+            return;
+        }
+        Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.DARK_GRAY + "Sietch Cache");
+        addLoot(inventory, spiceItem(64)); addLoot(inventory, spiceItem(64)); addLoot(inventory, spiceItem(64)); addLoot(inventory, spiceItem(58));
+        addLoot(inventory, enchantedGold(Material.GOLDEN_HELMET));
+        addLoot(inventory, enchantedGold(Material.GOLDEN_CHESTPLATE));
+        addLoot(inventory, enchantedGold(Material.GOLDEN_LEGGINGS));
+        addLoot(inventory, enchantedGold(Material.GOLDEN_BOOTS));
+        addLoot(inventory, new ItemStack(Material.OAK_PLANKS, 32));
+        addLoot(inventory, new ItemStack(Material.BREAD, 16));
+        openSietchLoot.put(player.getUniqueId(), new PersonalLoot(inventory, id));
+        player.openInventory(inventory);
+        player.sendMessage(ChatColor.GOLD + "This personal cache contains supplies for you.");
+    }
+
+    @EventHandler public void onSietchLootClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof org.bukkit.entity.Player player)) return;
+        PersonalLoot loot = openSietchLoot.get(player.getUniqueId());
+        if (loot == null || event.getView().getTopInventory() != loot.inventory()) return;
+        if (event.getClickedInventory() != loot.inventory()) return;
+        event.setCancelled(true);
+        ItemStack item = event.getCurrentItem();
+        if (item == null || item.getType().isAir()) return;
+        Map<Integer, ItemStack> leftovers = player.getInventory().addItem(item.clone());
+        if (leftovers.isEmpty()) loot.inventory().setItem(event.getSlot(), null);
+        else {
+            loot.inventory().setItem(event.getSlot(), leftovers.values().iterator().next());
+            player.sendMessage(ChatColor.RED + "Your inventory only had room for part of that stack.");
+        }
+    }
+
+    @EventHandler public void onSietchLootDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof org.bukkit.entity.Player player)) return;
+        PersonalLoot loot = openSietchLoot.get(player.getUniqueId());
+        if (loot != null && event.getView().getTopInventory() == loot.inventory()) event.setCancelled(true);
+    }
+
+    @EventHandler public void onSietchLootClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof org.bukkit.entity.Player player)) return;
+        PersonalLoot loot = openSietchLoot.get(player.getUniqueId());
+        if (loot == null || event.getView().getTopInventory() != loot.inventory()) return;
+        openSietchLoot.remove(player.getUniqueId());
+        for (ItemStack item : loot.inventory().getContents()) if (item != null && !item.getType().isAir()) {
+            Map<Integer, ItemStack> leftovers = player.getInventory().addItem(item);
+            leftovers.values().forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
+        }
+        player.getPersistentDataContainer().set(new NamespacedKey(this, "sietch_claim_" + loot.id()), PersistentDataType.BYTE, (byte) 1);
+    }
+
+    private static void addLoot(Inventory inventory, ItemStack item) {
+        for (int slot = 0; slot < inventory.getSize(); slot++) if (inventory.getItem(slot) == null) {
+            inventory.setItem(slot, item);
+            return;
+        }
+    }
+
+    private static ItemStack spiceItem(int amount) {
+        ItemStack item = new ItemStack(Material.ORANGE_DYE, amount);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatColor.GOLD + "Melange Spice");
+        meta.getPersistentDataContainer().set(new NamespacedKey("dunerealms", "item"), PersistentDataType.STRING, "spice");
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack enchantedGold(Material material) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        meta.addEnchant(Enchantment.PROTECTION, 2, true);
+        meta.addEnchant(Enchantment.UNBREAKING, 2, true);
+        item.setItemMeta(meta);
+        return item;
+    }
 
     @Override public ChunkGenerator getDefaultWorldGenerator(String worldName, String id) {
         String planet = id == null || id.isBlank()
@@ -49,6 +151,7 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
         saveDefaultConfig();
         getServer().getPluginManager().registerEvents(this, this);
         guildKey = new NamespacedKey("dunerealms", "guild");
+        sietchLootIdKey = new NamespacedKey(this, "sietch-loot-id");
         String planet = getConfig().getString("server.planet", "arrakis").toLowerCase(Locale.ROOT);
         if (!Arrays.asList(PLANETS).contains(planet)) {
             getLogger().severe("Invalid server.planet '" + planet + "'. Choose one of: " + String.join(", ", PLANETS));
@@ -137,7 +240,7 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
         private final String planet;
         PlanetChunkGenerator(DuneTerrain plugin, String planet) { this.plugin = plugin; this.planet = planet; }
         @Override public List<BlockPopulator> getDefaultPopulators(World world) {
-            return planet.equals("arrakis") ? List.of(new SietchPopulator()) : List.of();
+            return planet.equals("arrakis") ? List.of(new SietchPopulator(plugin)) : List.of();
         }
         @Override public void generateNoise(WorldInfo world, Random random, int chunkX, int chunkZ, ChunkData data) {
             String path = "planets." + planet + ".";
@@ -182,6 +285,7 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             }
             if (planet.equals("arrakis")) placeOasisTree(data, chunkX, chunkZ, heights, minY, maxY);
             if (planet.equals("arrakis")) {
+                placeDarkstoneIsland(data, chunkX, chunkZ, heights, minY, maxY);
                 placeSpiceDeposits(data, heights, random, minY, maxY);
                 placeRandomSpicePatch(data, chunkX, chunkZ, heights);
             }
@@ -222,6 +326,43 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             long z = cellZ * spacing + 8 + Math.floorMod(h2, spacing - 16);
             if (Math.floorDiv(x, spacing) != cellX || Math.floorDiv(z, spacing) != cellZ) return new long[]{Long.MIN_VALUE, Long.MIN_VALUE};
             return new long[]{x, z};
+        }
+        private void placeDarkstoneIsland(ChunkData data, int chunkX, int chunkZ, int[][] heights, int minY, int maxY) {
+            String path = "planets.arrakis.darkstone-islands.";
+            if (!plugin.getConfig().getBoolean(path + "enabled", true)) return;
+            int spacing = Math.max(128, plugin.getConfig().getInt(path + "spacing", 750));
+            int minRadius = Math.max(3, plugin.getConfig().getInt(path + "min-radius", 5));
+            int maxRadius = Math.max(minRadius, plugin.getConfig().getInt(path + "max-radius", 9));
+            int maxRise = Math.max(1, plugin.getConfig().getInt(path + "max-height", 4));
+            int worldMinX = chunkX * 16, worldMinZ = chunkZ * 16;
+            int firstCellX = Math.floorDiv(worldMinX - maxRadius, spacing), lastCellX = Math.floorDiv(worldMinX + 15 + maxRadius, spacing);
+            int firstCellZ = Math.floorDiv(worldMinZ - maxRadius, spacing), lastCellZ = Math.floorDiv(worldMinZ + 15 + maxRadius, spacing);
+            long salt = 0x4441524B49534C41L;
+            for (int cellX = firstCellX; cellX <= lastCellX; cellX++) for (int cellZ = firstCellZ; cellZ <= lastCellZ; cellZ++) {
+                long seed = mix64((long) cellX * 0x9E3779B97F4A7C15L ^ (long) cellZ * 0xC2B2AE3D27D4EB4FL ^ salt);
+                long centerX = (long) cellX * spacing + Math.floorMod(mix64(seed ^ 0x165667B19E3779F9L), spacing);
+                long centerZ = (long) cellZ * spacing + Math.floorMod(mix64(seed ^ 0x85EBCA77C2B2AE63L), spacing);
+                int radius = minRadius + (int) Math.floorMod(seed >>> 1, maxRadius - minRadius + 1L);
+                for (int lx = 0; lx < 16; lx++) for (int lz = 0; lz < 16; lz++) {
+                    long gx = (long) worldMinX + lx, gz = (long) worldMinZ + lz;
+                    long dx = gx - centerX, dz = gz - centerZ;
+                    long rough = mix64(gx * 0x9E3779B97F4A7C15L ^ gz * 0xC2B2AE3D27D4EB4FL ^ seed);
+                    double edge = radius + (((rough >>> 11) * 0x1.0p-53) - 0.5) * 2.8;
+                    double distance = Math.sqrt(dx * dx + dz * dz);
+                    if (distance > edge) continue;
+                    int baseY = heights[lx][lz];
+                    if (baseY + maxRise + 2 >= maxY || baseY <= minY + 1) continue;
+                    double fullness = Math.max(0.0, 1.0 - distance / (radius + 1.0));
+                    int rise = Math.max(1, Math.min(maxRise, 1 + (int) Math.round(fullness * (maxRise - 1))));
+                    int rockHeight = Math.max(1, rise - 1);
+                    Material[] darkRock = {Material.BLACKSTONE, Material.BASALT, Material.TUFF, Material.COBBLED_DEEPSLATE};
+                    for (int dy = 1; dy <= rockHeight; dy++) {
+                        int hashIndex = (int) Math.floorMod(mix64(rough + dy * 0x9E3779B97F4A7C15L), darkRock.length);
+                        data.setBlock(lx, baseY + dy, lz, darkRock[hashIndex]);
+                    }
+                    data.setBlock(lx, baseY + rise, lz, Material.SAND);
+                }
+            }
         }
         private Material configuredMaterial(String path, Material fallback) {
             String name = plugin.getConfig().getString(path, fallback.name());
@@ -325,9 +466,12 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
     }
 
     private static final class SietchPopulator extends BlockPopulator {
+        private final DuneTerrain plugin;
+        private SietchPopulator(DuneTerrain plugin) { this.plugin = plugin; }
         @Override public void populate(WorldInfo world, Random random, int cx, int cz, LimitedRegion region) {
             if (!world.getName().equalsIgnoreCase("arrakis")) return;
-            int spacing = 300;
+            if (!plugin.getConfig().getBoolean("sietches.enabled", true)) return;
+            int spacing = Math.max(256, plugin.getConfig().getInt("sietches.spacing", 2000));
             int centerX = cx * 16 + 8, centerZ = cz * 16 + 8;
             long cellX = Math.floorDiv(centerX, spacing), cellZ = Math.floorDiv(centerZ, spacing);
             long h1 = mix64(cellX * 0x9E3779B97F4A7C15L ^ cellZ * 0xC2B2AE3D27D4EB4FL ^ 0x534945544348L);
@@ -337,22 +481,114 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             if (Math.floorDiv(anchorX, 16) != cx || Math.floorDiv(anchorZ, 16) != cz) return;
             int x = (int) anchorX, z = (int) anchorZ;
             int y = region.getHighestBlockYAt(x, z);
-            if (y < 65 || y > world.getMaxHeight() - 12 || y - 12 < world.getMinHeight()) return;
-            for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) for (int dy = -10; dy <= 3; dy++) {
-                int ax = x + dx, az = z + dz, ay = y + dy;
-                if (!region.isInRegion(ax, ay, az)) continue;
-                boolean cave = dy >= -9 && dy <= -5 && Math.abs(dx) <= 3 && Math.abs(dz) <= 3;
-                if (cave) region.setType(ax, ay, az, dy <= -8 ? Material.WATER : Material.AIR);
-                else if (dy >= 0 && dy <= 3 && Math.abs(dx) <= 3 && Math.abs(dz) <= 3) {
-                    boolean wall = Math.abs(dx) == 3 || Math.abs(dz) == 3 || dy == 3;
-                    region.setType(ax, ay, az, wall ? Material.SANDSTONE : Material.AIR);
-                }
+            if (y < world.getMinHeight() + 40 || y > world.getMaxHeight() - 4 || y - 36 < world.getMinHeight()) return;
+
+            // Hub with three side chambers and a lower reservoir, all within the populator's chunk buffer.
+            int hy = y - 11;
+            carveRoom(region, x, hy, z, 5, 3, 5);
+            carveTunnel(region, x, hy - 2, z - 3, x - 7, hy - 6, z - 2);
+            carveRoom(region, x - 9, hy - 6, z - 2, 4, 2, 4);
+            carveTunnel(region, x, hy - 2, z + 3, x + 7, hy - 6, z + 2);
+            carveRoom(region, x + 9, hy - 6, z + 2, 4, 2, 4);
+            carveTunnel(region, x, hy - 2, z - 3, x, hy - 10, z - 9);
+            carveRoom(region, x, hy - 12, z - 10, 4, 2, 4);
+            carveTunnel(region, x, hy - 3, z + 3, x, hy - 18, z + 7);
+            carveRoom(region, x, hy - 21, z + 8, 5, 3, 5);
+
+            // A discreet surface entry descends into the central cavern; no ladder is used.
+            for (int step = 0; step <= 10; step++) {
+                int sx = x, sz = z - step / 3, sy = y - 1 - step;
+                carveRoom(region, sx, sy, sz, 1, 1, 1);
             }
-            for (int dy = -7; dy <= 2; dy++) {
-                if (region.isInRegion(x, y + dy, z)) region.setType(x, y + dy, z, Material.AIR);
-                if (region.isInRegion(x + 1, y + dy, z)) region.setType(x + 1, y + dy, z, Material.LADDER);
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+                if (Math.abs(dx) + Math.abs(dz) > 3) continue;
+                set(region, x + dx, y, z + dz, (Math.abs(dx) == 2 || Math.abs(dz) == 2) ? Material.CUT_SANDSTONE : Material.AIR);
             }
-            if (region.isInRegion(x, y + 4, z)) region.setType(x, y + 4, z, Material.ORANGE_BANNER);
+
+            // A narrow waterfall drops from the hub into the deep reservoir.
+            for (int dy = -4; dy >= -20; dy--) {
+                set(region, x + 2, hy + dy, z + 2, Material.WATER);
+                set(region, x + 1, hy + dy, z + 2, Material.STONE);
+                set(region, x + 3, hy + dy, z + 2, Material.STONE);
+                set(region, x + 2, hy + dy, z + 1, Material.STONE);
+                set(region, x + 2, hy + dy, z + 3, Material.STONE);
+            }
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++)
+                set(region, x + dx, hy - 23, z + dz, Material.WATER);
+
+            furnishSleepingHall(region, x - 9, hy - 6, z - 2);
+            furnishKitchen(region, x + 9, hy - 6, z + 2);
+            placePersonalChest(region, x, hy - 14, z - 10, cellX, cellZ);
+            for (int[] lamp : new int[][]{{0,-1,0},{-11,-5,-2},{11,-5,2},{0,-11,-11}})
+                set(region, x + lamp[0], hy + lamp[1], z + lamp[2], Material.TORCH);
+        }
+
+        private static void carveRoom(LimitedRegion region, int cx, int cy, int cz, int rx, int ry, int rz) {
+            for (int dx = -rx; dx <= rx; dx++) for (int dy = -ry; dy <= ry; dy++) for (int dz = -rz; dz <= rz; dz++) {
+                double outer = dx * dx / (double)(rx * rx) + dy * dy / (double)(ry * ry) + dz * dz / (double)(rz * rz);
+                if (outer > 1.15) continue;
+                int x = cx + dx, y = cy + dy, z = cz + dz;
+                if (outer >= 0.58) {
+                    long variation = mix64((long)x * 341873128712L ^ (long)y * 132897987541L ^ z);
+                    Material wall = switch ((int)Math.floorMod(variation, 10)) {
+                        case 0, 1 -> Material.TUFF;
+                        case 2 -> Material.ANDESITE;
+                        case 3 -> Material.COBBLED_DEEPSLATE;
+                        case 4 -> Material.COBBLESTONE;
+                        case 5 -> Material.MOSSY_COBBLESTONE;
+                        default -> Material.STONE;
+                    };
+                    set(region, x, y, z, wall);
+                } else set(region, x, y, z, Material.AIR);
+            }
+        }
+
+        private static void carveTunnel(LimitedRegion region, double ax, double ay, double az, double bx, double by, double bz) {
+            int steps = (int)Math.ceil(Math.sqrt((bx-ax)*(bx-ax) + (by-ay)*(by-ay) + (bz-az)*(bz-az)) * 1.5);
+            for (int i = 0; i <= steps; i++) {
+                double t = i / (double)Math.max(1, steps);
+                int cx = (int)Math.round(ax + (bx-ax)*t), cy = (int)Math.round(ay + (by-ay)*t), cz = (int)Math.round(az + (bz-az)*t);
+                for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++)
+                    if (dx*dx + dy*dy + dz*dz <= 2) set(region, cx+dx, cy+dy, cz+dz, Material.AIR);
+            }
+        }
+
+        private static void furnishSleepingHall(LimitedRegion r, int x, int y, int z) {
+            for (int i = -1; i <= 1; i++) {
+                set(r, x+i, y-1, z, Material.POLISHED_ANDESITE);
+                set(r, x+i, y, z, Material.RED_CARPET);
+                set(r, x+i, y+1, z, Material.AIR);
+            }
+            set(r, x-1, y, z, Material.WHITE_CARPET);
+            set(r, x+1, y, z, Material.WHITE_CARPET);
+            set(r, x-2, y-1, z+2, Material.BARREL);
+        }
+
+        private static void furnishKitchen(LimitedRegion r, int x, int y, int z) {
+            set(r, x-2, y-1, z, Material.STONE_BRICKS);
+            set(r, x-2, y, z, Material.FURNACE);
+            set(r, x-1, y-1, z, Material.STONE_BRICKS);
+            set(r, x-1, y, z, Material.SMOKER);
+            set(r, x, y-1, z, Material.STONE_BRICKS);
+            set(r, x, y, z, Material.CRAFTING_TABLE);
+            set(r, x+2, y-1, z+1, Material.BARREL);
+            set(r, x+2, y, z+1, Material.CAULDRON);
+        }
+
+        private void placePersonalChest(LimitedRegion r, int x, int y, int z, long cellX, long cellZ) {
+            set(r, x, y-1, z, Material.CHISELED_STONE_BRICKS);
+            set(r, x, y, z, Material.CHEST);
+            BlockState state = r.getBlockState(x, y, z);
+            if (state instanceof Chest chest) {
+                String id = Long.toUnsignedString(mix64(cellX * 0x9E3779B97F4A7C15L ^ cellZ * 0xC2B2AE3D27D4EB4FL ^ 0x534945544348L), 16);
+                chest.setCustomName("Personal Sietch Cache");
+                chest.getPersistentDataContainer().set(plugin.sietchLootIdKey, PersistentDataType.STRING, id);
+                chest.update(true, false);
+            }
+        }
+
+        private static void set(LimitedRegion region, int x, int y, int z, Material material) {
+            if (region.isInRegion(x, y, z)) region.setType(x, y, z, material);
         }
     }
 }

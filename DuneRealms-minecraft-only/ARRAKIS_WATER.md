@@ -1,6 +1,6 @@
 # Arrakis Water & Sietch prototype
 
-New Arrakis chunks can generate sandstone **sietches** with a cave and small water reservoir beneath. Existing chunks will not be retroactively populated. Generation is approximately 1 in 90 chunks (hard-coded in the populator; config field is informational for now).
+New Arrakis chunks generate underground cave **sietches** at roughly 2,000-block spacing. Each has connected chambers for sleeping and cooking, a concealed surface entry, a descending waterfall, and a bottom water reservoir. A chest opens a personal cache for each player with at least 250 tagged spice, enchanted gold armor, planks, and bread. Existing chunks will not be retroactively populated. See `plugins/DuneTerrain/config.yml` (`sietches.spacing`) to change the interval.
 
 - `/dune water guild` - become an official Spacing Guild water seller.
 - `/dune water smuggler` - become a smuggler.

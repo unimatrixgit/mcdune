@@ -7,6 +7,10 @@ server:
 guild-npc:
   enabled: true
 
+sietches:
+  enabled: true
+  spacing: 2000
+
 spice-deposits:
   per-chunk: 2
   patches:
@@ -28,6 +32,7 @@ planets:
     water: {level: 63, swamp-pools: false, coverage: 0.18}
     vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 0}
     oasis-trees: {enabled: true, spacing: 300, trunk-height: 7}
+    darkstone-islands: {enabled: true, spacing: 750, min-radius: 5, max-radius: 9, max-height: 4}
     ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 2, IRON_ORE: 2, COPPER_ORE: 1}
   giedi_prime:
     enabled: true
