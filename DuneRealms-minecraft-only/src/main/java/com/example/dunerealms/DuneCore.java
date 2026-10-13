@@ -780,7 +780,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             double chance = getConfig().getDouble(nearRichField ? "spice-raiders.chance-near-rich-field" : "spice-raiders.chance-per-player-check", nearRichField ? 0.45 : 0.08);
             if (random.nextDouble() >= Math.max(0, Math.min(1, chance))) continue;
             if (world.getNearbyEntities(player.getLocation(), 32, 24, 32).stream().anyMatch(this::isSpiceRaider)) continue;
-            Husk raider = spawnSpiceRaiderNear(player, random);
+            Zombie raider = spawnSpiceRaiderNear(player, random);
             if (raider != null) count++;
         }
     }
