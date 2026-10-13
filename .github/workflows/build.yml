@@ -1,5 +1,5 @@
 
-name: Build DuneRealms
+name: Build DuneCore and DuneTerrain
 
 on:
   workflow_dispatch:
@@ -29,7 +29,7 @@ jobs:
         with:
           gradle-version: '8.14'
 
-      - name: Compile DuneRealms
+      - name: Compile DuneCore
         run: gradle clean build
 
       - name: Upload compiled JAR
