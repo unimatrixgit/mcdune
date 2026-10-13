@@ -1,6 +1,6 @@
 # DuneCore for Paper 1.21.4
 
-Requires Java 21 and Gradle 8+. Build each project folder separately. Install Vault, then `DuneEss`, `DuneCore`, and `DuneTerrain` into Paper's `plugins/` directory. DuneEss owns Solaris and Guild/admin travel and registers its economy through Vault; DuneCore provides factions, spice gameplay, politics, and jobs; DuneTerrain generates the planet worlds. Remove the old `DuneRealms.jar` when upgrading.
+Requires Java 21 and Gradle 8+. Build each project folder separately. Install Vault, then `DuneEss`, `DuneCore`, and `DuneTerrain` into Paper's `plugins/` directory. The downloadable server package includes Vault 2.5.0. DuneEss owns Solaris and Guild/admin travel and registers its economy through Vault; DuneCore provides factions, spice gameplay, politics, and jobs; DuneTerrain generates the planet worlds. Remove the old `DuneRealms.jar` when upgrading.
 
 Commands: `/dune choose fremen|harkonnen|corrino|atreides|ordos`, `/dune kit`, `/dune guildnpc` (OP), `/dune givespice` (OP), `/duneess balance`, `/duneess sell`, `/duneess travel [planet]`, and `/duneess admin ...`. Use `/dune help` or `/duneess help` for the spaced, boxed chat guide with clickable Previous/Next links. `/duneess help <page>` opens a page directly and `/duneess help menu` opens the inventory guide.
 

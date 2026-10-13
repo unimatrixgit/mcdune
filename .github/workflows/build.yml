@@ -105,16 +105,25 @@ jobs:
           merge-multiple: true
       - name: Add resource pack and install instructions
         run: |
+          curl --fail --location --silent --show-error \
+            https://github.com/Foulest/Vault/releases/download/2.5.0/Vault-2.5.0.jar \
+            --output DuneRealms-Server-Package/Vault-2.5.0.jar
+          echo "3efb1c893d35807c0f3945068858a96af0f131020eee37545bdddb330044b2d9  DuneRealms-Server-Package/Vault-2.5.0.jar" | sha256sum --check --strict
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/Foulest/Vault/2.5.0/LICENSE \
+            --output DuneRealms-Server-Package/Vault-LICENSE.txt
           cp DuneResourcePack.zip DuneRealms-Server-Package/
           cat > DuneRealms-Server-Package/README.txt <<'EOF'
           DuneRealms Paper server package
 
-          Contents: DuneCore, DuneEss, and DuneTerrain plugin JARs, plus DuneResourcePack.zip.
+          Contents: Vault 2.5.0, DuneCore, DuneEss, and DuneTerrain plugin JARs, plus DuneResourcePack.zip.
 
-          Install all three JARs in the Paper server's plugins/ folder and restart the server.
+          Install all four plugin JARs in the Paper server's plugins/ folder and restart the server.
           Install the included resource pack on vanilla or Fabric 1.21.4 clients for sandworm, haunted Fremen, and spice textures.
           On Fabric, put the ZIP in .minecraft/resourcepacks and enable it in Options > Resource Packs; do not put it in mods/.
-          DuneEss provides the Vault economy service; install the Vault plugin as well.
+          DuneEss provides the Solaris economy through the included Vault API plugin.
+          Vault 2.5.0 is the GPL-3.0 licensed Foulest/MilkBowl Vault project; its license is included here.
+          Its source is available at https://github.com/Foulest/Vault/tree/2.5.0.
 
           Compatible build target: Paper 1.21.4, Java 21.
           See https://github.com/unimatrixgit/mcdune for setup and configuration details.
