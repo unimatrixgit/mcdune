@@ -855,7 +855,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
                 h.getPersistentDataContainer().set(wormKey, PersistentDataType.BYTE, (byte)1);
                 h.setCustomName(ChatColor.GOLD + "Shai-Hulud | Sandworm"); h.setCustomNameVisible(true); h.setRemoveWhenFarAway(true); h.setAware(true);
                 h.getAttribute(Attribute.MAX_HEALTH).setBaseValue(getConfig().getDouble("sandworms.health", 500.0)); h.setHealth(h.getAttribute(Attribute.MAX_HEALTH).getValue());
-                h.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(getConfig().getDouble("sandworms.movement-speed", 0.16));
+                h.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(getConfig().getDouble("sandworms.movement-speed", 0.12));
                 h.getAttribute(Attribute.SCALE).setBaseValue(getConfig().getDouble("sandworms.scale", 2.8));
             });
             world.spawnParticle(Particle.CLOUD, location, 45, 2, 1, 2, 0.1);
@@ -868,7 +868,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     }
     private void updateSandworms() {
         World world=Bukkit.getWorld("arrakis");if(world==null)return;
-        double speed=Math.max(0.55,Math.min(1.15,getConfig().getDouble("sandworms.path-speed",0.82)));
+        double speed=Math.max(0.55,Math.min(1.15,getConfig().getDouble("sandworms.path-speed",1.0)));
         double damage=Math.max(1.0,getConfig().getDouble("sandworms.attack-damage",8.0));long cooldown=Math.max(1000L,getConfig().getLong("sandworms.attack-cooldown-ms",2200L));long now=System.currentTimeMillis();
         for(Sniffer worm:world.getEntitiesByClass(Sniffer.class)){if(!isWorm(worm)||worm.isDead())continue;
             Player target=world.getPlayers().stream().filter(Player::isOnline).min(Comparator.comparingDouble(p->p.getLocation().distanceSquared(worm.getLocation()))).orElse(null);

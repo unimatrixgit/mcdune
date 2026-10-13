@@ -1,6 +1,8 @@
 package com.example.duneess;
 
 import net.milkbowl.vault.economy.Economy;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.*;
@@ -35,6 +37,7 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
     private String localPlanet;
     private NamespacedKey spiceKey;
     private NamespacedKey helpPageKey, helpActionKey;
+    private final Map<UUID, Integer> helpPageByPlayer = new HashMap<>();
     private static final String HELP_TITLE = ChatColor.DARK_RED + "Dune Field Guide";
     private static final List<List<HelpEntry>> HELP_PAGES = List.of(
         List.of(
@@ -137,9 +140,18 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
     @Override public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             int page = 1;
-            if (args.length > 1) try { page = Integer.parseInt(args[1]); } catch (NumberFormatException ignored) { }
-            if (sender instanceof Player player) openHelpMenu(player, page);
-            else help(sender);
+            if (args.length > 1 && args[1].equalsIgnoreCase("menu")) {
+                if (sender instanceof Player player) openHelpMenu(player, 1);
+                else sender.sendMessage("The visual guide is available in-game: /duneess help menu");
+                return true;
+            }
+            if (args.length > 1) {
+                if (args[1].equalsIgnoreCase("next")) page = (sender instanceof Player p ? helpPageByPlayer.getOrDefault(p.getUniqueId(), 1) : 1) + 1;
+                else if (args[1].equalsIgnoreCase("previous") || args[1].equalsIgnoreCase("prev")) page = (sender instanceof Player p ? helpPageByPlayer.getOrDefault(p.getUniqueId(), 1) : 1) - 1;
+                else try { page = Integer.parseInt(args[1]); } catch (NumberFormatException ignored) { }
+            }
+            if (sender instanceof Player player) sendHelpPage(player, page);
+            else help(sender, page);
             return true;
         }
         String root = args[0].toLowerCase(Locale.ROOT);
@@ -160,9 +172,59 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
         return true;
     }
 
-    private void help(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "Dune Field Guide: use /duneess help [page] in-game to browse the command pages.");
-        sender.sendMessage(ChatColor.GRAY + "DuneEss provides Solaris and Guild travel. DuneCore provides factions, politics, and contracts.");
+    private void help(CommandSender sender, int page) {
+        int index = Math.max(0, Math.min(HELP_PAGES.size() - 1, page - 1));
+        sender.sendMessage(ChatColor.DARK_RED + "╔" + "═".repeat(58) + "╗");
+        sendBoxLine(sender, ChatColor.GOLD + "DUNE FIELD GUIDE" + ChatColor.DARK_GRAY + "  •  " + ChatColor.GRAY + "PAGE " + (index + 1) + " / " + HELP_PAGES.size());
+        sender.sendMessage(ChatColor.DARK_RED + "╠" + "═".repeat(58) + "╣");
+        for (HelpEntry entry : HELP_PAGES.get(index)) {
+            sendBoxLine(sender, ChatColor.YELLOW + entry.command());
+            for (String descriptionLine : wrap(entry.description(), 50))
+                sendBoxLine(sender, ChatColor.GRAY + "  " + descriptionLine);
+            sendBoxLine(sender, " ");
+        }
+        sender.sendMessage(ChatColor.DARK_RED + "╠" + "═".repeat(58) + "╣");
+        sendBoxLine(sender, ChatColor.GRAY + "Use /duneess help menu for the visual guide.");
+        sendBoxLine(sender, ChatColor.GRAY + "DuneEss: Solaris & Guild travel  •  DuneCore: factions & Arrakis");
+        sender.sendMessage(ChatColor.DARK_RED + "╚" + "═".repeat(58) + "╝");
+        if (sender instanceof Player player) {
+            helpPageByPlayer.put(player.getUniqueId(), index + 1);
+            TextComponent nav = new TextComponent("§8[ " + (index == 0 ? "§8◀ Previous" : "§e◀ Previous") + " §8]     ");
+            if (index > 0) nav.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duneess help previous"));
+            TextComponent next = new TextComponent("§8[ " + (index == HELP_PAGES.size() - 1 ? "§8Next ▶" : "§eNext ▶") + " §8]");
+            if (index < HELP_PAGES.size() - 1) next.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duneess help next"));
+            TextComponent pages = new TextComponent("§7   (page " + (index + 1) + "/" + HELP_PAGES.size() + ")");
+            player.spigot().sendMessage(nav, next, pages);
+        } else {
+            sender.sendMessage(ChatColor.GRAY + "Page " + (index + 1) + "/" + HELP_PAGES.size() + "  •  /duneess help previous | next");
+        }
+    }
+
+    private void sendHelpPage(Player player, int page) {
+        int boundedPage = Math.max(1, Math.min(HELP_PAGES.size(), page));
+        help(player, boundedPage);
+    }
+
+    private void sendBoxLine(CommandSender sender, String text) {
+        String plain = ChatColor.stripColor(text);
+        if (plain.length() > 56) plain = plain.substring(0, 55) + "…";
+        String padding = " ".repeat(Math.max(0, 56 - plain.length()));
+        sender.sendMessage(ChatColor.DARK_RED + "║ " + text + padding + " " + ChatColor.DARK_RED + "║");
+    }
+
+    private List<String> wrap(String text, int width) {
+        List<String> lines = new ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split("\\s+")) {
+            if (line.length() > 0 && line.length() + 1 + word.length() > width) {
+                lines.add(line.toString());
+                line.setLength(0);
+            }
+            if (line.length() > 0) line.append(' ');
+            line.append(word);
+        }
+        if (line.length() > 0) lines.add(line.toString());
+        return lines;
     }
 
     private void openHelpMenu(Player player, int page) {
@@ -456,7 +518,7 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
 
     @Override public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if(args.length==1)return complete(List.of("help","balance","sell","travel","admin"),args[0]);
-        if(args[0].equalsIgnoreCase("help")&&args.length==2)return complete(List.of("1","2","3","4"),args[1]);
+        if(args[0].equalsIgnoreCase("help")&&args.length==2)return complete(List.of("1","2","3","4","next","previous","menu"),args[1]);
         if(args[0].equalsIgnoreCase("travel")&&args.length==2)return complete(PLANETS,args[1]);
         if(args[0].equalsIgnoreCase("admin")&&sender.hasPermission("dune.admin")){
             if(args.length==2)return complete(List.of("solari","teleport","spicebloom"),args[1]);

@@ -7,8 +7,8 @@ sandworms:
   health: 500.0
   attack-damage: 8.0
   attack-cooldown-ms: 2200
-  movement-speed: 0.16
-  path-speed: 0.82
+  movement-speed: 0.12
+  path-speed: 1.0
   scale: 2.8
   max-per-world: 3
   spawn-chance: 0.35
