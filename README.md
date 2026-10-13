@@ -90,3 +90,15 @@ The existing workflow builds all three modules and produces the downloadable ser
 - [Manual artwork and icon prompt notes](docs/artwork/README.md)
 
 The manual's cover, sietch art, and item icons are thematic illustrations, not screenshots or new game models. Actual faction armor uses vanilla leather armor with custom attributes and tags, and the winged suits use Elytra geometry. Shai-Hulud uses the vanilla Sniffer model with the updated desert skin.
+
+### Operator admin controls (DuneCore 1.0.6)
+Operators automatically receive a glowing **Imperial Admin Scepter**, a tagged blaze rod.
+Right-click it in your main hand to open the admin menu, or use `/dune admin`.
+`/dune adminitem` recovers the rod; delivery retries every five seconds if your inventory is full.
+The same check supplies newly opped online players and replacements after respawning. Existing rods are not duplicated.
+
+The menu can summon a sandworm at your current Arrakis location, place a Guild Navigator NPC,
+give one test spice item, reload `gui.yml`, issue your selected faction kit, and show politics status.
+Actions use the existing command checks. Both opening the menu and clicking a control require operator status;
+granting only `dune.admin` does not enable this menu. A deopped player cannot use a retained rod.
+The blaze rod has custom model data 1006, a gold name and enchantment glint; its current appearance uses the vanilla blaze rod texture.

@@ -58,6 +58,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private ServerJobs serverJobs;
     private final Map<UUID, Integer> sunExposureSeconds = new HashMap<>();
     private ConfigurableGui gui;
+    private AdminGui adminGui;
     private Politics politics;
     private SharedDatabase sharedDatabase;
     public SharedDatabase sharedDatabase(){return sharedDatabase;}
@@ -105,6 +106,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         duneCommand.setExecutor(this);
         duneCommand.setTabCompleter(this);
         Bukkit.getPluginManager().registerEvents(this, this);
+        adminGui = new AdminGui(this);
         announcements = new ArrakisAnnouncements(this);
         sandwormMobs = new SandwormMobs(this, wormKey);
         World loadedArrakis = Bukkit.getWorld("arrakis");
@@ -445,6 +447,15 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         try{ess.getClass().getMethod("factionArrival",Player.class,String.class).invoke(ess,p,planet);}catch(ReflectiveOperationException ex){getLogger().warning("Faction arrival failed: "+ex.getMessage());}
     }
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length > 0 && (args[0].equalsIgnoreCase("admin") || args[0].equalsIgnoreCase("adminitem"))) {
+            if (sender instanceof Player player) {
+                if (args[0].equalsIgnoreCase("adminitem")) {
+                    if (!player.isOp()) player.sendMessage(ChatColor.RED + "Operators only.");
+                    else { adminGui.giveRod(player); player.sendMessage("The admin rod is supplied when an inventory slot is free."); }
+                } else adminGui.open(player);
+            } else sender.sendMessage("Run this command in-game.");
+            return true;
+        }
         if (args.length > 0 && args[0].equalsIgnoreCase("summon")) {
             summonSandworm(sender, args);
             return true;
@@ -453,7 +464,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             if (sender instanceof Player player) Bukkit.dispatchCommand(player, "duneess help"); else sendHelp(sender);
             return true;
         }
-        if (args.length > 0 && List.of("admin","balance","sell","travel").contains(args[0].toLowerCase(Locale.ROOT))) {
+        if (args.length > 0 && List.of("balance","sell","travel").contains(args[0].toLowerCase(Locale.ROOT))) {
             sender.sendMessage(ChatColor.YELLOW + "Solaris, Guild travel, and admin teleports are now in DuneEss. Use /duneess help."); return true;
         }
         if (!(sender instanceof Player p)) { sender.sendMessage("Run this command in-game."); return true; }
@@ -538,6 +549,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             helpLine(sender, "/dune guireload", "Reload the configurable Navigator menu.");
             helpLine(sender, "/dune guildnpc", "Spawn a Spacing Guild Navigator at your location.");
             helpLine(sender, "/dune givespice", "Give yourself one spice item.");
+            helpLine(sender, "/dune admin | /dune adminitem", "Operators: open admin controls or recover the custom blaze rod.");
             helpLine(sender, "/dune summon sandworm [x y z]", "Summon Shai-Hulud on Arrakis at your position or explicit coordinates.");
             helpLine(sender, "/duneess admin teleport arrakis [player]", "Teleport a player to the loaded Arrakis spawn.");
             helpLine(sender, "/duneess admin teleport sietch [player]", "Teleport a player to a generated Arrakis sietch.");
@@ -562,7 +574,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if (args.length == 1) {
             List<String> commands = new ArrayList<>(List.of("help", "choose", "elytra", "kit", "politics", "trust", "water",
                 "menu", "gui", "menuitem", "exchange", "serverjobs", "job"));
-            if (sender.hasPermission("dune.admin")) commands.addAll(List.of("guireload", "guildnpc", "givespice", "summon"));
+            if (sender.hasPermission("dune.admin")) commands.addAll(List.of("guireload", "guildnpc", "givespice", "summon", "admin", "adminitem"));
             return matching(commands, args[0]);
         }
 
