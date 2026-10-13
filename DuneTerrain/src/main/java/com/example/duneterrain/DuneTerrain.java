@@ -595,28 +595,37 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             int y = region.getHighestBlockYAt(x, z);
             if (y < world.getMinHeight() + 40 || y > world.getMaxHeight() - 4 || y - 36 < world.getMinHeight()) return;
 
-            // Hub with three side chambers and a lower reservoir, all within the populator's chunk buffer.
+            // Enlarged hub, side chambers, cache chamber, and reservoir. The surface entrance stays compact.
             int hy = y - 11;
-            carveRoom(region, x, hy, z, 5, 3, 5);
-            carveTunnel(region, x, hy - 2, z - 3, x - 7, hy - 6, z - 2);
-            carveRoom(region, x - 9, hy - 6, z - 2, 4, 2, 4);
-            carveTunnel(region, x, hy - 2, z + 3, x + 7, hy - 6, z + 2);
-            carveRoom(region, x + 9, hy - 6, z + 2, 4, 2, 4);
-            carveTunnel(region, x, hy - 2, z - 3, x, hy - 10, z - 9);
-            carveRoom(region, x, hy - 12, z - 10, 4, 2, 4);
-            carveTunnel(region, x, hy - 3, z + 3, x, hy - 18, z + 7);
-            carveRoom(region, x, hy - 23, z + 8, 7, 5, 7);
+            carveRoom(region, x, hy, z, 10, 6, 10);
+            carveTunnelNetwork(region, new int[][]{
+                {x - 8, hy - 3, z - 2}, {x - 12, hy - 4, z - 2}, {x - 16, hy - 5, z - 2}
+            });
+            carveRoom(region, x - 18, hy - 6, z - 2, 8, 4, 8);
+            carveTunnelNetwork(region, new int[][]{
+                {x + 8, hy - 3, z + 2}, {x + 12, hy - 4, z + 2}, {x + 16, hy - 5, z + 2}
+            });
+            carveRoom(region, x + 18, hy - 6, z + 2, 8, 4, 8);
+            carveTunnelNetwork(region, new int[][]{
+                {x, hy - 3, z - 3}, {x - 3, hy - 4, z - 5}, {x - 6, hy - 5, z - 8},
+                {x - 4, hy - 6, z - 11}, {x, hy - 7, z - 12}, {x + 3, hy - 8, z - 11},
+                {x, hy - 10, z - 10}
+            });
+            carveRoom(region, x, hy - 12, z - 10, 8, 4, 8);
+            carveRoom(region, x, hy - 23, z + 8, 14, 10, 14);
 
             // A broad, rough cave mouth opens from the surface and slopes down into the hub.
             carveCaveEntrance(region, x, z, hy);
 
-            // A winding, gently descending cave ramp leads from the hub to the enlarged reservoir.
-            carveTunnel(region, x, hy - 3, z + 3, x - 4, hy - 5, z + 5);
-            carveTunnel(region, x - 4, hy - 5, z + 5, x - 7, hy - 8, z + 8);
-            carveTunnel(region, x - 7, hy - 8, z + 8, x - 7, hy - 11, z + 11);
-            carveTunnel(region, x - 7, hy - 11, z + 11, x - 4, hy - 14, z + 13);
-            carveTunnel(region, x - 4, hy - 14, z + 13, x, hy - 17, z + 11);
-            carveTunnel(region, x, hy - 17, z + 11, x, hy - 20, z + 8);
+            // Long switchbacks keep the descent gradual from the hub to the enlarged reservoir.
+            carveTunnelNetwork(region, new int[][]{
+                {x, hy - 3, z + 3}, {x - 4, hy - 4, z + 5}, {x - 8, hy - 5, z + 8},
+                {x - 10, hy - 6, z + 12}, {x - 8, hy - 7, z + 14}, {x - 4, hy - 8, z + 14},
+                {x - 2, hy - 9, z + 12}, {x - 5, hy - 10, z + 9}, {x - 8, hy - 11, z + 7},
+                {x - 10, hy - 12, z + 9}, {x - 8, hy - 13, z + 12}, {x - 5, hy - 14, z + 13},
+                {x - 3, hy - 15, z + 10}, {x - 5, hy - 16, z + 7}, {x - 7, hy - 17, z + 8},
+                {x - 5, hy - 18, z + 10}, {x - 4, hy - 19, z + 9}, {x - 5, hy - 20, z + 8}
+            });
 
             // The waterfall runs beside the ramp and feeds a broad pool at the bottom.
             for (int dy = -4; dy >= -25; dy--) {
@@ -633,10 +642,10 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                     set(region, x + dx, waterY, z + 8 + dz, Material.WATER);
             }
 
-            furnishSleepingHall(region, x - 9, hy - 6, z - 2);
-            furnishKitchen(region, x + 9, hy - 6, z + 2);
+            furnishSleepingHall(region, x - 18, hy - 6, z - 2);
+            furnishKitchen(region, x + 18, hy - 6, z + 2);
             placePersonalChest(region, x, hy - 14, z - 10, cellX, cellZ);
-            for (int[] lamp : new int[][]{{0,-1,0},{-11,-5,-2},{11,-5,2},{0,-11,-11}})
+            for (int[] lamp : new int[][]{{0,-1,0},{-20,-5,-2},{20,-5,2},{0,-11,-11}})
                 set(region, x + lamp[0], hy + lamp[1], z + lamp[2], Material.TORCH);
         }
 
@@ -669,7 +678,11 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             // Hollow a rough chamber just behind the stone arch, then connect it to the hub.
             carveRoom(region, entryX, mouthY, entryZ, 3, 2, 3);
             carveCaveTunnel(region, outsideX, surfaceY - 1, entryZ, x + 6, mouthY, entryZ);
-            carveTunnel(region, x + 6, mouthY, entryZ, x, hubY + 1, z);
+            carveTunnelNetwork(region, new int[][]{
+                {x + 6, mouthY, entryZ}, {x + 3, mouthY - 1, z - 9}, {x, mouthY - 2, z - 11},
+                {x - 4, mouthY - 3, z - 10}, {x - 6, mouthY - 4, z - 7},
+                {x - 5, mouthY - 5, z - 3}, {x - 2, mouthY - 6, z - 1}, {x, hubY + 1, z}
+            });
 
             // Irregular stone and tuff form a visible cave arch around the entrance.
             int faceX = x + 7;
@@ -698,6 +711,13 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                 int cx = (int)Math.round(ax + (bx-ax)*t), cy = (int)Math.round(ay + (by-ay)*t), cz = (int)Math.round(az + (bz-az)*t);
                 for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++)
                     if (dx*dx + dy*dy + dz*dz <= 2) set(region, cx+dx, cy+dy, cz+dz, Material.AIR);
+            }
+        }
+
+        private static void carveTunnelNetwork(LimitedRegion region, int[][] points) {
+            for (int i = 1; i < points.length; i++) {
+                int[] from = points[i - 1], to = points[i];
+                carveTunnel(region, from[0], from[1], from[2], to[0], to[1], to[2]);
             }
         }
 

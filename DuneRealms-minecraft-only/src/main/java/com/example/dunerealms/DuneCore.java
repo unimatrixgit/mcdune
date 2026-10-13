@@ -42,7 +42,7 @@ import java.util.*;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 
-public final class DuneCore extends JavaPlugin implements Listener, CommandExecutor {
+public final class DuneCore extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
     private final String[] planets = {"arrakis", "giedi_prime", "kaitain", "caladan", "sigma_draconis_iv"};
     private final String[] factions = {"Fremen", "Harkonnen", "Corrino", "Atreides", "Ordos"};
     private final Map<UUID, String> selected = new HashMap<>();
@@ -96,7 +96,9 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         Bukkit.getScheduler().runTaskTimer(this, this::checkArrakisSun, 20L, 20L);
         Bukkit.getScheduler().runTaskTimer(this, this::applyFactionSetEffects, 20L, 20L);
         gui = new ConfigurableGui(this, serverJobs, money, jobs, planets, factions, selected);
-        Objects.requireNonNull(getCommand("dune")).setExecutor(this);
+        PluginCommand duneCommand = Objects.requireNonNull(getCommand("dune"));
+        duneCommand.setExecutor(this);
+        duneCommand.setTabCompleter(this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getScheduler().runTaskTimer(this, this::spawnSandworms, 200L, 200L);
         Bukkit.getScheduler().runTaskTimer(this, this::spawnSpiceRaiders, 200L, 200L);
@@ -475,6 +477,10 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         p.openInventory(inv);
     }
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
+            sendHelp(sender);
+            return true;
+        }
         if (args.length > 0 && args[0].equalsIgnoreCase("admin")) {
             if (!sender.hasPermission("dune.admin")) { sender.sendMessage(ChatColor.RED + "Admin only."); return true; }
             if (args.length < 2 || (!args[1].equalsIgnoreCase("arrakis") && !args[1].equalsIgnoreCase("sietch")
@@ -528,9 +534,6 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         }
         if (!(sender instanceof Player p)) { sender.sendMessage("Run this command in-game."); return true; }
         if (args.length == 0) { gui.open(p, "main"); return true; }
-        if (args[0].equalsIgnoreCase("help")) {
-            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, admin arrakis|sietch|spiceblow [player], admin spicebloom [player], admin spiceblow spawn [player], admin solari <player> <amount>"); return true;
-        }
         switch (args[0].toLowerCase(Locale.ROOT)) {
             case "choose" -> {
                 if (args.length < 2) { p.sendMessage("Choose a faction name."); break; }
@@ -571,6 +574,127 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             default -> p.sendMessage("Use /dune help");
         }
         return true;
+    }
+
+    private void sendHelp(CommandSender sender) {
+        sender.sendMessage(ChatColor.GOLD + "=== DuneCore command guide ===");
+        helpSection(sender, "General");
+        helpLine(sender, "/dune", "Open the Dune Navigator menu.");
+        helpLine(sender, "/dune help", "Show this command guide.");
+        helpLine(sender, "/dune choose <faction>", "Join Fremen, Harkonnen, Corrino, Atreides, or Ordos and receive its kit.");
+        helpLine(sender, "/dune kit", "Receive your selected faction's kit.");
+        helpLine(sender, "/dune elytra", "Merge or repair elytra equipment in your inventory.");
+        helpLine(sender, "/dune menu | /dune gui", "Open the Dune Navigator menu.");
+        helpLine(sender, "/dune menuitem", "Give yourself a portable Dune Navigator item.");
+
+        helpSection(sender, "Travel");
+        helpLine(sender, "/dune travel", "Open the Spacing Guild planet travel menu.");
+
+        helpSection(sender, "Solaris and spice");
+        helpLine(sender, "/dune balance", "Check your Solaris balance.");
+        helpLine(sender, "/dune sell", "Sell tagged spice from your inventory for Solaris.");
+        helpLine(sender, "/dune exchange", "Open the player-posted spice job exchange.");
+
+        helpSection(sender, "Politics");
+        helpLine(sender, "/dune politics status", "Show Trust funds, election leaders, imperial appointments, and any invasion.");
+        helpLine(sender, "/dune politics deposit <solaris>", "Contribute your Solaris to the Spacing Trust.");
+        helpLine(sender, "/dune politics vote <player>", "Vote for a leader of your faction.");
+        helpLine(sender, "/dune politics emperorvote <player>", "Vote for the Emperor.");
+        helpLine(sender, "/dune politics leader", "Show the elected leader of your faction.");
+        helpLine(sender, "/dune politics invasion <house>", "Let your elected faction leader start an invasion, if the Trust can fund it.");
+        helpLine(sender, "/dune politics defend", "Contribute to your faction's defense against an active invasion.");
+        helpLine(sender, "/dune politics steward <house>", "Let the Emperor appoint the house that controls spice rights.");
+        helpLine(sender, "/dune politics houseofwater <house>", "Let the Emperor appoint the house that controls water rights.");
+        helpLine(sender, "/dune trust <action>", "Alias for /dune politics.");
+
+        helpSection(sender, "Contracts and water");
+        helpLine(sender, "/dune serverjobs [accept <id>]", "View hourly CHOAM spice contracts or accept an available contract.");
+        helpLine(sender, "/dune job", "View player-posted spice exchange jobs.");
+        helpLine(sender, "/dune job post <spice quota>", "List a spice gathering job for another player.");
+        helpLine(sender, "/dune job accept <player>", "Accept another player's spice gathering job.");
+        helpLine(sender, "/dune job finish", "Leave your active player-posted job.");
+        helpLine(sender, "/dune job cancel", "Cancel your unclaimed job listing.");
+        helpLine(sender, "/dune water guild", "Register as a Guild water trader for the standard legal rate.");
+        helpLine(sender, "/dune water smuggler", "Choose the higher-paying but riskier water smuggling career.");
+        helpLine(sender, "/dune water sell", "Sell finite water buckets collected on Arrakis.");
+        helpLine(sender, "/dune water status", "Show your water career and how water trading works.");
+
+        if (sender.hasPermission("dune.admin")) {
+            helpSection(sender, "Admin (dune.admin)");
+            helpLine(sender, "/dune guireload", "Reload the configurable Navigator menu.");
+            helpLine(sender, "/dune guildnpc", "Spawn a Spacing Guild Navigator at your location.");
+            helpLine(sender, "/dune givespice", "Give yourself one spice item.");
+            helpLine(sender, "/dune admin arrakis [player]", "Teleport a player to the loaded Arrakis spawn.");
+            helpLine(sender, "/dune admin sietch [player]", "Teleport a player to a generated Arrakis sietch.");
+            helpLine(sender, "/dune admin spiceblow [player]", "Teleport a player to the nearest generated spice blow.");
+            helpLine(sender, "/dune admin spicebloom [player]", "Place an untriggered spice bloom about 50 blocks ahead of a player on Arrakis.");
+            helpLine(sender, "/dune admin spiceblow spawn [player]", "Alias for placing a spice bloom about 50 blocks ahead.");
+            helpLine(sender, "/dune admin solari <player> <amount>", "Add Solaris to an online player's balance.");
+        }
+    }
+
+    private void helpLine(CommandSender sender, String command, String description) {
+        sender.sendMessage(ChatColor.YELLOW + command + ChatColor.GRAY + " — " + description);
+    }
+
+    private void helpSection(CommandSender sender, String section) {
+        sender.sendMessage(ChatColor.AQUA + "--- " + section + " ---");
+    }
+
+    @Override public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 0) return List.of();
+        String root = args[0].toLowerCase(Locale.ROOT);
+        if (args.length == 1) {
+            List<String> commands = new ArrayList<>(List.of("help", "choose", "elytra", "kit", "politics", "trust", "water",
+                "balance", "sell", "travel", "menu", "gui", "menuitem", "exchange", "serverjobs", "job"));
+            if (sender.hasPermission("dune.admin")) commands.addAll(List.of("admin", "guireload", "guildnpc", "givespice"));
+            return matching(commands, args[0]);
+        }
+
+        if (root.equals("choose") && args.length == 2) return matching(Arrays.asList(factions), args[1]);
+        if ((root.equals("politics") || root.equals("trust")) && args.length == 2)
+            return matching(List.of("status", "deposit", "vote", "emperorvote", "leader", "invasion", "defend", "steward", "houseofwater"), args[1]);
+        if ((root.equals("politics") || root.equals("trust")) && args.length == 3) {
+            if (args[1].equalsIgnoreCase("vote") || args[1].equalsIgnoreCase("emperorvote")) return onlinePlayerNames(args[2]);
+            if (args[1].equalsIgnoreCase("invasion") || args[1].equalsIgnoreCase("steward") || args[1].equalsIgnoreCase("houseofwater"))
+                return matching(Arrays.asList(factions), args[2]);
+        }
+        if (root.equals("water") && args.length == 2) return matching(List.of("guild", "smuggler", "sell", "status"), args[1]);
+        if (root.equals("serverjobs") && args.length == 2) {
+            List<String> options = new ArrayList<>(List.of("accept"));
+            if (sender.hasPermission("dune.admin")) options.add("reload");
+            return matching(options, args[1]);
+        }
+        if (root.equals("serverjobs") && args.length == 3 && args[1].equalsIgnoreCase("accept"))
+            return matching(serverJobs.offerIds(), args[2]);
+        if (root.equals("job") && args.length == 2) return matching(List.of("post", "accept", "finish", "cancel"), args[1]);
+        if (root.equals("job") && args.length == 3 && args[1].equalsIgnoreCase("accept")) return onlinePlayerNames(args[2]);
+
+        if (root.equals("admin") && sender.hasPermission("dune.admin")) {
+            if (args.length == 2) return matching(List.of("arrakis", "sietch", "spiceblow", "spicebloom", "solari"), args[1]);
+            String action = args[1].toLowerCase(Locale.ROOT);
+            if (action.equals("solari") && args.length == 3) return onlinePlayerNames(args[2]);
+            if (action.equals("solari") && args.length == 4) return matching(List.of("100", "500", "1000", "5000"), args[3]);
+            if (action.equals("spiceblow") && args.length == 3) {
+                List<String> options = new ArrayList<>(onlinePlayerNames(args[2]));
+                if ("spawn".startsWith(args[2].toLowerCase(Locale.ROOT))) options.add("spawn");
+                return options;
+            }
+            if (action.equals("spiceblow") && args.length == 4 && args[2].equalsIgnoreCase("spawn")) return onlinePlayerNames(args[3]);
+            if ((action.equals("arrakis") || action.equals("sietch") || action.equals("spicebloom")) && args.length == 3)
+                return onlinePlayerNames(args[2]);
+        }
+        return List.of();
+    }
+
+    private List<String> onlinePlayerNames(String prefix) {
+        return matching(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(), prefix);
+    }
+
+    private List<String> matching(Collection<String> options, String prefix) {
+        String start = prefix.toLowerCase(Locale.ROOT);
+        return options.stream().filter(option -> option.toLowerCase(Locale.ROOT).startsWith(start))
+            .distinct().sorted(String.CASE_INSENSITIVE_ORDER).toList();
     }
 
     private void teleportToNearestSietch(CommandSender sender, Player target, World arrakis) {
