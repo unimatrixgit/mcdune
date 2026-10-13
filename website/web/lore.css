@@ -36,3 +36,6 @@ footer{background:linear-gradient(#122723ec,#0b1c19f5),url('assets/ornament.webp
 @media(max-width:1150px){.faction-emblems{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.faction-heading{display:block;font-size:20px}.faction-heading small{display:block;margin-top:10px;font-size:8px}.faction-emblems{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.faction-emblem{padding:12px 9px;gap:9px}.faction-emblem img{width:36px;height:36px}.faction-emblem span{font-size:22px}.page-intro:before{width:75px;height:75px;top:30px;right:4%;opacity:.12}}
 
 .item-lore{border-top:1px solid #b79a5560;padding-top:13px;font-size:11px!important;line-height:1.8!important;color:#607164!important;font-style:italic}.item-lore>span{display:block;color:#927040;font:18px VT323,monospace;font-style:normal;letter-spacing:.08em;margin-bottom:5px}.lore-context{font-size:11px;line-height:1.8;padding:13px 16px;border-left:3px solid #aa8647;background:#decba14d;color:#455c46}.equipment-page .item-lore{color:#cbd1b8!important}
+
+.faction-atlas-card .planet-facts{display:block}.faction-atlas-card .planet-facts>div{display:block}.faction-atlas-card .planet-facts dt,.faction-atlas-card .planet-facts dd{display:block;width:auto}.faction-atlas-card .planet-facts dt{white-space:normal}
+
