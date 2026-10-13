@@ -1,0 +1,12 @@
+{
+  "baseline_pages": 58,
+  "pages": 77,
+  "baseline_art_area_sqpt": 1816304.74692472,
+  "art_area_sqpt": 3212904.74692472,
+  "art_increase_percent": 76.89,
+  "illustrated_reference_icons": 68,
+  "image_placements": 81,
+  "size_bytes": 19696861,
+  "required_content_checks": "passed",
+  "text_page_boundary_check": "passed"
+}

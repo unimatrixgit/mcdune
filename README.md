@@ -4,7 +4,7 @@
 
 A Dune-themed Minecraft Java plugin suite for **Paper 1.21.4 and Java 21**. Explore Arrakis, harvest melange, join a faction, trade through the Spacing Guild, and encounter Shai-Hulud.
 
-**[Read the illustrated user manual](docs/Dune-User-Manual.pdf)** for the complete player and administrator guide, command reference, default configuration, 64 illustrated item and interface icons, and reserved chapters for the other planets.
+**[Read the illustrated user manual](docs/Dune-User-Manual.pdf)** for the complete player and administrator guide, command reference, default configuration, 77 pages, 68 illustrated item and interface icons, ornate Minecraft-inspired House and spice backgrounds, and reserved chapters for the other planets.
 
 ## Current modules
 
@@ -14,7 +14,7 @@ A Dune-themed Minecraft Java plugin suite for **Paper 1.21.4 and Java 21**. Expl
 | DuneTerrain | 1.0.7 | Planet generation, Arrakis formations and landmarks, spice deposits, personal sietch caches, and safe spawn. |
 | DuneNPC | 1.0.0 | Guild Navigators, smuggler missions, stationary quest camps, timed deadlines, particles and NPC admin GUI. |
 | DuneEss | 1.0.1 | Solaris economy through Vault, spice sales, Guild travel, help, and administrative travel/economy tools. |
-| DuneResourcePack.zip | Minecraft Java 1.21.4 | Desert Sniffer skin, haunted Fremen zombies, and spice-gold suspicious sand. |
+| DuneResourcePack.zip | Minecraft Java 1.21.4 | Desert Sniffer skin, haunted Fremen zombies, spice-gold suspicious sand, and smuggler wandering traders. |
 
 ## Download and install
 
@@ -36,6 +36,9 @@ For a planet used as Paper's primary world, configure its generator and biome pr
 - Haunted Fremen zombie raiders, with an increased spawn chance near rich spice fields.
 - Lore sightings with coordinates on Arrakis, followed by a **fifteen-minute Spacing Guild announcement** to online players across the proxy. Timers persist through restart and avoid repeating a sighting on ordinary chunk reload.
 - Configurable Navigator menus, a Guild travel menu, and a paged in-game help guide.
+- Operator-only Imperial Admin Scepters, automatically supplied to ops, with linked DuneNPC management controls.
+- Roaming Arrakis smugglers with lore-based spice and water missions, a 30-minute real-time deadline, stationary illuminated quest camps and green/purple status particles.
+- A 33% gross spice-sale bonus for Imperial appointees; those appointees use basic spice sales instead of smuggler missions.
 
 The other planet terrain profiles already exist: Giedi Prime, Kaitain, Caladan, and Sigma Draconis IV. Their dedicated manual chapters reserve space for future planet-specific gameplay rather than describing unreleased quests or cities.
 
@@ -84,6 +87,11 @@ The existing workflow builds all four project modules and produces the downloada
 ## Documentation and artwork
 
 - [Illustrated user manual](docs/Dune-User-Manual.pdf)
+- [Plain-background illustrated manual](docs/Dune-Complete-Illustrated-Manual.pdf)
+- [Compact decorated game poster](docs/posters/Dune-Compact-Decorated-Poster.png)
+- [Worlds and mechanics poster](docs/posters/Dune-Illustrated-Worlds-and-Mechanics-Poster.png)
+- [Editable manual sources](docs/manual-authoring/README.md)
+- [DuneNPC commands and mission mechanics](DuneNPC/README.md)
 - [Session 2 changes](SESSION-2.md)
 - [DuneTerrain setup](DuneTerrain/README.md)
 - [DuneCore details](DuneRealms-minecraft-only/README.md)

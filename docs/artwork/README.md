@@ -54,3 +54,14 @@ Use case: stylized-concept. Asset type: single 4x4 atlas of exactly 16 Minecraft
 - Row 4: rolled-out Minecraft map, tan-and-brown speckled Husk spawn egg, ordinary brown leather chestplate, Minecraft arrow.
 
 Consistent attractive crisp pixel-block outlines, all objects fully within their own cell, absolutely no extra items, no characters. Suitable to cut into 16 individual square illustrated reference icons. The objects refer to existing plugin menu symbols, not new fictional equipment.
+# Current NPC and decorated manual edition
+
+The default manual now has 77 pages and 68 illustrated reference icons. The plain-background edition has 76.89% more visible artwork area than the prior 58-page guide; `manual-validation.json` records that comparison. The default decorated edition additionally embeds the richly illustrated Minecraft-influenced House and spice background on every interior page.
+
+- `dune-minecraft-page-background.png`: ornate House-inspired heraldry, voxel citadels, melange crystals, dunes, harvester and sandworm. See [background notes](DECORATED-BACKGROUND-NOTES.md).
+- `smuggler-spice-mission.png`, `smuggler-water-camp.png`, `imperial-npc-administration.png`: mission and admin scenes. See [NPC artwork prompts](NPC-ARTWORK-PROMPTS.md).
+- `admin-icons-atlas.png`: four additional reference icons for the admin scepter and NPC/mob controls.
+- `world-0.png` through `world-4.png`: planet divider artwork, derived from `five-worlds-panorama.png`.
+- `guild-navigator.png`, `shai-hulud-encounter.png`, `spice-expedition.png`: illustrated game-theme scenes.
+
+All artwork is illustrative. It does not add buildings, items or capabilities to the plugin.

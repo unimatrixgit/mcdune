@@ -1,2 +1,6 @@
 .gradle/
 build/
+
+# Manual render and conversion intermediates
+tmp/
+__pycache__/

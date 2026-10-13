@@ -140,6 +140,8 @@ jobs:
             --output DuneRealms-Server-Package/Vault-LICENSE.txt
           cp DuneResourcePack.zip DuneRealms-Server-Package/
           cp docs/Dune-User-Manual.pdf DuneRealms-Server-Package/
+          cp docs/Dune-Complete-Illustrated-Manual.pdf DuneRealms-Server-Package/
+          cp docs/posters/*.png DuneRealms-Server-Package/
           cp README.md DuneRealms-Server-Package/Project-README.md
           cat > DuneRealms-Server-Package/README.txt <<'EOF'
           DuneRealms Paper server package
