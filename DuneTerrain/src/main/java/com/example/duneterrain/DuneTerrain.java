@@ -420,36 +420,57 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             String path = "planets.arrakis.darkstone-islands.";
             if (!plugin.getConfig().getBoolean(path + "enabled", true)) return;
             int spacing = Math.max(128, plugin.getConfig().getInt(path + "spacing", 750));
-            int minRadius = Math.max(3, plugin.getConfig().getInt(path + "min-radius", 5));
-            int maxRadius = Math.max(minRadius, plugin.getConfig().getInt(path + "max-radius", 9));
-            int maxRise = Math.max(1, plugin.getConfig().getInt(path + "max-height", 4));
+            int minRadius = Math.max(6, plugin.getConfig().getInt(path + "min-radius", 10));
+            int maxRadius = Math.max(minRadius, plugin.getConfig().getInt(path + "max-radius", 18));
+            int maxRise = Math.max(4, plugin.getConfig().getInt(path + "max-height", 14));
+            int baseHeight = plugin.getConfig().getInt("planets.arrakis.terrain.base-height", 70);
+            double variation = plugin.getConfig().getDouble("planets.arrakis.terrain.height-variation", 11);
+            double scale = Math.max(0.001, plugin.getConfig().getDouble("planets.arrakis.terrain.noise-scale", 0.02));
             int worldMinX = chunkX * 16, worldMinZ = chunkZ * 16;
-            int firstCellX = Math.floorDiv(worldMinX - maxRadius, spacing), lastCellX = Math.floorDiv(worldMinX + 15 + maxRadius, spacing);
-            int firstCellZ = Math.floorDiv(worldMinZ - maxRadius, spacing), lastCellZ = Math.floorDiv(worldMinZ + 15 + maxRadius, spacing);
+            int firstCellX = Math.floorDiv(worldMinX - maxRadius - 3, spacing), lastCellX = Math.floorDiv(worldMinX + 15 + maxRadius + 3, spacing);
+            int firstCellZ = Math.floorDiv(worldMinZ - maxRadius - 3, spacing), lastCellZ = Math.floorDiv(worldMinZ + 15 + maxRadius + 3, spacing);
             long salt = 0x4441524B49534C41L;
             for (int cellX = firstCellX; cellX <= lastCellX; cellX++) for (int cellZ = firstCellZ; cellZ <= lastCellZ; cellZ++) {
                 long seed = mix64((long) cellX * 0x9E3779B97F4A7C15L ^ (long) cellZ * 0xC2B2AE3D27D4EB4FL ^ salt);
                 long centerX = (long) cellX * spacing + Math.floorMod(mix64(seed ^ 0x165667B19E3779F9L), spacing);
                 long centerZ = (long) cellZ * spacing + Math.floorMod(mix64(seed ^ 0x85EBCA77C2B2AE63L), spacing);
                 int radius = minRadius + (int) Math.floorMod(seed >>> 1, maxRadius - minRadius + 1L);
+                int highestGround = Integer.MIN_VALUE;
+                for (int sampleX = (int)centerX - radius - 2; sampleX <= centerX + radius + 2; sampleX++)
+                    for (int sampleZ = (int)centerZ - radius - 2; sampleZ <= centerZ + radius + 2; sampleZ++) {
+                        if (Math.hypot(sampleX - centerX, sampleZ - centerZ) > radius + 2) continue;
+                        double noise = Math.sin(sampleX * scale) * Math.cos(sampleZ * scale * 1.13)
+                            + Math.sin(sampleX * scale * 2.7 + sampleZ * scale * 1.45) * 0.35;
+                        highestGround = Math.max(highestGround, baseHeight + (int)Math.round(noise * variation));
+                    }
+                int plateauY = highestGround + maxRise;
+                double plateauRadius = radius * 0.58;
                 for (int lx = 0; lx < 16; lx++) for (int lz = 0; lz < 16; lz++) {
                     long gx = (long) worldMinX + lx, gz = (long) worldMinZ + lz;
                     long dx = gx - centerX, dz = gz - centerZ;
                     long rough = mix64(gx * 0x9E3779B97F4A7C15L ^ gz * 0xC2B2AE3D27D4EB4FL ^ seed);
-                    double edge = radius + (((rough >>> 11) * 0x1.0p-53) - 0.5) * 2.8;
+                    double edge = radius + (((rough >>> 11) * 0x1.0p-53) - 0.5) * 3.0;
                     double distance = Math.sqrt(dx * dx + dz * dz);
                     if (distance > edge) continue;
                     int baseY = heights[lx][lz];
-                    if (baseY + maxRise + 2 >= maxY || baseY <= minY + 1) continue;
-                    double fullness = Math.max(0.0, 1.0 - distance / (radius + 1.0));
-                    int rise = Math.max(1, Math.min(maxRise, 1 + (int) Math.round(fullness * (maxRise - 1))));
-                    int rockHeight = Math.max(1, rise - 1);
-                    Material[] darkRock = {Material.BLACKSTONE, Material.BASALT, Material.TUFF, Material.COBBLED_DEEPSLATE};
-                    for (int dy = 1; dy <= rockHeight; dy++) {
-                        int hashIndex = (int) Math.floorMod(mix64(rough + dy * 0x9E3779B97F4A7C15L), darkRock.length);
-                        data.setBlock(lx, baseY + dy, lz, darkRock[hashIndex]);
+                    if (plateauY + 2 >= maxY || baseY <= minY + 1) continue;
+                    boolean plateau = distance <= plateauRadius;
+                    double slope = Math.max(0.0, Math.min(1.0, (distance - plateauRadius) / Math.max(1.0, edge - plateauRadius)));
+                    int sideTop = plateau ? plateauY : plateauY - (int)Math.floor(slope * maxRise);
+                    Material[] darkRock = {Material.BLACKSTONE, Material.BASALT, Material.POLISHED_BLACKSTONE};
+                    if (plateau) {
+                        for (int y = baseY + 1; y < plateauY; y++) {
+                            int hashIndex = (int)Math.floorMod(mix64(rough + y * 0x9E3779B97F4A7C15L), darkRock.length);
+                            data.setBlock(lx, y, lz, darkRock[hashIndex]);
+                        }
+                        data.setBlock(lx, plateauY, lz, Material.SAND);
+                    } else {
+                        int sideSurface = Math.max(baseY, sideTop);
+                        for (int y = baseY; y <= sideSurface; y++) {
+                            int hashIndex = (int)Math.floorMod(mix64(rough + y * 0x9E3779B97F4A7C15L), darkRock.length);
+                            data.setBlock(lx, y, lz, darkRock[hashIndex]);
+                        }
                     }
-                    data.setBlock(lx, baseY + rise, lz, Material.SAND);
                 }
             }
         }
@@ -462,7 +483,9 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             int count = Math.max(0, plugin.getConfig().getInt("spice-deposits.per-chunk", 2));
             for (int i = 0; i < count; i++) {
                 int x = random.nextInt(16), z = random.nextInt(16), y = heights[x][z];
-                if (y + 1 < maxY && y > minY) data.setBlock(x, y, z, Material.SUSPICIOUS_SAND);
+                Material surface = data.getType(x, y, z);
+                if (y + 1 < maxY && y > minY && (surface == Material.SAND || surface == Material.RED_SAND))
+                    data.setBlock(x, y, z, Material.SUSPICIOUS_SAND);
             }
         }
         private void placeRandomSpicePatch(ChunkData data, int chunkX, int chunkZ, int[][] heights) {
@@ -582,21 +605,33 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             carveTunnel(region, x, hy - 2, z - 3, x, hy - 10, z - 9);
             carveRoom(region, x, hy - 12, z - 10, 4, 2, 4);
             carveTunnel(region, x, hy - 3, z + 3, x, hy - 18, z + 7);
-            carveRoom(region, x, hy - 21, z + 8, 5, 3, 5);
+            carveRoom(region, x, hy - 23, z + 8, 7, 5, 7);
 
             // A broad, rough cave mouth opens from the surface and slopes down into the hub.
             carveCaveEntrance(region, x, z, hy);
 
-            // A narrow waterfall drops from the hub into the deep reservoir.
-            for (int dy = -4; dy >= -20; dy--) {
-                set(region, x + 2, hy + dy, z + 2, Material.WATER);
-                set(region, x + 1, hy + dy, z + 2, Material.STONE);
-                set(region, x + 3, hy + dy, z + 2, Material.STONE);
-                set(region, x + 2, hy + dy, z + 1, Material.STONE);
-                set(region, x + 2, hy + dy, z + 3, Material.STONE);
+            // A winding, gently descending cave ramp leads from the hub to the enlarged reservoir.
+            carveTunnel(region, x, hy - 3, z + 3, x - 4, hy - 5, z + 5);
+            carveTunnel(region, x - 4, hy - 5, z + 5, x - 7, hy - 8, z + 8);
+            carveTunnel(region, x - 7, hy - 8, z + 8, x - 7, hy - 11, z + 11);
+            carveTunnel(region, x - 7, hy - 11, z + 11, x - 4, hy - 14, z + 13);
+            carveTunnel(region, x - 4, hy - 14, z + 13, x, hy - 17, z + 11);
+            carveTunnel(region, x, hy - 17, z + 11, x, hy - 20, z + 8);
+
+            // The waterfall runs beside the ramp and feeds a broad pool at the bottom.
+            for (int dy = -4; dy >= -25; dy--) {
+                set(region, x + 3, hy + dy, z + 5, Material.WATER);
+                set(region, x + 2, hy + dy, z + 5, Material.STONE);
+                set(region, x + 4, hy + dy, z + 5, Material.STONE);
+                set(region, x + 3, hy + dy, z + 4, Material.STONE);
+                set(region, x + 3, hy + dy, z + 6, Material.STONE);
             }
-            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++)
-                set(region, x + dx, hy - 23, z + dz, Material.WATER);
+            for (int dx = -5; dx <= 5; dx++) for (int dz = -5; dz <= 5; dz++) {
+                if (dx * dx + dz * dz > 25) continue;
+                set(region, x + dx, hy - 29, z + 8 + dz, Material.STONE);
+                for (int waterY = hy - 28; waterY <= hy - 25; waterY++)
+                    set(region, x + dx, waterY, z + 8 + dz, Material.WATER);
+            }
 
             furnishSleepingHall(region, x - 9, hy - 6, z - 2);
             furnishKitchen(region, x + 9, hy - 6, z + 2);

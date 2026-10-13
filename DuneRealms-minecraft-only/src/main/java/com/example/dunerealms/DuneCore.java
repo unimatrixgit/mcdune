@@ -478,8 +478,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if (args.length > 0 && args[0].equalsIgnoreCase("admin")) {
             if (!sender.hasPermission("dune.admin")) { sender.sendMessage(ChatColor.RED + "Admin only."); return true; }
             if (args.length < 2 || (!args[1].equalsIgnoreCase("arrakis") && !args[1].equalsIgnoreCase("sietch")
-                && !args[1].equalsIgnoreCase("spiceblow") && !args[1].equalsIgnoreCase("solari"))) {
-                sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin <arrakis|sietch|spiceblow> [player] | solari <player> <amount>"); return true;
+                && !args[1].equalsIgnoreCase("spiceblow") && !args[1].equalsIgnoreCase("spicebloom") && !args[1].equalsIgnoreCase("solari"))) {
+                sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin <arrakis|sietch|spiceblow [spawn]|spicebloom> [player] | solari <player> <amount>"); return true;
             }
             if (args[1].equalsIgnoreCase("solari")) {
                 if (args.length != 4) { sender.sendMessage(ChatColor.YELLOW + "Usage: /dune admin solari <player> <amount>"); return true; }
@@ -497,14 +497,21 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
                 sender.sendMessage(ChatColor.GREEN + "Added " + amount + " Solaris to " + recipient.getName() + ". Balance: " + money.get(recipient.getUniqueId()) + ".");
                 return true;
             }
+            boolean spawnBloom = args[1].equalsIgnoreCase("spicebloom")
+                || (args[1].equalsIgnoreCase("spiceblow") && args.length >= 3 && args[2].equalsIgnoreCase("spawn"));
+            int playerArg = args[1].equalsIgnoreCase("spiceblow") && args.length >= 3 && args[2].equalsIgnoreCase("spawn") ? 3 : 2;
             Player target;
-            if (args.length >= 3) {
-                target = Bukkit.getPlayerExact(args[2]);
+            if (args.length > playerArg) {
+                target = Bukkit.getPlayerExact(args[playerArg]);
                 if (target == null) { sender.sendMessage(ChatColor.RED + "That player is not online."); return true; }
             } else if (sender instanceof Player player) target = player;
-            else { sender.sendMessage(ChatColor.YELLOW + "From console, specify an online player: /dune admin <arrakis|sietch|spiceblow> <player>"); return true; }
+            else { sender.sendMessage(ChatColor.YELLOW + "From console, specify an online player: /dune admin spicebloom <player>"); return true; }
             World arrakis = Bukkit.getWorld("arrakis");
             if (arrakis == null) { sender.sendMessage(ChatColor.RED + "Arrakis is not loaded on this server. Set DuneTerrain's server.planet to arrakis and restart this backend."); return true; }
+            if (spawnBloom) {
+                spawnSpiceBloom(sender, target, arrakis);
+                return true;
+            }
             if (args[1].equalsIgnoreCase("sietch")) {
                 teleportToNearestSietch(sender, target, arrakis);
                 return true;
@@ -522,7 +529,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if (!(sender instanceof Player p)) { sender.sendMessage("Run this command in-game."); return true; }
         if (args.length == 0) { gui.open(p, "main"); return true; }
         if (args[0].equalsIgnoreCase("help")) {
-            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, admin arrakis|sietch|spiceblow [player], admin solari <player> <amount>"); return true;
+            p.sendMessage(ChatColor.GOLD + "/dune choose <fremen|harkonnen|corrino|atreides>, kit, balance, sell, water, travel, politics, exchange, serverjobs, serverjobs accept <id>, job post <spice>, job accept <player>, job finish, admin arrakis|sietch|spiceblow [player], admin spicebloom [player], admin spiceblow spawn [player], admin solari <player> <amount>"); return true;
         }
         switch (args[0].toLowerCase(Locale.ROOT)) {
             case "choose" -> {
@@ -638,6 +645,43 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             return;
         }
         sender.sendMessage(ChatColor.RED + "No spice blow was found nearby. Explore new Arrakis terrain with DuneTerrain enabled, then try again.");
+    }
+
+    private void spawnSpiceBloom(CommandSender sender, Player target, World arrakis) {
+        if (!target.getWorld().equals(arrakis)) {
+            sender.sendMessage(ChatColor.RED + "The target player must be on Arrakis to spawn a spice bloom 50 blocks away.");
+            return;
+        }
+        double baseAngle = Math.toRadians(90.0 - target.getLocation().getYaw());
+        int originX = target.getLocation().getBlockX(), originZ = target.getLocation().getBlockZ();
+        Block center = null;
+        int[][] offsets = {{0,0},{1,0},{-1,0},{2,0},{-2,0},{3,0},{-3,0},{4,0},{-4,0},{5,0},{-5,0},{6,0},{-6,0},{7,0},{-7,0},{8,0},{-8,0},{9,0},{-9,0},{10,0},{-10,0},{11,0},{-11,0},{12,0},{-12,0}};
+        for (int[] offset : offsets) {
+            double angle = baseAngle + Math.toRadians(offset[0] * 15.0);
+            int x = originX + (int)Math.round(Math.cos(angle) * 50.0);
+            int z = originZ + (int)Math.round(Math.sin(angle) * 50.0);
+            int y = arrakis.getHighestBlockYAt(x, z);
+            boolean suitable = true;
+            for (int dx = -1; dx <= 1 && suitable; dx++) for (int dz = -1; dz <= 1; dz++) {
+                Block surface = arrakis.getBlockAt(x + dx, y, z + dz);
+                if ((surface.getType() != Material.SAND && surface.getType() != Material.RED_SAND)
+                    || !arrakis.getBlockAt(x + dx, y + 1, z + dz).isPassable()) { suitable = false; break; }
+            }
+            if (suitable && arrakis.getBlockAt(x, y + 2, z).isPassable()) {
+                center = arrakis.getBlockAt(x, y, z);
+                break;
+            }
+        }
+        if (center == null) {
+            sender.sendMessage(ChatColor.RED + "No flat, clear sand patch was found about 50 blocks in front of " + target.getName() + ".");
+            return;
+        }
+        int x = center.getX(), y = center.getY(), z = center.getZ();
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+            arrakis.getBlockAt(x + dx, y, z + dz).setType(Material.MAGMA_BLOCK, false);
+        arrakis.getBlockAt(x, y + 1, z).setType(Material.MAGMA_BLOCK, false);
+        target.sendMessage(ChatColor.GOLD + "An untriggered spice bloom was placed about 50 blocks ahead at " + x + ", " + z + ".");
+        sender.sendMessage(ChatColor.GREEN + "Spawned a spice bloom about 50 blocks in front of " + target.getName() + " at " + x + ", " + z + ".");
     }
 
     void runGuiCommand(Player p, String command) {
