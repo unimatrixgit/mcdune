@@ -16,7 +16,11 @@ Timers and sighting identities persist in `plugins/DuneCore/arrakis-announcement
 
 `/dune summon sandworm` summons at your current position on Arrakis. `/dune summon sandworm <x> <y> <z>` accepts absolute numeric coordinates on the loaded Arrakis world, including from console. Both require `dune.admin` (OP by default). Invalid, non-finite, obstructed, out-of-height, and out-of-border locations are rejected. Summoned worms use the natural worm's tags, attributes, hostile AI, effects, and death spice field. An explicit admin summon bypasses the automatic population limit and does not change the automatic hourly cooldown.
 
-## Validation
+## Sniffer model update
+
+DuneCore 1.0.5 uses a visible, damageable Sniffer body and an invisible Husk providing native zombie targeting, pursuit and melee attacks. Linked UUIDs persist on both entities. Existing loaded Husk sandworms are converted without resetting their remaining health. Only the visible body is tagged as the reward-bearing sandworm; killing it removes the controller and generates one spice field. Natural spawns and admin summons share this implementation. DuneResourcePack.zip includes the updated 192x192 Sniffer skin with desert-tan segments and toothlike head details. The texture changes the skin; the visible geometry remains the vanilla Sniffer.
+
+## Build verification
 
 Run `gradle clean build` separately in each plugin directory. Terrain tests cover plateau count/spacing hard caps, flat levels, and monotonic terrace boundaries. Core tests cover the fifteen-minute deadline, coordinate messages, reload deduplication, restart persistence, offline delivery retry, and a single correctly encoded global Guild message. A live Paper/Velocity network is still required to verify gameplay appearance and actual proxy delivery.
 

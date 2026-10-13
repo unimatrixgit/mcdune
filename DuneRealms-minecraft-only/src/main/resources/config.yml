@@ -1,7 +1,7 @@
 spice-respawn-seconds: 120
 
 # Sandworms spawn near players on Arrakis only, at most once per interval serverwide.
-# Husk-based sandworm uses its built-in hostile target and chase AI.
+# A visible Sniffer body follows an invisible Husk with native zombie targeting and melee AI.
 sandworms:
   enabled: true
   health: 500.0

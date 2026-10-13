@@ -1,5 +1,7 @@
 # DuneCore for Paper 1.21.4
 
+The detailed [player and administrator manual](../docs/Dune-User-Manual.pdf) includes the complete Arrakis guide, command reference, configuration defaults, and reserved chapters for all other planets. DuneCore 1.0.5 renders sandworms as Sniffers while retaining native zombie AI through invisible Husk controllers; `/dune summon sandworm [x y z]` is available to admins.
+
 Requires Java 21 and Gradle 8+. Build each project folder separately. Install Vault, then `DuneEss`, `DuneCore`, and `DuneTerrain` into Paper's `plugins/` directory. The downloadable server package includes Vault 2.5.0. DuneEss owns Solaris and Guild/admin travel and registers its economy through Vault; DuneCore provides factions, spice gameplay, politics, and jobs; DuneTerrain generates the planet worlds. Remove the old `DuneRealms.jar` when upgrading.
 
 Commands: `/dune choose fremen|harkonnen|corrino|atreides|ordos`, `/dune kit`, `/dune guildnpc` (OP), `/dune givespice` (OP), `/duneess balance`, `/duneess sell`, `/duneess travel [planet]`, and `/duneess admin ...`. Use `/dune help` or `/duneess help` for the spaced, boxed chat guide with clickable Previous/Next links. `/duneess help <page>` opens a page directly and `/duneess help menu` opens the inventory guide.
@@ -14,7 +16,7 @@ Admins with `dune.admin` can force teleport to Arrakis or generated landmarks wi
 
 ## Sandworms (Shai-Hulud)
 
-Hostile oversized Husks representing sandworms spawn on sandy surfaces near players **only on Arrakis**, at most once per hour serverwide by default. The successful spawn time is saved in the plugin config, so a restart does not reset the cooldown. They have 500 health, 8 melee damage, a movement attribute of 0.33, and scale 3.5, and play a Warden roar when emerging. Settings are under `sandworms` in `config.yml`. Admins can use `/dune summon sandworm [x y z]` to summon one explicitly. Arrakis sightings include coordinates and a fifteen-minute warning before the Spacing Guild informs the network. See [Session 2](../SESSION-2.md) for timer persistence, proxy delivery, and plateau settings.
+Visible oversized Sniffers with invisible Husk controllers supplying native zombie AI spawn on sandy surfaces near players **only on Arrakis**, at most once per hour serverwide by default. The successful spawn time is saved in the plugin config, so a restart does not reset the cooldown. They have 500 health, 8 melee damage, a controller movement attribute of 0.33, and visible scale 3.5, and play a Warden roar when emerging. Settings are under `sandworms` in `config.yml`. Admins can use `/dune summon sandworm [x y z]` to summon one explicitly. Arrakis sightings include coordinates and a fifteen-minute warning before the Spacing Guild informs the network. See [Session 2](../SESSION-2.md) for timer persistence, proxy delivery, and plateau settings.
 
 ## Spice contracts and sandworm blooms
 - On Arrakis, defeating a sandworm generates a broad patch of suspicious-sand spice deposits with a target base harvest value of 100,000 Solaris (actual value depends on available sandy terrain and faction bonuses).

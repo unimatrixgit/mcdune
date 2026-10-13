@@ -65,6 +65,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     public void persistPlayers(){savePlayers();}
     private ArrakisWater arrakisWater;
     private ArrakisAnnouncements announcements;
+    private SandwormMobs sandwormMobs;
 
     public void announceArrakisEvent(String kind, Location location, String identity) {
         if (announcements != null) announcements.announce(kind, location, identity);
@@ -105,6 +106,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         duneCommand.setTabCompleter(this);
         Bukkit.getPluginManager().registerEvents(this, this);
         announcements = new ArrakisAnnouncements(this);
+        sandwormMobs = new SandwormMobs(this, wormKey);
         World loadedArrakis = Bukkit.getWorld("arrakis");
         if (loadedArrakis != null) for (Entity entity : loadedArrakis.getEntities())
             if (isWorm(entity)) announceArrakisEvent("sandworm", entity.getLocation(), "worm:" + entity.getUniqueId());
@@ -855,7 +857,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         World world = Bukkit.getWorld("arrakis");
         if (world == null) return;
         int max = Math.max(0, getConfig().getInt("sandworms.max-per-world", 12));
-        int count = (int) world.getEntitiesByClass(Husk.class).stream().filter(this::isWorm).count();
+        int count = (int) world.getEntitiesByClass(Sniffer.class).stream().filter(this::isWorm).count();
         Random rng = java.util.concurrent.ThreadLocalRandom.current();
         for (Player player : world.getPlayers()) {
             if (count >= max) break;
@@ -878,17 +880,9 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         }
     }
 
-    private Husk spawnSandworm(Location location, Player target) {
+    private Sniffer spawnSandworm(Location location, Player target) {
             World world = Objects.requireNonNull(location.getWorld());
-            Husk worm = world.spawn(location, Husk.class, h -> {
-                h.getPersistentDataContainer().set(wormKey, PersistentDataType.BYTE, (byte)1);
-                h.setCustomName(ChatColor.GOLD + "Shai-Hulud | Sandworm"); h.setCustomNameVisible(true); h.setRemoveWhenFarAway(true); h.setAdult(); h.setCanPickupItems(false);
-                h.getAttribute(Attribute.MAX_HEALTH).setBaseValue(getConfig().getDouble("sandworms.health", 500.0)); h.setHealth(h.getAttribute(Attribute.MAX_HEALTH).getValue());
-                h.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(getConfig().getDouble("sandworms.attack-damage", 8.0));
-                h.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(getConfig().getDouble("sandworms.movement-speed", 0.33));
-                h.getAttribute(Attribute.SCALE).setBaseValue(getConfig().getDouble("sandworms.scale", 3.5));
-                if (target != null) h.setTarget(target);
-            });
+            Sniffer worm = sandwormMobs.spawn(location, target);
             world.spawnParticle(Particle.CLOUD, location, 45, 2, 1, 2, 0.1);
             world.playSound(location, Sound.ENTITY_WARDEN_ROAR, 2f, 0.6f);
             announceArrakisEvent("sandworm", location, "worm:" + worm.getUniqueId());
