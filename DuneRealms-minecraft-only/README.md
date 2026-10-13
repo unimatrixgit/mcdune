@@ -8,13 +8,13 @@ For proxy travel, configure `network.local-planet` for this backend and the `net
 
 Suspicious sand on Arrakis is harvestable spice. Use the tagged netherite spice shovel from `/dune kit`. Spice can be sold with `/duneess sell` and Solaris spent through Guild travel. Each faction has a passive perk; Fremen harvest double spice. Faction data persists in `plugins/DuneCore/players.yml`; DuneEss imports legacy balances from old Dune player files and stores them in its own balances file or shared economy table.
 
-Limitations: this is a gameplay prototype, not a fully polished mod. Custom equipment uses vanilla items and colored names, not resource-pack models. Worlds have themed terrain, but no cities, unique buildings, or detailed biome decorations. Guild NPCs are placed by operators. No permissions-based faction change for ordinary players. The plugin has not been compiled or tested against a running Paper server in this environment.
+Limitations: this is a gameplay prototype, not a fully polished mod. Custom equipment uses vanilla items and colored names, not resource-pack models. Worlds have themed terrain, but no cities, unique buildings, or detailed biome decorations. Guild NPCs are placed by operators. No permissions-based faction change for ordinary players. The plugins compile with Java 21; live Paper/Velocity gameplay verification remains pending.
 
 Admins with `dune.admin` can force teleport to Arrakis or generated landmarks with `/duneess admin teleport <destination> [player]`. Omit the player name to teleport yourself. From console, specify an online player. These commands require the Arrakis world to be loaded on that backend.
 
 ## Sandworms (Shai-Hulud)
 
-Hostile oversized Sniffers representing sandworms spawn on sandy surfaces near players **only on Arrakis**, at most once per hour serverwide by default. The successful spawn time is saved in the plugin config, so a restart does not reset the cooldown. They have 500 health and 8 melee damage, and play a Warden roar when emerging. Their default movement attribute is 0.12 with a 1.0 pathfinding speed modifier, making them slightly faster than the Sniffer baseline while leaving sprinting as a way to escape. Settings are under `sandworms` in `config.yml`. `DuneResourcePack.zip` adds a sandworm texture, haunted Fremen husk texture, and distinct spice-gold suspicious sand. Vanilla resource packs change textures, not Sniffer geometry.
+Hostile oversized Husks representing sandworms spawn on sandy surfaces near players **only on Arrakis**, at most once per hour serverwide by default. The successful spawn time is saved in the plugin config, so a restart does not reset the cooldown. They have 500 health, 8 melee damage, a movement attribute of 0.33, and scale 3.5, and play a Warden roar when emerging. Settings are under `sandworms` in `config.yml`. Admins can use `/dune summon sandworm [x y z]` to summon one explicitly. Arrakis sightings include coordinates and a fifteen-minute warning before the Spacing Guild informs the network. See [Session 2](../SESSION-2.md) for timer persistence, proxy delivery, and plateau settings.
 
 ## Spice contracts and sandworm blooms
 - On Arrakis, defeating a sandworm generates a broad patch of suspicious-sand spice deposits with a target base harvest value of 100,000 Solaris (actual value depends on available sandy terrain and faction bonuses).
@@ -26,7 +26,7 @@ Hostile oversized Sniffers representing sandworms spawn on sandy surfaces near p
 - `/dune job finish` leaves a job; `/dune job cancel` cancels an unclaimed listing.
 - A sponsor's job remains listed across restarts, but active worker assignments must be reaccepted after restart.
 
-This is source code, not a tested compiled JAR.
+Session 2 builds all three plugin JARs and runs automated terrain, announcement, and command-validation tests.
 
 ## Hourly server-issued CHOAM jobs
 Edit `plugins/DuneCore/server-jobs.yml` to configure job `title`, `spice-required`, `pay`, and `time-limit-minutes`. `offers-per-hour` controls how many are randomly selected. Listings rotate every hour at UTC hour boundaries. Existing accepted contracts persist through restarts, including their original deadlines; if a definition is removed while active, that contract expires without a fine.

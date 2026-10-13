@@ -39,7 +39,8 @@ planets:
     water: {level: 63, swamp-pools: false, coverage: 0.18}
     vegetation: {trees: false, tree-chance: 0.0, flowers-per-chunk: 0}
     oasis-trees: {enabled: true, spacing: 300, trunk-height: 7}
-    darkstone-islands: {enabled: true, spacing: 750, min-radius: 10, max-radius: 18, max-height: 14}
+    # Nested flat terraces, hard capped at 3 levels and 5 blocks between levels.
+    darkstone-islands: {enabled: true, spacing: 750, min-radius: 10, max-radius: 18, max-height: 14, max-plateaus: 3, plateau-interval: 5}
     ores: {min-y: -48, max-y: 48, vein-size: 5, COAL_ORE: 2, IRON_ORE: 2, COPPER_ORE: 1}
   giedi_prime:
     enabled: true

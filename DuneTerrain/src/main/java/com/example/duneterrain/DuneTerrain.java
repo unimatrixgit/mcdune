@@ -29,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import java.io.File;
 import java.util.*;
 
@@ -38,6 +39,35 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
     private NamespacedKey sietchLootIdKey;
     private final Map<UUID, PersonalLoot> openSietchLoot = new HashMap<>();
     private record PersonalLoot(Inventory inventory, String id) {}
+
+    public void announceSpiceBloom(Location location) {
+        org.bukkit.plugin.Plugin core = Bukkit.getPluginManager().getPlugin("DuneCore");
+        if (core == null || !core.isEnabled()) return;
+        try {
+            String id = "bloom:" + location.getWorld().getUID() + ":" + location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ();
+            core.getClass().getMethod("announceArrakisEvent", String.class, Location.class, String.class)
+                .invoke(core, "spicebloom", location, id);
+        } catch (ReflectiveOperationException ex) { getLogger().warning("Spice bloom announcement failed: " + ex.getMessage()); }
+    }
+
+    @EventHandler public void onBloomChunkLoad(ChunkLoadEvent event) {
+        if (!event.getWorld().getName().equalsIgnoreCase("arrakis")) return;
+        Chunk chunk = event.getChunk();
+        Bukkit.getScheduler().runTask(this, () -> inspectBlooms(chunk));
+    }
+
+    private void inspectBlooms(Chunk chunk) {
+        World world = chunk.getWorld();
+        if (!chunk.isLoaded()) return;
+        for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+            int wx = chunk.getX() * 16 + x, wz = chunk.getZ() * 16 + z;
+            int y = world.getHighestBlockYAt(wx, wz);
+            // The raised marker sits above a 3x3 magma patch; no neighbouring chunk access.
+            if (y > world.getMinHeight() && chunk.getBlock(x, y, z).getType() == Material.MAGMA_BLOCK
+                && chunk.getBlock(x, y - 1, z).getType() == Material.MAGMA_BLOCK)
+                announceSpiceBloom(new Location(world, wx, y, wz));
+        }
+    }
 
     @EventHandler public void onSpiceBlowProjectile(ProjectileHitEvent event) {
         if (!(event.getEntity() instanceof Arrow) && !(event.getEntity() instanceof Trident)) return;
@@ -116,7 +146,8 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             block.setType(Material.SUSPICIOUS_SAND, false);
             placed++;
         }
-        world.getPlayers().forEach(player -> player.sendMessage(ChatColor.GOLD + "A spice blow erupted on Arrakis! A rich field has surfaced nearby."));
+        announceSpiceBloom(center.getLocation());
+        for (org.bukkit.entity.Player player : world.getPlayers()) player.sendMessage(ChatColor.GOLD + "A spice blow erupted at X " + x + ", Y " + center.getY() + ", Z " + z + " on Arrakis! " + placed + " deposits surfaced.");
         getLogger().info("Spice blow at " + x + ", " + z + " deployed " + placed + " spice deposits (target value " + targetValue + " Solaris).");
     }
 
@@ -254,6 +285,9 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
     }
 
     @EventHandler public void onServerLoad(ServerLoadEvent event) {
+        World arrakis = Bukkit.getWorld("arrakis");
+        if (arrakis != null) for (Chunk chunk : arrakis.getLoadedChunks())
+            Bukkit.getScheduler().runTask(this, () -> inspectBlooms(chunk));
         String planet = getConfig().getString("server.planet", "arrakis").toLowerCase(Locale.ROOT);
         World world = Bukkit.getWorld(planet);
         if (world == null) {
@@ -422,7 +456,7 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
             int spacing = Math.max(128, plugin.getConfig().getInt(path + "spacing", 750));
             int minRadius = Math.max(6, plugin.getConfig().getInt(path + "min-radius", 10));
             int maxRadius = Math.max(minRadius, plugin.getConfig().getInt(path + "max-radius", 18));
-            int maxRise = Math.max(4, plugin.getConfig().getInt(path + "max-height", 14));
+            int maxRise = Math.max(1, plugin.getConfig().getInt(path + "max-height", 14));
             int baseHeight = plugin.getConfig().getInt("planets.arrakis.terrain.base-height", 70);
             double variation = plugin.getConfig().getDouble("planets.arrakis.terrain.height-variation", 11);
             double scale = Math.max(0.001, plugin.getConfig().getDouble("planets.arrakis.terrain.noise-scale", 0.02));
@@ -443,8 +477,9 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                             + Math.sin(sampleX * scale * 2.7 + sampleZ * scale * 1.45) * 0.35;
                         highestGround = Math.max(highestGround, baseHeight + (int)Math.round(noise * variation));
                     }
-                int plateauY = highestGround + maxRise;
-                double plateauRadius = radius * 0.58;
+                int plateauCount = RockPlateaus.count(seed, Math.min(maxRise, plugin.getConfig().getInt(path + "max-plateaus", 3)));
+                int interval = RockPlateaus.interval(plugin.getConfig().getInt(path + "plateau-interval", 5), maxRise, plateauCount);
+                int plateauY = highestGround + plateauCount * interval;
                 for (int lx = 0; lx < 16; lx++) for (int lz = 0; lz < 16; lz++) {
                     long gx = (long) worldMinX + lx, gz = (long) worldMinZ + lz;
                     long dx = gx - centerX, dz = gz - centerZ;
@@ -454,16 +489,18 @@ public final class DuneTerrain extends JavaPlugin implements Listener {
                     if (distance > edge) continue;
                     int baseY = heights[lx][lz];
                     if (plateauY + 2 >= maxY || baseY <= minY + 1) continue;
-                    boolean plateau = distance <= plateauRadius;
-                    double slope = Math.max(0.0, Math.min(1.0, (distance - plateauRadius) / Math.max(1.0, edge - plateauRadius)));
-                    int sideTop = plateau ? plateauY : plateauY - (int)Math.floor(slope * maxRise);
+                    int level = RockPlateaus.level(distance, radius, plateauCount);
+                    boolean plateau = level > 0;
+                    int terraceY = highestGround + level * interval;
+                    double slope = Math.max(0.0, Math.min(1.0, (edge - distance) / Math.max(1.0, edge - radius * 0.9)));
+                    int sideTop = highestGround + (int)Math.floor(slope * interval);
                     Material[] darkRock = {Material.BLACKSTONE, Material.BASALT, Material.POLISHED_BLACKSTONE};
                     if (plateau) {
-                        for (int y = baseY + 1; y < plateauY; y++) {
+                        for (int y = baseY + 1; y < terraceY; y++) {
                             int hashIndex = (int)Math.floorMod(mix64(rough + y * 0x9E3779B97F4A7C15L), darkRock.length);
                             data.setBlock(lx, y, lz, darkRock[hashIndex]);
                         }
-                        data.setBlock(lx, plateauY, lz, Material.SAND);
+                        data.setBlock(lx, terraceY, lz, Material.SAND);
                     } else {
                         int sideSurface = Math.max(baseY, sideTop);
                         for (int y = baseY; y <= sideSurface; y++) {

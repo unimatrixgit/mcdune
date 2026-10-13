@@ -67,6 +67,7 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
             new HelpEntry("/duneess admin teleport sietch", "Teleport yourself to a generated sietch.", Material.CHEST),
             new HelpEntry("/duneess admin teleport spiceblow", "Teleport yourself to a generated spice blow.", Material.MAGMA_BLOCK),
             new HelpEntry("/duneess admin spicebloom", "Place an untriggered bloom about 50 blocks ahead of you.", Material.GLOWSTONE),
+            new HelpEntry("/dune summon sandworm", "Admin: summon on Arrakis; optionally supply x y z.", Material.HUSK_SPAWN_EGG),
             new HelpEntry("/dune guireload", "Reload DuneCore's configurable Navigator menu.", Material.COMPARATOR)
         )
     );
@@ -514,6 +515,12 @@ public final class DuneEss extends JavaPlugin implements CommandExecutor, TabCom
         }
         if(center==null){sender.sendMessage(ChatColor.RED+"No clear sand patch was found 50 blocks ahead.");return;}
         int x=center.getX(),y=center.getY(),z=center.getZ();for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)world.getBlockAt(x+dx,y,z+dz).setType(Material.MAGMA_BLOCK,false);world.getBlockAt(x,y+1,z).setType(Material.MAGMA_BLOCK,false);
+        org.bukkit.plugin.Plugin core = Bukkit.getPluginManager().getPlugin("DuneCore");
+        if (core != null && core.isEnabled()) try {
+            Location bloom = new Location(world, x, y + 1, z);
+            core.getClass().getMethod("announceArrakisEvent", String.class, Location.class, String.class)
+                .invoke(core, "spicebloom", bloom, "bloom:" + world.getUID() + ":" + x + ":" + (y + 1) + ":" + z);
+        } catch (ReflectiveOperationException ex) { getLogger().warning("Spice bloom announcement failed: " + ex.getMessage()); }
         sender.sendMessage(ChatColor.GREEN+"Placed a spice bloom near "+x+", "+z+".");target.sendMessage(ChatColor.GOLD+"A spice bloom appeared about 50 blocks ahead.");
     }
 

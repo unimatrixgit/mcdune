@@ -64,6 +64,11 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     public String factionOf(Player player){return selected.getOrDefault(player.getUniqueId(),"");}
     public void persistPlayers(){savePlayers();}
     private ArrakisWater arrakisWater;
+    private ArrakisAnnouncements announcements;
+
+    public void announceArrakisEvent(String kind, Location location, String identity) {
+        if (announcements != null) announcements.announce(kind, location, identity);
+    }
 
     @Override public void onEnable() {
         migrateLegacyData();
@@ -99,6 +104,10 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         duneCommand.setExecutor(this);
         duneCommand.setTabCompleter(this);
         Bukkit.getPluginManager().registerEvents(this, this);
+        announcements = new ArrakisAnnouncements(this);
+        World loadedArrakis = Bukkit.getWorld("arrakis");
+        if (loadedArrakis != null) for (Entity entity : loadedArrakis.getEntities())
+            if (isWorm(entity)) announceArrakisEvent("sandworm", entity.getLocation(), "worm:" + entity.getUniqueId());
         Bukkit.getScheduler().runTaskTimer(this, this::spawnSandworms, 200L, 200L);
                 Bukkit.getScheduler().runTaskTimer(this, this::spawnSpiceRaiders, 200L, 200L);
         getLogger().info("DuneCore enabled. Gameplay, faction travel, Arrakis threats, and spice raiders ready.");
@@ -434,6 +443,10 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         try{ess.getClass().getMethod("factionArrival",Player.class,String.class).invoke(ess,p,planet);}catch(ReflectiveOperationException ex){getLogger().warning("Faction arrival failed: "+ex.getMessage());}
     }
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("summon")) {
+            summonSandworm(sender, args);
+            return true;
+        }
         if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
             if (sender instanceof Player player) Bukkit.dispatchCommand(player, "duneess help"); else sendHelp(sender);
             return true;
@@ -523,6 +536,7 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             helpLine(sender, "/dune guireload", "Reload the configurable Navigator menu.");
             helpLine(sender, "/dune guildnpc", "Spawn a Spacing Guild Navigator at your location.");
             helpLine(sender, "/dune givespice", "Give yourself one spice item.");
+            helpLine(sender, "/dune summon sandworm [x y z]", "Summon Shai-Hulud on Arrakis at your position or explicit coordinates.");
             helpLine(sender, "/duneess admin teleport arrakis [player]", "Teleport a player to the loaded Arrakis spawn.");
             helpLine(sender, "/duneess admin teleport sietch [player]", "Teleport a player to a generated Arrakis sietch.");
             helpLine(sender, "/duneess admin teleport spiceblow [player]", "Teleport a player to the nearest generated spice blow.");
@@ -546,11 +560,12 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
         if (args.length == 1) {
             List<String> commands = new ArrayList<>(List.of("help", "choose", "elytra", "kit", "politics", "trust", "water",
                 "menu", "gui", "menuitem", "exchange", "serverjobs", "job"));
-            if (sender.hasPermission("dune.admin")) commands.addAll(List.of("guireload", "guildnpc", "givespice"));
+            if (sender.hasPermission("dune.admin")) commands.addAll(List.of("guireload", "guildnpc", "givespice", "summon"));
             return matching(commands, args[0]);
         }
 
         if (root.equals("choose") && args.length == 2) return matching(Arrays.asList(factions), args[1]);
+        if (root.equals("summon") && args.length == 2 && sender.hasPermission("dune.admin")) return matching(List.of("sandworm"), args[1]);
         if ((root.equals("politics") || root.equals("trust")) && args.length == 2)
             return matching(List.of("status", "deposit", "vote", "emperorvote", "leader", "invasion", "defend", "steward", "houseofwater"), args[1]);
         if ((root.equals("politics") || root.equals("trust")) && args.length == 3) {
@@ -763,6 +778,9 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
     private boolean isWorm(Entity entity) {
         return entity.getPersistentDataContainer().has(wormKey, PersistentDataType.BYTE);
     }
+    @EventHandler public void onWormLoaded(com.destroystokyo.paper.event.entity.EntityAddToWorldEvent event) {
+        if (isWorm(event.getEntity())) announceArrakisEvent("sandworm", event.getEntity().getLocation(), "worm:" + event.getEntity().getUniqueId());
+    }
     private boolean isSpiceRaider(Entity entity) {
         return entity.getPersistentDataContainer().has(raiderKey, PersistentDataType.BYTE);
     }
@@ -852,6 +870,16 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
             Material surface = world.getBlockAt(x, y, z).getType();
             if (surface != Material.SAND && surface != Material.RED_SAND) continue;
             Location location = new Location(world, x + 0.5, y + 1, z + 0.5);
+            spawnSandworm(location, player);
+            long interval = Math.max(60L, getConfig().getLong("sandworms.spawn-interval-seconds", 3600L));
+            getConfig().set("sandworms.next-spawn-at", now + interval * 1000L);
+            saveConfig();
+            return;
+        }
+    }
+
+    private Husk spawnSandworm(Location location, Player target) {
+            World world = Objects.requireNonNull(location.getWorld());
             Husk worm = world.spawn(location, Husk.class, h -> {
                 h.getPersistentDataContainer().set(wormKey, PersistentDataType.BYTE, (byte)1);
                 h.setCustomName(ChatColor.GOLD + "Shai-Hulud | Sandworm"); h.setCustomNameVisible(true); h.setRemoveWhenFarAway(true); h.setAdult(); h.setCanPickupItems(false);
@@ -859,15 +887,42 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
                 h.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(getConfig().getDouble("sandworms.attack-damage", 8.0));
                 h.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(getConfig().getDouble("sandworms.movement-speed", 0.33));
                 h.getAttribute(Attribute.SCALE).setBaseValue(getConfig().getDouble("sandworms.scale", 3.5));
-                h.setTarget(player);
+                if (target != null) h.setTarget(target);
             });
             world.spawnParticle(Particle.CLOUD, location, 45, 2, 1, 2, 0.1);
             world.playSound(location, Sound.ENTITY_WARDEN_ROAR, 2f, 0.6f);
-            long interval = Math.max(60L, getConfig().getLong("sandworms.spawn-interval-seconds", 3600L));
-            getConfig().set("sandworms.next-spawn-at", now + interval * 1000L);
-            saveConfig();
-            return;
+            announceArrakisEvent("sandworm", location, "worm:" + worm.getUniqueId());
+            return worm;
+    }
+
+    private void summonSandworm(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("dune.admin")) { sender.sendMessage(ChatColor.RED + "You need dune.admin to summon Shai-Hulud."); return; }
+        if ((args.length != 2 && args.length != 5) || !args[1].equalsIgnoreCase("sandworm")) {
+            sender.sendMessage("Usage: /dune summon sandworm [x y z]"); return;
         }
+        World world = Bukkit.getWorld("arrakis");
+        if (world == null) { sender.sendMessage(ChatColor.RED + "Arrakis is not loaded on this server."); return; }
+        Location location;
+        if (args.length == 2) {
+            if (!(sender instanceof Player player) || !player.getWorld().equals(world)) {
+                sender.sendMessage("On Arrakis, omit coordinates to summon at your position; otherwise supply x y z."); return;
+            }
+            location = player.getLocation().clone();
+        } else {
+            try { location = new Location(world, Double.parseDouble(args[2]), Double.parseDouble(args[3]), Double.parseDouble(args[4])); }
+            catch (NumberFormatException ex) { sender.sendMessage(ChatColor.RED + "Coordinates must be numbers."); return; }
+        }
+        if (!Double.isFinite(location.getX()) || !Double.isFinite(location.getY()) || !Double.isFinite(location.getZ())
+            || location.getY() < world.getMinHeight() || location.getY() + 2 >= world.getMaxHeight()
+            || Math.abs(location.getX()) > 29999984 || Math.abs(location.getZ()) > 29999984
+            || !world.getWorldBorder().isInside(location)) {
+            sender.sendMessage(ChatColor.RED + "Coordinates must be inside Arrakis' world border and build height."); return;
+        }
+        if (!location.getBlock().isPassable() || !location.clone().add(0, 1, 0).getBlock().isPassable()) {
+            sender.sendMessage(ChatColor.RED + "Choose an open space for the sandworm."); return;
+        }
+        spawnSandworm(location, sender instanceof Player player && player.getWorld().equals(world) ? player : null);
+        sender.sendMessage(ChatColor.GREEN + "Shai-Hulud summoned at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ".");
     }
     @EventHandler public void onRaiderCombust(EntityCombustEvent e) {
         if (isSpiceRaider(e.getEntity())) e.setCancelled(true);
@@ -904,7 +959,8 @@ public final class DuneCore extends JavaPlugin implements Listener, CommandExecu
                 }
             }
         w.strikeLightningEffect(center);
-        Bukkit.broadcastMessage(ChatColor.GOLD + "Shai-Hulud has fallen! A spice bloom has appeared on Arrakis (" + placed + " deposits, up to " + (placed * price) + " Solaris at base yield).");
+        if (placed > 0) announceArrakisEvent("spicebloom", center, "worm-bloom:" + UUID.randomUUID());
+        for (Player player : w.getPlayers()) player.sendMessage(ChatColor.GOLD + "Shai-Hulud has fallen at X " + center.getBlockX() + ", Y " + center.getBlockY() + ", Z " + center.getBlockZ() + "! " + placed + " spice deposits surfaced, worth up to " + (placed * price) + " Solaris at base yield.");
     }
     @EventHandler public void onCombat(EntityDamageByEntityEvent e) {
         if (e.getDamager() instanceof Player p && selected.getOrDefault(p.getUniqueId(), "").equals("Harkonnen")) e.setDamage(e.getDamage() * 1.15);

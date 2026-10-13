@@ -2,6 +2,8 @@
 
 DuneTerrain is a standalone Paper plugin that generates one Dune planet world per server. It includes the five planet profiles, terrain and ore generation, Arrakis spice deposits and sietches, safe world spawn setup, and a protected Spacing Guild navigator.
 
+New darkstone formations now have up to three flat plateaus with at most five blocks between levels. With DuneCore installed, loaded spice blooms announce coordinates on Arrakis and start a fifteen-minute countdown to a network-wide Spacing Guild announcement. See [Session 2](../SESSION-2.md).
+
 ## Build and install
 
 Build the plugin from this directory with Java 21 and Gradle 8.14 or newer:
@@ -10,7 +12,7 @@ Build the plugin from this directory with Java 21 and Gradle 8.14 or newer:
 gradle clean build
 ```
 
-Copy `build/libs/DuneTerrain-1.0.4.jar` into the Paper server's `plugins/` directory. Set `server.planet` in `plugins/DuneTerrain/config.yml` separately on each backend, then restart.
+Copy `build/libs/DuneTerrain-1.0.5.jar` into the Paper server's `plugins/` directory. Set `server.planet` in `plugins/DuneTerrain/config.yml` separately on each backend, then restart.
 
 Valid values are `arrakis`, `giedi_prime`, `kaitain`, `caladan`, and `sigma_draconis_iv`. All five planet profiles are present in each server's config; change `server.planet` to select the world that backend creates. The generated world is named after the selected planet. Adjust its `planets.<planet>` settings for terrain, biome, surface, water, vegetation, ores, and spawn coordinates.
 
