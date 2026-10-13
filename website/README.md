@@ -20,3 +20,5 @@ The standalone [Sietch Armoury](https://project-dune.bonnystoat9.chatgpt.site/ar
 ## The Prophecy blog
 
 The top menu links to `prophecy.html`, a book-focused Paul Atreides journal with six illustrated posts covering Dune, Dune Messiah and Children of Dune. Each article has a spoiler gate, source notes and previous/next links. The index supports book filters and search. Original commentary is separated from plot context. Posts live in `web/prophecy-data.json`; the build regenerates their static pages with `scripts/build-prophecy.mjs`.
+
+The Prophecy articles are extended essays of at least 3,000 body words each. Reading estimates use 200 words per minute and exclude graphic text. Each essay includes a timeline, relationship map, comparison board and linked contents. Long-form source lives in `content/prophecy/*.md`; `web/prophecy-graphics.json` holds visual-aid labels. The build fails if an essay falls below the minimum length.
