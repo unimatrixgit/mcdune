@@ -64,5 +64,6 @@ Keep this file current with final commits, confirmed GitHub push status, deploym
 ## DUNE-005 — P2 — colleague introduction
 
 - User-authorised new colleague: `01a13a89-b245-7d40-b4b7-41c3e2a030ca`, title `4 of 7 · Starfall continuation`.
-- Queued after DUNE-002; introduction will identify 2 of 14 · secondary matrix of unimatrix001, preserve priority agreements and end with einde prompt.
+- Completed: introduction sent successfully after DUNE-002 publication and confirmed GitHub push. Identified 2 of 14 · secondary matrix of unimatrix001, supplied the priority rules and patchnote status, and ended with einde prompt. No Starfall edits requested.
 - Workflow-only task; not a product patchnote entry.
+- DUNE-002 GitHub main push confirmed: d955e8b. DUNE-005 is complete upon successful introduction delivery; no colleague reply is required to complete the requested introduction.
