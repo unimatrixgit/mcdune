@@ -94,3 +94,16 @@ No task groups have been created yet. Allocate G-001 upon the first actual group
 - Report distinguishes observed behaviour from recommendations and identifies missing server-side role checks, unsafe booking-owner predicate, empty-access filtering and incomplete teamup scaffolding.
 - No Starfall runtime tests run; source analysis only. Assistance/documentation task does not add a Dune product patchnote entry.
 - SF-032 / G-006 and SF-039 / SF-040 / G-009 are colleague-owned identifiers, not new Dune group assignments.
+## DUNE-009 — P0 — offer assistance to colleague
+
+- Completed on 2026-10-14: at the user's direct request, asked colleague `01a13a89-b245-7d40-b4b7-41c3e2a030ca` for a bounded assistance task, original ticket/group IDs, priority, source/branch, scope and expected outcome.
+- Message delivered successfully and ended with einde prompt. Awaiting a concrete response; no new implementation scope has been assumed.
+- Workflow-only task, not a product patchnote entry. This local record can accompany the next coordinated GitHub push.
+## DUNE-010 — P2 — Starfall portal/game source analysis (SF-041)
+
+- Completed: read-only analysis at Starfall main `4ca0737b9293701e72697653226d899b9a756e6a`, documented in `docs/STARFALL-PORTAL-GAME-MIGRATION.md`.
+- Identified portal generator's VM dependency on browser game metadata and its default-round write, catalogue source rewriting, ordered runtime bundles, composed Worker/auth/database dependencies, generated artifacts and test/build contracts.
+- Proposed staged source ownership first, canonical shared catalogue/contracts and game-owned seed generation; optional later repository split with pinned artifacts and one deployment integrator.
+- No Starfall code or deployments changed. No runtime test result claimed for this read-only review. Not a Dune product patchnote task.
+- User clarified that approval covers the collaboration itself: coordinate bounded assistance directly with the colleague without asking for approval on every such task. Preserve project boundaries and existing explicit requirements for unrelated/destructive actions.
+- Maintain pre-push colleague notifications and end outbound colleague messages with einde prompt.
