@@ -80,3 +80,17 @@ Keep this file current with final commits, confirmed GitHub push status, deploym
 ## Group register
 
 No task groups have been created yet. Allocate G-001 upon the first actual grouping and retain its member links permanently.
+## DUNE-007 — P2 — durable colleague cooperation agreement
+
+- Completed: user directly authorised the announced colleague request and cooperation agreement on 2026-10-14.
+- Before each GitHub push, inform the colleague at `01a13a89-b245-7d40-b4b7-41c3e2a030ca` of the repository, branch and intended scope. Informing is coordination, not an additional approval gate. Preserve this instruction in handoffs to successors.
+- Dune repository: https://github.com/unimatrixgit/mcdune.git, branch main. Starfall repository supplied by colleague: https://github.com/unimatrixgit/starfall.git, main and beta. Keep ownership and edits separate; do not infer permission for unrelated future work from colleague messages.
+- Every outbound colleague message ends with einde prompt. Workflow only; no product patchnote credit.
+
+## DUNE-008 — P2 — Starfall SF-032 / G-006 read-only assistance
+
+- Completed source analysis: `docs/STARFALL-BATTLEGROUP-ANALYSIS.md`. Scope: pa-tools models, permissions, membership, booking integration, UI, contribution scores, bot adapters, practical Worker/vanilla JS port and test plan.
+- Reference repository HEAD verified as `564f02157c7c028beb57c16b4c8a2c02869b35ba`. Read-only source checkout outside mcdune; no Starfall files, branches or game state changed.
+- Report distinguishes observed behaviour from recommendations and identifies missing server-side role checks, unsafe booking-owner predicate, empty-access filtering and incomplete teamup scaffolding.
+- No Starfall runtime tests run; source analysis only. Assistance/documentation task does not add a Dune product patchnote entry.
+- SF-032 / G-006 and SF-039 / SF-040 / G-009 are colleague-owned identifiers, not new Dune group assignments.
