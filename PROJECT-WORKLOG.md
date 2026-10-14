@@ -155,3 +155,10 @@ No task groups have been created yet. Allocate G-001 upon the first actual group
 - Colleague notified before branch publication. This agreement supersedes the earlier instruction to implement all Dune changes directly on main. Preserve in successor handoff.
 - DUNE-016 remains pending the Starfall colleague's confirmed beta base SHA; this independent branch setup did not edit Starfall files.
 - Documentation/branch coordination only: no runtime tests required or deployment performed. Exact beta commit and confirmed push are reported in chat/Git history.
+## DUNE-016 delivery — SF052 Starfall beta
+
+- Completed authorised four-file contribution, confirmed pushed to Starfall beta as `c4169b3d5697a1fdbec19c074537ba3d28ba52f9` from confirmed base `f0752b54f6313a06036b76126853fa0a712c0d91`. Fetch immediately before push confirmed no remote divergence.
+- Scope: worker/cache.js, scripts/asset-manifest.cjs and two new focused test files only. 241 tests pass. No Starfall main push, deployment/reset or colleague-owned file edits.
+- Cache now bounded by aggregate bytes and avoids stale inflight repopulation; public query/header guards and known-unrelated mutation handling tested. Conservative read-only manifest with explicit previous-release protection; no source assets deleted.
+- Complete collector hook and limitations in `docs/STARFALL-BETA-EFFICIENCY-HANDOFF.md`. Build wiring remains with colleague, so digest/pruning are not claimed active in production. 23 candidates / 1,268,514 raw bytes are measured potential only.
+- Earlier pending-base entry is superseded by this completed delivery. DUNE-017 branch setup also completed. This is Starfall assistance, not an extra Dune product patchnote task.
