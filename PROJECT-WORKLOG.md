@@ -107,3 +107,9 @@ No task groups have been created yet. Allocate G-001 upon the first actual group
 - No Starfall code or deployments changed. No runtime test result claimed for this read-only review. Not a Dune product patchnote task.
 - User clarified that approval covers the collaboration itself: coordinate bounded assistance directly with the colleague without asking for approval on every such task. Preserve project boundaries and existing explicit requirements for unrelated/destructive actions.
 - Maintain pre-push colleague notifications and end outbound colleague messages with einde prompt.
+## DUNE-011 — P2 — stronghold policy proposal (SF-046)
+
+- Completed read-only proposal in `docs/STARFALL-STRONGHOLD-POLICY.md`; reference source inspected with git show at Starfall `2577efe` without editing that checkout.
+- Compares exclusive claim and shared strongholds; recommends one galaxy owner while preserving residents' alliance membership. Covers atomic claims/slots, leader permissions, inactive claims, ownership/bonus UI, safe migration and protected 1:1 ghosts.
+- Existing conflicts require explicit resolution; no assets, memberships or gameplay rules changed. No runtime tests claimed. Not a Dune product patchnote task.
+- Colleague relayed SF-047 (P0): route these bounded policy exercises to this agent. Apply under the user's direct standing collaboration approval; retain in successor handoff. Return proposals to colleague; new gameplay policy still requires the user's decision before implementation.
