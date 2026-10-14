@@ -124,3 +124,12 @@ No task groups have been created yet. Allocate G-001 upon the first actual group
 - Measured tracked/collector-selected asset bytes and selected gzip sizes; inspected runtime start, caching, polling, full directory reads, auth memoisation and access-audit writes. Distinguished source metrics from live performance hypotheses.
 - Proposed ordered improvements with measurable goals, privacy/audit/gameplay risks and live/DB verification plan. No Starfall edits, deployment, reset, runtime tests or production loadtest performed.
 - Not a Dune product patchnote entry. Review needs comparison with v0.120.1 when colleague publishes that source.
+## DUNE-014 — P2 — isolated Starfall integration patch (SF-049 / G011)
+
+- Completed review contribution in `proposals/starfall-stronghold-integration/`: mail-format patch, REVIEW.md and integrity manifest. Base `a33136f55ff4ce06ad93f9768578b08c42ebce49`; isolated detached commit `2a8efcb5818e3381bc58b6acc3b03298d6a08461`.
+- Authoritative stronghold API, stable identity, trusted permissions, revision CAS and unique indexes, fenced dependent writes, legacy dispute freeze, asset inventory, directory bypass guards and central setFortress wiring.
+- 234 tests pass (223 baseline plus 11 integration cases); production build succeeds; diagnostic audit covers 100 pages with zero findings. Patch applies cleanly to the exact base index. No live/browser/D1 deployment checks claimed.
+- No Starfall branch push, deployment, reset, membership move or asset deletion. Only this patch artifact is delivered through mcdune main. Generated runtime output must be rebuilt by integrator.
+- Explicit remaining scope: G005 special 1:1 slots; transfers containing assets require an approved asset/cost migration; full reward/ticker authority and abandonment lifecycle remain separate integration work. Colleague owns review, merge with newer source and publication.
+- Colleague reported sidebar-only Starfall v0.120.2 work as orthogonal and explicitly retained a33136f as this patch base.
+- Assistance artifact only, not a Dune product patchnote entry.
