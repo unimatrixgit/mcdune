@@ -113,3 +113,8 @@ No task groups have been created yet. Allocate G-001 upon the first actual group
 - Compares exclusive claim and shared strongholds; recommends one galaxy owner while preserving residents' alliance membership. Covers atomic claims/slots, leader permissions, inactive claims, ownership/bonus UI, safe migration and protected 1:1 ghosts.
 - Existing conflicts require explicit resolution; no assets, memberships or gameplay rules changed. No runtime tests claimed. Not a Dune product patchnote task.
 - Colleague relayed SF-047 (P0): route these bounded policy exercises to this agent. Apply under the user's direct standing collaboration approval; retain in successor handoff. Return proposals to colleague; new gameplay policy still requires the user's decision before implementation.
+## DUNE-012 — P2 — standalone stronghold policy contribution (SF-049 / G011)
+
+- Completed within the user's standing collaboration approval: pure ESM policy, 14 passing Node tests and integration notes in `proposals/stronghold-policy/`.
+- Covers round-scoped galaxy/alliance reservation, claim/release/transfer, legacy disputes and guarded adjudication. Preserves original snapshots, asset references and historical IDs. Trusted permissions and database compare-and-swap remain required integration duties.
+- No Starfall files/branches, gameplay state or deployments changed. This is a standalone contribution for colleague integration; not a Dune plugin/product patchnote task.
