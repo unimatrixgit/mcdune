@@ -67,3 +67,16 @@ Keep this file current with final commits, confirmed GitHub push status, deploym
 - Completed: introduction sent successfully after DUNE-002 publication and confirmed GitHub push. Identified 2 of 14 · secondary matrix of unimatrix001, supplied the priority rules and patchnote status, and ended with einde prompt. No Starfall edits requested.
 - Workflow-only task; not a product patchnote entry.
 - DUNE-002 GitHub main push confirmed: d955e8b. DUNE-005 is complete upon successful introduction delivery; no colleague reply is required to complete the requested introduction.
+
+## DUNE-006 — P2 — group identifiers (confirmed 2026-10-14)
+
+- Completed: the user directly confirmed the grouping agreement relayed by the colleague as Starfall SF-036. This is a workflow task, not a product patchnote entry.
+- When grouping tasks, allocate a new, permanent G-ID (G-001, G-002, …). Preserve every original DUNE record and its permanent ID.
+- Record the group with `id` and `members`, for example `{"id":"G-001","members":["DUNE-xxx","DUNE-yyy"]}`. Record each member's group relationship alongside its original ticket. These example IDs are not actual assignments.
+- Derive group progress from member status: all completed means completed; some completed means partially completed; none completed means not completed. Preserve each member's individual status, including blockers or work in progress.
+- Reports may use the G-ID but must retain a lookup of all original IDs. Grouping never creates additional product tasks or increases the 5–10-task patchnote count.
+- Existing priority and receipt-order rules remain in force for member tasks; grouping does not itself change their priority or completion.
+
+## Group register
+
+No task groups have been created yet. Allocate G-001 upon the first actual grouping and retain its member links permanently.
