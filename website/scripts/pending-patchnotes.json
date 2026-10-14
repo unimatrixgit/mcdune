@@ -1,0 +1,8 @@
+{
+  "minimumTasks":5,
+  "maximumTasks":10,
+  "completed":[
+    {"id":"staff-page","promptIds":["DUNE-001"],"priority":"P2","completedAt":"2026-10-14","title":"Staff & Contributors page","changes":["Dedicated Dune-styled staff directory, private support links and site-wide footer navigation.","Clearly separate AI contribution plaque for 2 of 14, with a project medal and traceable contribution record. Human roster remains empty until public staff details are confirmed."],"checks":["25 existing website tests passed.","Local page links, artwork assets, support routes and AI-versus-staff labelling checked."]},
+    {"id":"patchnote-system","promptIds":["DUNE-002"],"priority":"P2","completedAt":"2026-10-14","title":"Traceable patchnote register","changes":["Public patchnote archive, pending feature queue and separate urgent bugfix treatment.","Source-driven release pages with permanent task IDs, a 5–10 product-task gate, unique versions and release-to-task traceability. Development patchnotes remain separate from live game news."],"checks":["Release policy boundary and data validation tests.","Website build and generated link checks."]}
+  ]
+}

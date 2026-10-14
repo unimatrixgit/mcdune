@@ -45,3 +45,8 @@ footer{background:linear-gradient(#122723ec,#0b1c19f5),url('assets/ornament.webp
 .kit-display.faction-atreides .kit-mannequin{background-position:0% center}.kit-display.faction-harkonnen .kit-mannequin{background-position:25% center}.kit-display.faction-corrino .kit-mannequin{background-position:50% center}.kit-display.faction-fremen .kit-mannequin{background-position:75% center}.kit-display.faction-ordos .kit-mannequin{background-position:100% center}
 
 .banner-menu a[href='armoury.html']{--realm-art:url('assets/faction-kit-mannequins.webp')}.banner-menu a[href='diplomacy.html']{--realm-art:url('assets/kaitain.webp')}.banner-menu a:last-child{grid-column:1/-1}
+
+.urgent-bugfix-news{padding:28px 6%;background:#352c23;border-top:3px solid #b9744c;border-bottom:3px solid #b9744c}.urgent-bugfix-news h2{font-size:43px}.urgent-bugfix-news>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.urgent-bugfix-news article{padding:23px;border:3px solid #bb8260;background:#1b3025;min-width:0}.urgent-bugfix-news img{width:50px;height:50px;float:right;margin:0 0 12px 12px}.urgent-bugfix-news h3{font-size:30px;color:#e0bd80}.urgent-bugfix-news p{font:11px/1.8 Manrope,Arial,sans-serif;color:#d2cbb0}.urgent-bugfix-news a{color:#edc88a;font-family:VT323,monospace}.urgent-bugfix-news article>a{font-size:22px}@media(max-width:850px){.urgent-bugfix-news>div{grid-template-columns:1fr}}
+
+footer>div{flex-wrap:wrap;gap:14px 22px}
+

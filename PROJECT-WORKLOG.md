@@ -19,7 +19,7 @@
 | --- | --- | --- | --- |
 | DUNE-003 | P0 | Persist and follow the priority rules, including the colleague discussion | Completed and pushed to main as `40efbff` |
 | DUNE-001 | P2 | Create a staff page if needed | Completed — staff.html deployed successfully; AI contributor plaque, support links and empty unconfirmed human roster |
-| DUNE-002 | P2 | Introduce a patchnote system; ask colleague how Starfall did it and include ticket ID | In progress — technical response received; next after staff delivery |
+| DUNE-002 | P2 | Introduce a patchnote system; ask colleague how Starfall did it and include ticket ID | Completed — published and tested; two completed product tasks await the normal 5–10-task release threshold |
 | DUNE-004 | P2 | End every colleague message with `einde prompt` | Completed — applied, communicated and recorded; every colleague message ends with einde prompt |
 
 P2 receipt order: DUNE-001, then DUNE-002. DUNE-003 was handled first after receipt. This workflow-only task is not a product release entry.
@@ -50,3 +50,19 @@ Keep this file current with final commits, confirmed GitHub push status, deploym
 - Staff HTML links/assets and separation from AI credit checked; 25 website tests pass. No browser-control tool is available in the current tool set, so visual browser QA was not performed.
 - Local packaging adapter updated to the installed Sites 1.0.2-remix-b.1 validator after its old 1.0.0 path disappeared.
 - GitHub push is the final source-delivery step for this ticket; see commit history for exact hash.
+
+## DUNE-002 delivery
+
+- Public archive: https://project-dune.bonnystoat9.chatgpt.site/patch-notes.html
+- Sites source commit: `8ed087eedf421d3ce8a298a8f68f8341339f82f0`.
+- Confirmed successful public deployment: `appgdep_6acf8144c27081918b08f7a17169c907` (2026-10-14).
+- Permanent task register, completed-product queue, validated 5–10-task batches, separate urgent bugfix reports, generated archive/release pages and news links implemented.
+- Two completed product tasks pending; no invented release or bugfix. Workflow agreements do not count toward product batches.
+- 32 website tests passed, including batch boundaries, duplicate IDs, urgent bugfix validation and repeated-generation checks. Build and internal links/assets across 26 pages passed. Browser visual QA unavailable in this tool set.
+- GitHub main commit/push is the final source-delivery step; exact hash is in Git history.
+
+## DUNE-005 — P2 — colleague introduction
+
+- User-authorised new colleague: `01a13a89-b245-7d40-b4b7-41c3e2a030ca`, title `4 of 7 · Starfall continuation`.
+- Queued after DUNE-002; introduction will identify 2 of 14 · secondary matrix of unimatrix001, preserve priority agreements and end with einde prompt.
+- Workflow-only task; not a product patchnote entry.

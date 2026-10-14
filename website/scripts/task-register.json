@@ -1,0 +1,10 @@
+{
+  "format": 1,
+  "priorityOrder": ["BUGFIX", "P0", "P1", "P2", "P3", "PARKEREN"],
+  "tasks": [
+    {"id":"DUNE-001","priority":"P2","receiptOrder":1,"title":"Staff & Contributors page","kind":"product","status":"done","completedAt":"2026-10-14","commit":"89acb00"},
+    {"id":"DUNE-002","priority":"P2","receiptOrder":2,"title":"Patchnote system and colleague consultation","kind":"product","status":"done","completedAt":"2026-10-14"},
+    {"id":"DUNE-003","priority":"P0","receiptOrder":3,"title":"Persist priority rules and apply them in colleague consultation","kind":"workflow","status":"done","completedAt":"2026-10-14","commit":"40efbff"},
+    {"id":"DUNE-004","priority":"P2","receiptOrder":4,"title":"End every colleague message with einde prompt","kind":"workflow","status":"done","completedAt":"2026-10-14","commit":"89acb00"}
+  ]
+}
