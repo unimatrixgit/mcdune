@@ -1,0 +1,18 @@
+{
+  "staff": [],
+  "contributor": {
+    "name": "2 of 14",
+    "designation": "secondary matrix of unimatrix001",
+    "kind": "AI development contributor",
+    "platform": "Codex",
+    "description": "Development assistance for Project Dune: plugin implementation, documentation, illustrated website features, private support tools and The Prophecy reading journal. Human project owners retain responsibility for deployment, staffing and game administration."
+  },
+  "contributions": [
+    {"title":"Community and private support", "description":"Independent forums, YouSMP community page, private profiles, ban appeals and staff-support tickets.", "commit":"79fd7a7"},
+    {"title":"Minecraft navigation", "description":"Separate page navigation, inventory-style buttons and distinct menu icon sets.", "commit":"edebada"},
+    {"title":"Dune world and faction artwork", "description":"Illustrated faction heraldry and planet cards, with lore and clear gameplay status.", "commit":"21551bd"},
+    {"title":"The Sietch Armoury", "description":"Five faction mannequins and a standalone reference covering all 68 illustrated item entries and armour abilities.", "commit":"7ce8ead"},
+    {"title":"Imperial Diplomacy integration", "description":"Read-only game-office snapshots through the opt-in DuneCore DiscordSRV bridge.", "commit":"7ce8ead"},
+    {"title":"The Prophecy long-form journal", "description":"Six 3,000-word essays about Paul Atreides, with spoiler gates, reference notes and 18 graphic aids.", "commit":"3b10264"}
+  ]
+}

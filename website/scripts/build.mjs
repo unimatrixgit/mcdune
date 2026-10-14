@@ -1,4 +1,5 @@
 import './build-prophecy.mjs';
+import './build-staff.mjs';
 import {readFileSync,writeFileSync,readdirSync,statSync,mkdirSync,existsSync,rmSync,cpSync} from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),web=path.join(root,'web'),dist=path.join(root,'dist');
 const assets={};const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.webp':'image/webp','.svg':'image/svg+xml'};
