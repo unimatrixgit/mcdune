@@ -118,3 +118,9 @@ No task groups have been created yet. Allocate G-001 upon the first actual group
 - Completed within the user's standing collaboration approval: pure ESM policy, 14 passing Node tests and integration notes in `proposals/stronghold-policy/`.
 - Covers round-scoped galaxy/alliance reservation, claim/release/transfer, legacy disputes and guarded adjudication. Preserves original snapshots, asset references and historical IDs. Trusted permissions and database compare-and-swap remain required integration duties.
 - No Starfall files/branches, gameplay state or deployments changed. This is a standalone contribution for colleague integration; not a Dune plugin/product patchnote task.
+## DUNE-013 — P2 — Starfall efficiency review (SF-052)
+
+- Completed read-only source review at main `2577efefb56aae14da63df725cdf180419563bd1`; announced v0.120.1 source had not yet been pushed when fetched. Report: `docs/STARFALL-EFFICIENCY-REVIEW.md`.
+- Measured tracked/collector-selected asset bytes and selected gzip sizes; inspected runtime start, caching, polling, full directory reads, auth memoisation and access-audit writes. Distinguished source metrics from live performance hypotheses.
+- Proposed ordered improvements with measurable goals, privacy/audit/gameplay risks and live/DB verification plan. No Starfall edits, deployment, reset, runtime tests or production loadtest performed.
+- Not a Dune product patchnote entry. Review needs comparison with v0.120.1 when colleague publishes that source.
