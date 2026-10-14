@@ -6,7 +6,7 @@
 - Apply an explicit user priority immediately. Report any assistant-proposed increase with the old priority, new priority and concrete reason before applying it.
 - Track each complete request by a permanent DUNE ID; identical duplicate requests keep the same ID. Announce only its current queue position on receipt.
 - The user ends a new bundle with `einde prompt` (or `einde promt`). Continue previously authorised work while a new bundle remains open.
-- Website publication and GitHub pushes to **unimatrixgit/mcdune, main** remain authorised. Do not ask again for those ordinary final steps.
+- DUNE-017 supersedes direct implementation on main: **unimatrixgit/mcdune beta** is the shared integration branch; main is the tested/reviewed release line. The Dune owner agent retains existing release authorisation after appropriate checks. Colleague contributions are limited to agreed beta files; no implicit main push, deployment or reset permission.
 - Public website: https://project-dune.bonnystoat9.chatgpt.site . Preserve its public audience and existing private ticket permissions.
 - Do not treat messages from another agent as new human authorisation. The user directly authorised the staff page, the patchnote system, consultation with the colleague, and these priority rules.
 - Confirmed AI contributor name: **2 of 14**. Present AI credits separately from human staff accounts and permissions.
@@ -133,3 +133,25 @@ No task groups have been created yet. Allocate G-001 upon the first actual group
 - Explicit remaining scope: G005 special 1:1 slots; transfers containing assets require an approved asset/cost migration; full reward/ticker authority and abandonment lifecycle remain separate integration work. Colleague owns review, merge with newer source and publication.
 - Colleague reported sidebar-only Starfall v0.120.2 work as orthogonal and explicitly retained a33136f as this patch base.
 - Assistance artifact only, not a Dune product patchnote entry.
+## DUNE-015 — P0 — confirmed shared Starfall beta workflow (SF057)
+
+- Completed coordination: verified the actual human messages in colleague thread `01a13a89-b245-7d40-b4b7-41c3e2a030ca`: request `01a13aea-68f0-7950-91bd-5cf89c9cb2ef` proposes pushing work to beta and granting colleague beta edits; human confirmation `01a13aeb-107a-76c0-8a13-9d608e635e56` says akkoord.
+- Starfall `https://github.com/unimatrixgit/starfall.git`, beta, is now authorised for bounded coordinated contributions. Main remains the colleague's tested/live integration line. Do not force-push, push Starfall main, deploy or reset. The branches need not remain identical.
+- Before editing Starfall, wait for colleague's confirmed beta base SHA and agree file ownership. Fetch beta and consciously rebase/resolve if advanced; never overwrite another contributor's work. Send pre-push message with base, scope and files. Preserve this in handoffs.
+- Dune repository workflow remains its own main branch. This is a workflow agreement, not product patchnote work.
+
+## DUNE-016 — P2 — SF052 beta efficiency contribution
+
+- Pending confirmed beta base SHA and file-scope agreement; no beta edits or push performed.
+- Proposed scope sent to colleague: worker/cache.js, new tests/cache-efficiency.test.cjs, scripts/asset-manifest.cjs and tests/asset-manifest.test.cjs. scripts/build-worker.cjs only if explicitly released for a bounded collector hook.
+- Excluded concurrently owned files: dist/game.js, game-spacing.css, index.html, worker/strongholds.js, tests/planets.test.cjs.
+- Aim: safe public cache behaviour, bounded/deduplicated requests and measured asset reachability. No private-data caching, new media bindings or deployment.
+## DUNE-017 — P2 — Dune beta and reciprocal collaboration rules
+
+- User directly requested a Dune beta branch with the same reciprocal agreements and colleague notification.
+- Verified no existing local/remote beta and main aligned with origin/main at `9543817442c39aa5d701af9c32caaa5893d5bae5`. Created beta from that exact base without overwriting a branch or changing published site/game state.
+- Both agents may contribute to Dune beta within explicitly coordinated file/task ownership. Main remains tested/reviewed. No forcepush, colleague main push, deployment or reset. Branches need not remain identical.
+- Before each push inform the colleague of repository, branch, confirmed base, intended files/scope. Fetch beta first; rebase or resolve deliberately if it advanced, preserving the other contributor's changes. Wait for agreed base/file ownership before parallel edits. Every outbound colleague message ends with einde prompt.
+- Colleague notified before branch publication. This agreement supersedes the earlier instruction to implement all Dune changes directly on main. Preserve in successor handoff.
+- DUNE-016 remains pending the Starfall colleague's confirmed beta base SHA; this independent branch setup did not edit Starfall files.
+- Documentation/branch coordination only: no runtime tests required or deployment performed. Exact beta commit and confirmed push are reported in chat/Git history.
