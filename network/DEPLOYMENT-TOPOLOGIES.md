@@ -1,5 +1,7 @@
 # DuneRealms Hetzner deployment topologies
 
+> Live status, 18 October 2026: [Velocity plus the saved Guild lobby](live-lobby/README.md) run together on the EU Minecraft VM. The website and CloudPanel run separately. The seven-VM arrangement below is an earlier proposed topology, not the deployed layout. The custom lobby and Navigator structure now exist on beta and are installed; planet backends still need their own provisioned hosts and configuration.
+
 ## Current layout: seven virtual machines
 - `dune-proxy-01`: Velocity, public Minecraft TCP 25565.
 - `dune-lobby-01`: Spacing Guild Paper (25571) **plus CloudPanel website** (80, 443, 8443).

@@ -1,5 +1,7 @@
 # Tonight's Hetzner deployment runbook
 
+> Historical plan, superseded for the live lobby on 18 October 2026. See [the verified live deployment](live-lobby/README.md): Velocity and Paper lobby share the EU Minecraft VM; CloudPanel and the website run on a separate host. Do not install CloudPanel or Pterodactyl over the live Minecraft VM. The saved Guild lobby is implemented and deployed from the beta branch. The five planet backends remain pending; the seven-VM layout below is a proposal, not existing infrastructure.
+
 ## Intended layout (7 VMs)
 | VM | Role | Port |
 |---|---|---|

@@ -21,6 +21,8 @@ jobs:
           node-version: '22'
       - name: Build the illustrated website and API
         run: node scripts/build.mjs
+      - name: Install website server dependencies
+        run: npm install --omit=dev --no-audit --no-fund
       - name: Test feeds and compiled pages
         run: node --test tests/*.test.mjs
       - name: Upload website build

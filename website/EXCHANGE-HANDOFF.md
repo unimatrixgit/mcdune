@@ -1,5 +1,9 @@
 # CHOAM Exchange — handoff notes (18 October 2026)
 
+## Later hosting update
+
+The website is now also published at https://dunerealms.com with valid HTTPS, Node on CloudPanel port 3000 and a connected MySQL database for accounts, forum discussions, profiles and support tickets. See [Node hosting](node/README.md). The website database is not the shared PostgreSQL game economy: real market offers still require that economy and its authenticated read-only bridge. The new [live Velocity/Guild lobby](../network/live-lobby/README.md) is installed and verified, including persistence across a service restart; DuneEss/DuneCore and the planet backends are not installed on that dedicated lobby. Earlier no-deployment statements below describe the original exchange coding stage.
+
 ## Completion update — supersedes the old pre-deployment checklist below
 
 - Website: 40 clearly labelled fictional offers, all five planets and six categories, working sidebar/select/tile filters, search (including category and planet names), sorting, pagination and retry. Demo offers never show a purchase command. A valid empty live market remains empty. Matching responsive CSS is implemented; mobile planet controls no longer inherit absolute navigation positioning. Planet artwork is in external CSS to comply with the production Content Security Policy.
