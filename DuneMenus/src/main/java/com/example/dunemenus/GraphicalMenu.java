@@ -2,7 +2,10 @@ package com.example.dunemenus;
 import org.bukkit.*;import org.bukkit.entity.Player;import org.bukkit.inventory.*;import org.bukkit.inventory.meta.ItemMeta;import org.bukkit.event.inventory.*;import net.kyori.adventure.key.Key;import net.kyori.adventure.text.Component;import net.kyori.adventure.text.format.NamedTextColor;import java.util.*;
 /** Server-owned graphical cards. Display items never enter player inventory. */
 final class GraphicalMenu {
- static final String RELEASE="Alpha 1.0.0.3";
+ static final String RELEASE="Alpha 1.0.0.4";
+ static final int[] DASHBOARD_SLOTS={10,12,14,16,28,30,32,34,40};
+ static boolean navigator(String title){String s=title.toLowerCase(Locale.ROOT);return s.contains("main menu")||s.contains("navigator");}
+ static boolean directNavigation(DuneMenus.Card card){String s=card.label().toLowerCase(Locale.ROOT);return card.action()!=null&&(s.contains("exchange")||s.contains("shop")||s.contains("bank")||s.contains("wallet")||s.contains("passport")||s.contains("faction")||s.contains("house")||s.contains("travel")||s.contains("contract")||s.contains("job")||s.contains("achievement")||s.contains("event")||s.contains("staff")||s.contains("ticket")||s.contains("war room")||s.contains("notification")||s.contains("menu"));}
  static final int[] CENTERS={10,13,16,28,31,34};
  static final Map<UUID,Screen> screens=new HashMap<>();
  static final class Screen implements InventoryHolder {
@@ -15,7 +18,7 @@ final class GraphicalMenu {
  static void forget(Player actor){screens.remove(actor.getUniqueId());}
  static void clear(){screens.clear();}
  static ItemStack icon(Material material,String label,String body){ItemStack item=new ItemStack(material);ItemMeta meta=item.getItemMeta();meta.setDisplayName(ChatColor.GOLD+label);List<String> lore=new ArrayList<>();for(String line:body.split("\n"))for(int at=0;at<Math.max(1,line.length());at+=42)lore.add(ChatColor.GRAY+line.substring(Math.min(at,line.length()),Math.min(at+42,line.length())));meta.setLore(lore);item.setItemMeta(meta);return item;}
- private static ItemStack card(DuneMenus.Card card,boolean navigation){ItemStack item=card.item();if(item==null)item=icon(Material.PAPER,card.label(),card.body());ItemMeta meta=item.getItemMeta();meta.setDisplayName(ChatColor.GOLD+card.label());List<String> lore=new ArrayList<>();for(String text:card.body().split("\n"))for(int at=0;at<Math.max(1,text.length());at+=42)lore.add(ChatColor.GRAY+text.substring(Math.min(at,text.length()),Math.min(at+42,text.length())));lore.add(ChatColor.YELLOW+"Click to review");meta.setLore(lore);
+ private static ItemStack card(DuneMenus.Card card,boolean navigation){ItemStack item=card.item();if(item==null)item=icon(Material.PAPER,card.label(),card.body());ItemMeta meta=item.getItemMeta();meta.setDisplayName(ChatColor.GOLD+card.label());List<String> lore=new ArrayList<>();for(String text:card.body().split("\n"))for(int at=0;at<Math.max(1,text.length());at+=42)lore.add(ChatColor.GRAY+text.substring(Math.min(at,text.length()),Math.min(at+42,text.length())));lore.add(ChatColor.YELLOW+(navigation&&directNavigation(card)?"Click to open":"Click to review"));meta.setLore(lore);
  if(navigation){String s=card.label().toLowerCase(Locale.ROOT);String model=s.contains("exchange")||s.contains("shop")?"gui_nav_shop":s.contains("contract")||s.contains("job")?"gui_nav_jobs":s.contains("staff")||s.contains("ticket")?"gui_nav_staff":s.contains("faction")||s.contains("clan")?"gui_nav_clan":null;if(model!=null){item=new ItemStack(Material.PAPER);meta=item.getItemMeta();meta.setDisplayName(ChatColor.GOLD+card.label());meta.setLore(lore);meta.setItemModel(new NamespacedKey("dunerealms",model));}}
  item.setItemMeta(meta);return item;}
  static Component title(Player actor){Component label=Component.text(RELEASE+" · Menu",NamedTextColor.GOLD).font(Key.key("minecraft:default"));return actor.hasResourcePack()?Component.text("\ue232\ue230\ue231\ue233",NamedTextColor.WHITE).font(Key.key("dunerealms:imperial_menus")).append(label):label;}
@@ -25,13 +28,16 @@ final class GraphicalMenu {
   screen.actions.clear();screen.inventory.clear();long revision=view.revision().incrementAndGet();
   ItemStack fill=icon(Material.BLACK_STAINED_GLASS_PANE," ","");for(int i=0;i<54;i++)screen.inventory.setItem(i,fill);
   screen.inventory.setItem(4,icon(Material.NETHER_STAR,view.title(),RELEASE+"\n"+MenuTheme.of(view.title()).name()));
-  if(detail<0){int pages=Math.max(1,(view.cards().size()+5)/6);if(page<0||page>=pages)return;boolean nav=view.title().toLowerCase(Locale.ROOT).contains("main menu")||view.title().toLowerCase(Locale.ROOT).contains("navigator");
-   for(int i=page*6;i<Math.min(page*6+6,view.cards().size());i++){int index=i,center=CENTERS[i-page*6];var card=view.cards().get(i);screen.inventory.setItem(center,card(card,nav));
-    for(int slot:region(center))screen.actions.put(slot,()->plugin.navigate(actor,view,"detail",index,revision));
+  if(detail<0){boolean nav=navigator(view.title());int perPage=nav?DASHBOARD_SLOTS.length:CENTERS.length;int pages=Math.max(1,(view.cards().size()+perPage-1)/perPage);if(page<0||page>=pages)return;
+   for(int i=page*perPage;i<Math.min((page+1)*perPage,view.cards().size());i++){
+    int index=i,position=i-page*perPage,center=nav?DASHBOARD_SLOTS[position]:CENTERS[position];
+    var entry=view.cards().get(i);screen.inventory.setItem(center,card(entry,nav));
+    if(nav){String op=directNavigation(entry)?"action":"detail";screen.actions.put(center,()->plugin.navigate(actor,view,op,index,revision));}
+    else for(int slot:region(center))screen.actions.put(slot,()->plugin.navigate(actor,view,"detail",index,revision));
    }
    if(nav){screen.inventory.setItem(0,icon(Material.CHISELED_SANDSTONE," ",""));screen.actions.put(0,()->plugin.navigate(actor,view,"ornament",0,revision));}
    if(page>0)button(screen,45,Material.ARROW,"Previous page","",()->show(plugin,actor,view,-1,page-1));
-   screen.inventory.setItem(48,icon(Material.MAP,"Page "+(page+1)+" / "+pages,"Click a card to review its action"));
+   screen.inventory.setItem(48,icon(Material.MAP,"Page "+(page+1)+" / "+pages,nav?"Select a service to open":"Click a card to review"));
    if(page+1<pages)button(screen,53,Material.ARROW,"Next page","",()->show(plugin,actor,view,-1,page+1));
   }else{
    if(detail>=view.cards().size())return;var card=view.cards().get(detail);screen.inventory.setItem(22,card(card,false));screen.inventory.setItem(13,icon(Material.WRITABLE_BOOK,card.label(),card.body()));
