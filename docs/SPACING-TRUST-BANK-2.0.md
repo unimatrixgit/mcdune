@@ -21,6 +21,13 @@ Use one authoritative transactional double-entry general ledger. Every posting b
 - Lending policy: bank liquidity/reserve rules and an explicit owner-controlled money creation policy. Default to **fully funded lending**: debit bank lending reserve and credit borrower; repayments restore reserve, interest transfers to bank earnings. No free balance creation. Credit facilities reserve committed funds.
 - No loan purchase with real money, no debt tied to real-world identities, no punitive debt traps, no negative real-world consequences. For young players: conservative limits, cooling-off, clear disclosures, no collection harassment, no real-money collateral.
 
+## Borrowing limits by institution
+- **Personal borrowers:** additional borrowing and refinancing are permitted subject to affordability and funded lending reserves. Refinancing can settle overdue installments and the one-time 40% late fee, then remove the in-game credit blacklist only once arrears have actually been paid. A new loan must never silently erase an outstanding debt or fee.
+- **Companies:** maximum **two active loans** per company, counted across corporate term loans and refinancing facilities. A refinancing replacement must atomically settle or close the replaced loan before the slot is released. Company directors cannot evade the cap using another authorized signer.
+- **Government:** **unlimited concurrent loan count** for the Imperial Treasury, Landsraad, the five official House treasuries and the Spacing Guild's official institutional treasury. This is not unlimited money: each loan requires documented authority, actual available bank funding, repayment terms, audited ledger entries and public monthly reporting. A newly elected officeholder inherits the institution's obligations and cannot move them into a personal account.
+- Company-owned Spacing Guild commercial subsidiaries remain subject to the **company** cap unless they are explicitly the official institutional treasury. Clan treasuries are not government accounts.
+- All credit restrictions, delinquency and automatic recovery rules remain applicable unless a separately approved, audited government borrowing policy explicitly provides otherwise.
+
 ## Risk, treasury and administration
 Bank capital/reserves, liquidity coverage, daily reconciliation, exposure by player/company, concentration limits, anti-wash trading, suspicious transfers, loan-loss provisioning, debt aging, write-offs and authorized audit. Support queues, disputed transactions, charge reversals (new compensating postings, never editing old entries), account freezes, dual approval for large adjustments, staff segregation of duties and immutable security logs.
 
