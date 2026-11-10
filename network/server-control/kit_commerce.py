@@ -7,6 +7,7 @@ from pathlib import Path
 from functools import lru_cache
 from decimal import Decimal
 from player_bank import identity
+from structured_communication import receipt_ogm
 
 TIERS = ('common', 'uncommon', 'rare', 'very_rare', 'legendary')
 KINDS = ('personal_sale', 'official_sale', 'faction_sale', 'server_sale')
@@ -256,7 +257,7 @@ def checkout(connect, key, payload, context=listing_context):
                     if not hmac.compare_digest(old['code_hash'],digest):
                         raise RuntimeError('Item-code key differs from the original receipt')
                     con.rollback()
-                    return {'ok':True,'alreadyPaid':True,'orderLineId':line,'code':code,'delivery':'redeem-code'}
+                    return {'ok':True,'alreadyPaid':True,'orderLineId':line,'structuredCommunication':receipt_ogm('kit',line),'code':code,'delivery':'redeem-code'}
                 authority=context(cur,buyer,listing)
                 if authority.get('buyer_uuid') != buyer or authority.get('commerce_kind') not in KINDS:
                     raise PermissionError('Current verified buyer and supported listing required')
@@ -300,7 +301,7 @@ def checkout(connect, key, payload, context=listing_context):
                 import uuid
                 cur.execute('INSERT INTO dune_staff_bank_ledger(id,player_uuid,action,delta,balance_after,created_at,reference) VALUES(%s,%s,%s,%s,%s,%s,%s)',(str(uuid.uuid4()),buyer,'kit-sale-tax',tax,treasury,stamp,'kit-sale:'+line))
             con.commit()
-            return {'ok':True,'alreadyPaid':False,'orderLineId':line,'code':code,'delivery':'redeem-code'}
+            return {'ok':True,'alreadyPaid':False,'orderLineId':line,'structuredCommunication':receipt_ogm('kit',line),'code':code,'delivery':'redeem-code'}
         except Exception:
             con.rollback();raise
 
