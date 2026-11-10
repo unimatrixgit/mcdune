@@ -11,8 +11,6 @@ Use one authoritative transactional double-entry general ledger. Every posting b
 ## Loans and credit products
 - Personal installment loans for approved gameplay purposes.
 - Corporate term loans and revolving credit facilities.
-- Settlement-property mortgages secured ONLY by in-game property with a documented voluntary foreclosure process.
-- Optional collateral-backed loans using verifiably owned in-game assets, held in escrow; never real-money purchases or personal data.
 - Application -> eligibility and affordability -> offer -> explicit acceptance -> approval -> disbursement -> repayment schedule -> closure.
 - Store principal, annual rate, term, fixed/variable rule, interest accrual basis, installment schedule, grace policy, fees, status, contract version and signatures. Money calculations use integer cents/decimal, with final-installment rounding correction.
 - Automated scheduled repayment with idempotent run key; early repayment, partial payments, rescheduling, missed payments, default and voluntary settlement. Never repeatedly charge on retry.
@@ -31,8 +29,8 @@ DuneHub and in-game interfaces share bank service. Exchange, Kit Exchange, Spaci
 2. Double-entry ledger, account registry, mandates, bank-to-bank payments, standing orders, OGM and statements.
 3. Treasury, taxes, settlement adapters, company/House accounts, monthly reports.
 4. Loan application and fully funded loan engine; repayment scheduler and risk rules.
-5. Credit lines, escrow, mortgages, investments, administrative review and comprehensive UI.
+5. Credit lines, escrow, investments, administrative review and comprehensive UI.
 6. Test concurrency, idempotency, crashes, rollbacks, reconciliation, zero-sum posting, permissions, loan rounding, overdue jobs, rate boundaries, cross-server race and recovery. No live deployment before verification.
 
 ## Explicit non-goals
-No real licensed banking, Belgian IBAN claims, real-world credit, real-money interest, financial investment promises, or unrestricted creation of Dunemarks.
+No mortgages, property-backed lending, property foreclosure, real licensed banking, Belgian IBAN claims, real-world credit, real-money interest, financial investment promises, or unrestricted creation of Dunemarks.
