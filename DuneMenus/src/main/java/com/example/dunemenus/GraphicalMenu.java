@@ -5,7 +5,7 @@ final class GraphicalMenu {
  static final String RELEASE="Alpha 1.0.0.4";
  static final int[] DASHBOARD_SLOTS={10,12,14,16,28,30,32,34,40};
  static boolean navigator(String title){String s=title.toLowerCase(Locale.ROOT);return s.contains("main menu")||s.contains("navigator");}
- static boolean directNavigation(DuneMenus.Card card){String s=card.label().toLowerCase(Locale.ROOT);return card.action()!=null&&(s.contains("exchange")||s.contains("shop")||s.contains("bank")||s.contains("wallet")||s.contains("passport")||s.contains("faction")||s.contains("house")||s.contains("travel")||s.contains("contract")||s.contains("job")||s.contains("achievement")||s.contains("event")||s.contains("staff")||s.contains("ticket")||s.contains("war room")||s.contains("notification")||s.contains("menu"));}
+ static boolean directNavigation(DuneMenus.Card card){String s=card.label().toLowerCase(Locale.ROOT);return card.action()!=null&&(s.equals("exchange")||s.equals("bank")||s.equals("passport")||s.equals("war room")||s.equals("achievements")||s.equals("notifications")||s.equals("events")||s.equals("staff console")||s.equals("my house")||s.equals("contracts")||s.equals("item exchange"));}
  static final int[] CENTERS={10,13,16,28,31,34};
  static final Map<UUID,Screen> screens=new HashMap<>();
  static final class Screen implements InventoryHolder {
