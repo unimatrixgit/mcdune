@@ -1,0 +1,43 @@
+name: DuneRealms Web CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'website/**'
+      - '.forgejo/workflows/web-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  web:
+    runs-on: dune-ci
+    steps:
+      - name: Checkout
+        shell: bash
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git init .
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$REPO_TOKEN" | base64 -w0)" fetch --depth=1 https://www.dunerealms.com/git/unimatrix/MC.git "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+
+      - name: Install Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build and test website
+        working-directory: website
+        run: |
+          corepack enable
+          corepack pnpm install --frozen-lockfile
+          corepack pnpm build
+          corepack pnpm test
+
+      - name: Upload website build
+        uses: actions/upload-artifact@v3
+        with:
+          name: DuneRealms-Website
+          path: website/dist/
+          if-no-files-found: error
