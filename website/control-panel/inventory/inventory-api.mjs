@@ -1,3 +1,4 @@
+import {exchangeSaleOgm} from './structured-communication.mjs';
 const uuidPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const reply=(value,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'private, no-store','Vary':'Cookie','X-Content-Type-Options':'nosniff'}});
 
@@ -48,7 +49,7 @@ export function createSalesHistoryHandler({authenticate,verifiedMinecraftUuid,po
       if(!uuid)return reply({status:'unlinked',sales:[],nextCursor:null});
       if(!uuidPattern.test(uuid))return reply({message:'The verified game link is invalid.'},503);
       const result=await pool.query({text:'SELECT id::text,listing_id::text,material,display_name,quantity,unit_price::text,total_price::text,origin,buyer_name,sold_at FROM dune_exchange_sales WHERE seller=$1 AND ($2::bigint IS NULL OR id<$2::bigint) ORDER BY id DESC LIMIT 21',values:[uuid,before],query_timeout:5000});
-      const sales=result.rows.slice(0,20);
+      const sales=result.rows.slice(0,20).map(row=>({...row,structuredCommunication:exchangeSaleOgm(row.id)}));
       return reply({status:'ready',sales,nextCursor:result.rows.length>20?sales.at(-1).id:null});
     } catch {
       logger.error?.('Account sales history unavailable.');
