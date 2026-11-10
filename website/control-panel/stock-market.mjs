@@ -3,7 +3,8 @@ export const FOUNDING_ISSUERS=Object.freeze([
  {ticker:'DRMG',name:'DuneRealms Mother Group',kind:'holding'},
  {ticker:'DRML',name:'DuneRealms Mail',kind:'mail'},
  {ticker:'DRTV',name:'DuneRealms Travel',kind:'travel'},
- {ticker:'DRBK',name:'Spacing Trust Bank',kind:'bank'}
+ {ticker:'DRBK',name:'Spacing Trust Bank',kind:'bank'},
+ {ticker:'DRSG',name:'Spacing Guild',kind:'transport'}
 ]);
 
 export function marketCapitalization(priceCents,issuedShares) {
