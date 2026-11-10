@@ -1,0 +1,38 @@
+# Spacing Trust Bank 2.0 — complete fictional banking scope
+
+Status: design and engineering acceptance criteria, NOT a live service. All currency, credit, rates, and contracts are fictional in-game Dunemarks (DM); no real-money deposits, withdrawals, cash-out, real-world credit reporting or debt enforcement.
+
+## Accounts and customer services
+Personal current and savings, joint, company, clan, five House, Landsraad, Imperial and Spacing Guild accounts. Unique fictional IBAN-style numbers with MOD-97 and reserved 979 official prefix. Account lifecycle: open, approve, activate, freeze, unfreeze, close and archive. Co-owner invitations and scoped revocable mandates (view, deposit, pay, manage, approve) with limits, expiry, maker-checker for sensitive transactions and role transitions on elections. Beneficiaries, payment requests, standing orders, recurring payments, direct-debit mandates with revocation, escrow, scheduled transfers, batch payroll, searchable statements, OGM and free references, receipts, exports and dispute handling.
+
+## Core banking ledger
+Use one authoritative transactional double-entry general ledger. Every posting balances to zero, is immutable, has idempotency key and source event, account epoch, currency, timestamps and authorized actor. Never silently mint DM through a secondary plugin or website. Separate available and reserved funds; prevent double spending, enforce nonnegative ordinary accounts, explicit overdraft limits, transaction locks and concurrent-request fencing. Track all income and expenses, including fictional 21% Imperial VAT on eligible commerce, without taxing own-account transfers. Preserve historical ledgers through prelaunch reset; archive old epoch and reconcile opening balances.
+
+## Loans and credit products
+- Personal installment loans for approved gameplay purposes.
+- Corporate term loans and revolving credit facilities.
+- Settlement-property mortgages secured ONLY by in-game property with a documented voluntary foreclosure process.
+- Optional collateral-backed loans using verifiably owned in-game assets, held in escrow; never real-money purchases or personal data.
+- Application -> eligibility and affordability -> offer -> explicit acceptance -> approval -> disbursement -> repayment schedule -> closure.
+- Store principal, annual rate, term, fixed/variable rule, interest accrual basis, installment schedule, grace policy, fees, status, contract version and signatures. Money calculations use integer cents/decimal, with final-installment rounding correction.
+- Automated scheduled repayment with idempotent run key; early repayment, partial payments, rescheduling, missed payments, default and voluntary settlement. Never repeatedly charge on retry.
+- Separate principal, interest, accrued interest, write-offs and recoveries in the general ledger. Display effective total fictional cost before acceptance.
+- Lending policy: bank liquidity/reserve rules and an explicit owner-controlled money creation policy. Default to **fully funded lending**: debit bank lending reserve and credit borrower; repayments restore reserve, interest transfers to bank earnings. No free balance creation. Credit facilities reserve committed funds.
+- No loan purchase with real money, no debt tied to real-world identities, no punitive debt traps, no negative real-world consequences. For young players: conservative limits, cooling-off, clear disclosures, no collection harassment, no real-money collateral.
+
+## Risk, treasury and administration
+Bank capital/reserves, liquidity coverage, daily reconciliation, exposure by player/company, concentration limits, anti-wash trading, suspicious transfers, loan-loss provisioning, debt aging, write-offs and authorized audit. Support queues, disputed transactions, charge reversals (new compensating postings, never editing old entries), account freezes, dual approval for large adjustments, staff segregation of duties and immutable security logs.
+
+## Investments and integration
+DuneHub and in-game interfaces share bank service. Exchange, Kit Exchange, Spacing Guild shares, DRX20, company registry, contracts, imperial taxation, House treasuries and monthly public statements use the same authoritative ledger. Company dividends and share purchases are debits from real funded accounts. Company loans cannot directly buy issuer's own shares or create wash trades. All settlement references carry OGM plus separate unique transaction ID.
+
+## Delivery sequence and tests
+1. Verify live schema, back up and perform authorized prelaunch reset and IBAN migration in staging first.
+2. Double-entry ledger, account registry, mandates, bank-to-bank payments, standing orders, OGM and statements.
+3. Treasury, taxes, settlement adapters, company/House accounts, monthly reports.
+4. Loan application and fully funded loan engine; repayment scheduler and risk rules.
+5. Credit lines, escrow, mortgages, investments, administrative review and comprehensive UI.
+6. Test concurrency, idempotency, crashes, rollbacks, reconciliation, zero-sum posting, permissions, loan rounding, overdue jobs, rate boundaries, cross-server race and recovery. No live deployment before verification.
+
+## Explicit non-goals
+No real licensed banking, Belgian IBAN claims, real-world credit, real-money interest, financial investment promises, or unrestricted creation of Dunemarks.
