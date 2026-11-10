@@ -439,7 +439,7 @@ def read_orders(connect, key, player):
             orders=[]
             for row in cur.fetchall():
                 item=json.loads(row['snapshot_json'])
-                entry={'orderLineId':row['id'],'side':'purchase' if row['buyer_uuid']==player else 'sale',
+                entry={'orderLineId':row['id'],'structuredCommunication':receipt_ogm('kit',row['id']),'side':'purchase' if row['buyer_uuid']==player else 'sale',
                     'name':item['name'],'quality':row['rarity'],'shopType':row['shop_type'],'commerceKind':row['commerce_kind'],
                     'grossDunemarks':format(Decimal(row['gross_cents'])/100,'.2f'),
                     'serverTaxDunemarks':format(Decimal(row['server_tax_cents'])/100,'.2f'),
