@@ -106,3 +106,12 @@
 4. Funded loans, arrears, 40% fee, blacklist, automatic collection and refinancing work.
 5. Bank reserves, monthly close and company bank accounts work.
 6. Insolvency, rescue and DRX exchange launch only after bank foundation passes staging tests.
+
+## Deployment usability requirement — minimal commands
+- [ ] Provide a single documented operator entry point (for example `./bankctl install`) that validates prerequisites, fetches or builds version-pinned artifacts, checks Central API reachability, creates verified backups, applies **non-destructive** migrations and restarts affected services in dependency order.
+- [ ] Provide `./bankctl status` for a concise PASS/FAIL report including API, database, Minecraft plugin, DuneHub integration and ledger reconciliation.
+- [ ] Provide `./bankctl rollback` with explicit safeguards and backup verification; do not pretend a database rollback is safe if new transactions have occurred.
+- [ ] Support unattended, repeatable installation after initial setup with safe defaults; no editing Java, hand-running Gradle or pasting SQL in the normal path.
+- [ ] Never run the prelaunch economy wipe as a side effect of install/update. Require a separate destructive command, preview, verified backup and explicit confirmation when the operator is ready and able to review it.
+- [ ] Write full logs to a timestamped file and print a short human-readable summary with actionable errors.
+- [ ] Verify the one-command workflow in staging before claiming it works in production.
