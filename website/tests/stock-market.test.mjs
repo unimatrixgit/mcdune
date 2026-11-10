@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FOUNDING_ISSUERS,drx20Level,marketCapitalization,validateIssuerDraft} from '../control-panel/stock-market.mjs';
 
-test('four founding official company templates',()=>{
- assert.deepEqual(FOUNDING_ISSUERS.map(i=>i.ticker),['DRMG','DRML','DRTV','DRBK']);
+test('five founding official company templates',()=>{
+ assert.deepEqual(FOUNDING_ISSUERS.map(i=>i.ticker),['DRMG','DRML','DRTV','DRBK','DRSG']);
 });
 test('market cap and index calculations do not change Dunemarks balances',()=>{
  assert.equal(marketCapitalization(1250,200),250000n);
