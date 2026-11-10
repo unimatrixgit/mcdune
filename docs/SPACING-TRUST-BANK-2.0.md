@@ -3,7 +3,7 @@
 Status: design and engineering acceptance criteria, NOT a live service. All currency, credit, rates, and contracts are fictional in-game Dunemarks (DM); no real-money deposits, withdrawals, cash-out, real-world credit reporting or debt enforcement.
 
 ## Accounts and customer services
-Personal current and savings, joint, company, clan, five House, Landsraad, Imperial and Spacing Guild accounts. Unique fictional IBAN-style numbers with MOD-97 and reserved 979 official prefix. Account lifecycle: open, approve, activate, freeze, unfreeze, close and archive. Co-owner invitations and scoped revocable mandates (view, deposit, pay, manage, approve) with limits, expiry, maker-checker for sensitive transactions and role transitions on elections. Beneficiaries, payment requests, standing orders, recurring payments, direct-debit mandates with revocation, escrow, scheduled transfers, batch payroll, searchable statements, OGM and free references, receipts, exports and dispute handling.
+Personal current and savings, joint, company, clan, five House, Landsraad, Imperial and Spacing Guild accounts. Unique fictional IBAN-style numbers with MOD-97 and reserved 979 official prefix. Account lifecycle: open, approve, activate, freeze, unfreeze, close and archive. Co-owner invitations and scoped revocable mandates (view, deposit, pay, manage, approve) with limits, expiry, maker-checker for sensitive transactions and role transitions on elections. Saved beneficiaries, payment requests, escrow, one-off transfers, batch payroll, searchable statements, OGM and free references, receipts and exports. Require two-person authorization for configurable high-value joint, company and institutional payments. No bank cards, direct debits, standing orders, recurring payment schedules or customer-service module.
 
 ## Core banking ledger
 Use one authoritative transactional double-entry general ledger. Every posting balances to zero, is immutable, has idempotency key and source event, account epoch, currency, timestamps and authorized actor. Never silently mint DM through a secondary plugin or website. Separate available and reserved funds; prevent double spending, enforce nonnegative ordinary accounts except authorized loan-repayment overdrafts, explicit overdraft limits, transaction locks and concurrent-request fencing. Track all income and expenses, including fictional 21% Imperial VAT on eligible commerce, without taxing own-account transfers. Preserve historical ledgers through prelaunch reset; archive old epoch and reconcile opening balances.
@@ -29,7 +29,7 @@ Use one authoritative transactional double-entry general ledger. Every posting b
 - All credit restrictions, delinquency and automatic recovery rules remain applicable unless a separately approved, audited government borrowing policy explicitly provides otherwise.
 
 ## Risk, treasury and administration
-Bank capital/reserves, liquidity coverage, daily reconciliation, exposure by player/company, concentration limits, anti-wash trading, suspicious transfers, loan-loss provisioning, debt aging, write-offs and authorized audit. Support queues, disputed transactions, charge reversals (new compensating postings, never editing old entries), account freezes, dual approval for large adjustments, staff segregation of duties and immutable security logs.
+Bank capital/reserves, liquidity coverage, daily reconciliation, exposure by player/company, concentration limits, loan-loss provisioning, debt aging, write-offs and authorized audit. Retain transactional authorization, idempotency and duplicate-payment protection as core integrity controls; do not add a standalone fraud-monitoring product. Administrative correction of erroneous postings (new compensating postings, never editing old entries), account freezes, dual approval for large adjustments, staff segregation of duties and immutable security logs. No customer-service portal or separate fraud-monitoring system.
 
 ## Investments and integration
 DuneHub and in-game interfaces share bank service. Exchange, Kit Exchange, Spacing Guild shares, DRX20, company registry, contracts, imperial taxation, House treasuries and monthly public statements use the same authoritative ledger. Company dividends and share purchases are debits from real funded accounts. Company loans cannot directly buy issuer's own shares or create wash trades. All settlement references carry OGM plus separate unique transaction ID.
@@ -38,9 +38,12 @@ DuneHub and in-game interfaces share bank service. Exchange, Kit Exchange, Spaci
 1. Verify live schema, back up and perform authorized prelaunch reset and IBAN migration in staging first.
 2. Double-entry ledger, account registry, mandates, bank-to-bank payments, standing orders, OGM and statements.
 3. Treasury, taxes, settlement adapters, company/House accounts, monthly reports.
-4. Loan application and fully funded loan engine; repayment scheduler and risk rules.
-5. Credit lines, escrow, investments, administrative review and comprehensive UI.
-6. Test concurrency, idempotency, crashes, rollbacks, reconciliation, zero-sum posting, permissions, loan rounding, overdue jobs, rate boundaries, cross-server race and recovery. No live deployment before verification.
+4. Loan application and fully funded loan engine; repayment scheduler, in-game credit score based on repayment history, restructuring/consolidation and risk rules.
+5. Credit lines, escrow, investments, saved beneficiaries, two-person payment approvals, bank reserves and comprehensive UI.
+6. Automated daily reconciliation and monthly close: account statements, loan arrears, fictional Imperial VAT, public company/institutional bookkeeping and bank balance sheet. Add an in-world Spacing Guild Banking Authority for published oversight and auditable bank policy decisions, not real-world regulatory status.\n7. Test concurrency, idempotency, crashes, rollbacks, reconciliation, zero-sum posting, permissions, loan rounding, overdue jobs, rate boundaries, cross-server race and recovery. No live deployment before verification.
 
 ## Explicit non-goals
 No mortgages, property-backed lending, property foreclosure, real licensed banking, Belgian IBAN claims, real-world credit, real-money interest, financial investment promises, or unrestricted creation of Dunemarks.
+
+## Confirmed scope exclusions (owner decision)
+Do not implement bank cards, fraud-monitoring dashboards, direct debits, standing orders/recurring scheduled transfers, or a customer-service/ticket module. Security authorization, reconciliation, immutable auditing, idempotency, and transactional controls remain mandatory engineering safeguards. Monthly closing and loan repayment automation remain in scope; these are not user-created standing orders.
