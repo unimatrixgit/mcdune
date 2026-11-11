@@ -26,7 +26,7 @@ export function updatePortalNavigation(html){
  return updated.replace('</head>',SHARED_HEAD+'</head>');
 }
 export function pageContextFor(value,links=PORTAL_LINKS){
- const url=new URL(value),host=url.hostname;if(url.pathname==='/kits.html')return {label:'Kit Exchange',icon:'items/office_water.png'};if(url.pathname==='/shop.html')return {label:'Shop',icon:'nav-shop-v1.webp'}; if(host==='wiki.dunerealms.com')return {label:'Manual/wiki',icon:'nav-manual-full-v2.webp'};
+ const url=new URL(value),host=url.hostname;if(url.pathname==='/kits.html')return {label:'Kit Exchange',icon:'items/office_water.png'};if(url.pathname==='/shop.html')return {label:'Shop',icon:'nav-exchange-v2.webp'}; if(host==='wiki.dunerealms.com')return {label:'Manual/wiki',icon:'nav-manual-full-v2.webp'};
  if(url.pathname.startsWith('/git/'))return {label:'DuneGit',icon:'nav-manual-full-v2.webp'};
  if(url.pathname.startsWith('/news/'))return {label:'News dispatch',icon:'nav-discord-full-v2.webp'};
  if(url.pathname==='/news-archive.html')return {label:url.searchParams.has('post')?'News dispatch':'News archive',icon:'nav-discord-full-v2.webp'};
