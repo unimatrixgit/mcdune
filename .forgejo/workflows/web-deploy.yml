@@ -41,3 +41,26 @@ jobs:
           name: DuneRealms-Website
           path: website/dist/
           if-no-files-found: error
+      - name: Trigger deployment after successful CI
+        env:
+          DEPLOY_KEY: ${{ secrets.DUNEREALMS_DEPLOY_KEY }}
+        shell: bash
+        run: |
+          test -n "$DEPLOY_KEY"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 22 162.55.87.104 >> ~/.ssh/known_hosts
+          ssh -p 22 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes dunedeploy@162.55.87.104 "$GITHUB_SHA"
+
+      - name: Trigger deployment after successful CI
+        shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.DUNEREALMS_DEPLOY_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 22 162.55.87.104 >> ~/.ssh/known_hosts
+          ssh -p 22 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes dunedeploy@162.55.87.104 "$GITHUB_SHA"
+          rm -f ~/.ssh/deploy_key
