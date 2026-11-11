@@ -1,0 +1,38 @@
+{
+  "alpha-tester": {
+    "src": "/assets/seals/alpha-tester.png",
+    "footer150": "/assets/seals/alpha-tester-150.png",
+    "original": "website\\artwork\\community-seals\\alpha-tester-master.png",
+    "authority": false
+  },
+  "beta-tester": {
+    "src": "/assets/seals/beta-tester.png",
+    "footer150": "/assets/seals/beta-tester-150.png",
+    "original": "website\\artwork\\community-seals\\beta-tester-master.png",
+    "authority": false
+  },
+  "launch-contributor": {
+    "src": "/assets/seals/launch-contributor.png",
+    "footer150": "/assets/seals/launch-contributor-150.png",
+    "original": "website\\artwork\\community-seals\\launch-contributor-master.png",
+    "authority": false
+  },
+  "dedicated-tester": {
+    "src": "/assets/seals/dedicated-tester.png",
+    "footer150": "/assets/seals/dedicated-tester-150.png",
+    "original": "website\\artwork\\community-seals\\dedicated-tester-master.png",
+    "authority": false
+  },
+  "season-tavren-ii": {
+    "src": "/assets/seals/season-tavren-ii.png",
+    "footer150": "/assets/seals/season-tavren-ii-150.png",
+    "original": "website\\artwork\\community-seals\\season-tavren-ii-master.png",
+    "authority": false
+  },
+  "dunegit-owner": {
+    "src": "/assets/seals/dunegit-owner.png",
+    "footer150": "/assets/seals/dunegit-owner-150.png",
+    "original": "website/artwork/community-seals/dunegit-owner-master.png",
+    "authority": false
+  }
+}

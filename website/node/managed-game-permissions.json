@@ -1,0 +1,746 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "node": "coreprotect.inspect",
+      "label": "Native block-history inspect",
+      "source": "CoreProtect native check",
+      "highRisk": false
+    },
+    {
+      "node": "coreprotect.lookup",
+      "label": "Native block-history lookup",
+      "source": "CoreProtect native check",
+      "highRisk": false
+    },
+    {
+      "node": "coreprotect.restore",
+      "label": "Native block restore",
+      "source": "CoreProtect native check",
+      "highRisk": true
+    },
+    {
+      "node": "coreprotect.rollback",
+      "label": "Native block rollback",
+      "source": "CoreProtect native check",
+      "highRisk": true
+    },
+    {
+      "node": "dune.admin",
+      "label": "Gameplay/economy administrator",
+      "source": "Core, Ess, NPC code; broad financial/item administration",
+      "highRisk": true
+    },
+    {
+      "node": "dune.ban.global",
+      "label": "Network-wide ban",
+      "source": "DuneBan scoped command/API",
+      "highRisk": true
+    },
+    {
+      "node": "dune.ban.local",
+      "label": "Local server ban",
+      "source": "DuneBan scoped command/API",
+      "highRisk": false
+    },
+    {
+      "node": "dune.ban.protected",
+      "label": "Protected from scoped bans",
+      "source": "DuneBan guard",
+      "highRisk": true
+    },
+    {
+      "node": "dune.clans.view",
+      "label": "Clan bank/shop/kit GUI",
+      "source": "DuneClans; live clan role checks apply",
+      "highRisk": false
+    },
+    {
+      "node": "dune.moderation.ban",
+      "label": "Moderation GUI ban tools",
+      "source": "Core ModerationGui",
+      "highRisk": false
+    },
+    {
+      "node": "dune.moderation.protected",
+      "label": "Protected from GUI bans",
+      "source": "Core ModerationGui",
+      "highRisk": true
+    },
+    {
+      "node": "dune.moderation.unban",
+      "label": "Moderation GUI unban tools",
+      "source": "Core ModerationGui",
+      "highRisk": false
+    },
+    {
+      "node": "dune.quests.admin",
+      "label": "Quest administration/status",
+      "source": "DuneQuests; CP engine edit separately authorized",
+      "highRisk": true
+    },
+    {
+      "node": "dune.quests.view",
+      "label": "Own discovered quests",
+      "source": "DuneQuests",
+      "highRisk": false
+    },
+    {
+      "node": "dune.tickets.staff",
+      "label": "Support-team ticket GUI",
+      "source": "Core staff-ticket GUI; fresh website department filtering still applies",
+      "highRisk": false
+    },
+    {
+      "node": "dune.tickets.view",
+      "label": "Own support tickets",
+      "source": "Core own-ticket GUI",
+      "highRisk": false
+    },
+    {
+      "node": "dune.unban.global",
+      "label": "Network-wide exact ban removal",
+      "source": "DuneBan scoped command/API",
+      "highRisk": true
+    },
+    {
+      "node": "dune.unban.local",
+      "label": "Local exact ban removal",
+      "source": "DuneBan scoped command/API",
+      "highRisk": false
+    },
+    {
+      "node": "dunebank.staff.deposit",
+      "label": "Deposit staff treasury",
+      "source": "DuneBank plus fresh website SQL authorization",
+      "highRisk": false
+    },
+    {
+      "node": "dunebank.staff.manage",
+      "label": "Withdraw/manage staff treasury",
+      "source": "DuneBank plus fresh website SQL authorization",
+      "highRisk": true
+    },
+    {
+      "node": "dunebank.staff.view",
+      "label": "Read staff treasury",
+      "source": "DuneBank plus fresh website SQL authorization",
+      "highRisk": false
+    },
+    {
+      "node": "dunebank.use",
+      "label": "Personal bank",
+      "source": "DuneBank plus fresh website SQL authorization",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.basics",
+      "label": "Homes/spawn/player travel",
+      "source": "DuneEss EssentialsBasics",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.chat.colors",
+      "label": "Chat colors",
+      "source": "DuneEss NetworkChat",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.chat.faction",
+      "label": "Faction chat",
+      "source": "DuneEss NetworkChat; faction checked independently",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.chat.format",
+      "label": "Chat decorations",
+      "source": "DuneEss NetworkChat",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.chat.imperial",
+      "label": "Imperial chat",
+      "source": "DuneEss NetworkChat",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.chat.nearby",
+      "label": "Nearby chat",
+      "source": "DuneEss NetworkChat",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.chat.network",
+      "label": "Network chat",
+      "source": "DuneEss NetworkChat",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.chat.team",
+      "label": "Team chat",
+      "source": "DuneEss NetworkChat; team checked independently",
+      "highRisk": false
+    },
+    {
+      "node": "duneess.labels.hidden",
+      "label": "Hide gameplay nameplate",
+      "source": "DuneEss PlayerLabels",
+      "highRisk": false
+    },
+    {
+      "node": "duneitems.admin",
+      "label": "Give custom items",
+      "source": "DuneItems",
+      "highRisk": true
+    },
+    {
+      "node": "duneprotect.inspect",
+      "label": "Block-history inspect facade",
+      "source": "DuneProtect; requires native CoreProtect node too",
+      "highRisk": false
+    },
+    {
+      "node": "duneprotect.lookup",
+      "label": "Block-history lookup facade",
+      "source": "DuneProtect; requires native CoreProtect node too",
+      "highRisk": false
+    },
+    {
+      "node": "duneprotect.regions",
+      "label": "WorldGuard region facade",
+      "source": "DuneProtect; requires native WorldGuard permission too",
+      "highRisk": true
+    },
+    {
+      "node": "duneprotect.restore",
+      "label": "Block restore facade",
+      "source": "DuneProtect; requires native CoreProtect node too",
+      "highRisk": true
+    },
+    {
+      "node": "duneprotect.rollback",
+      "label": "Block rollback facade",
+      "source": "DuneProtect; requires native CoreProtect node too",
+      "highRisk": true
+    },
+    {
+      "node": "duneprotect.worldedit",
+      "label": "WorldEdit command facade",
+      "source": "DuneProtect; requires native WorldEdit permission too",
+      "highRisk": true
+    },
+    {
+      "node": "worldedit.*",
+      "label": "All WorldEdit tools",
+      "source": "Approved plugin wildcard: network administrator only",
+      "highRisk": true
+    },
+    {
+      "node": "worldguard.*",
+      "label": "All WorldGuard tools",
+      "source": "Approved plugin wildcard: network administrator only",
+      "highRisk": true
+    }
+  ],
+  "networkAdministratorRoles": [
+    "owners",
+    "web_net_admin",
+    "official_account",
+    "web_net_owner"
+  ],
+  "suggestedRoles": [
+    {
+      "id": "user",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "vip",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.colors": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "staff",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_streamer",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.colors": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_news",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_forum",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_support",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.staff": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_net_admin",
+      "permissions": {
+        "coreprotect.inspect": true,
+        "coreprotect.lookup": true,
+        "coreprotect.restore": true,
+        "coreprotect.rollback": true,
+        "dune.admin": true,
+        "dune.ban.global": true,
+        "dune.ban.local": true,
+        "dune.ban.protected": true,
+        "dune.clans.view": true,
+        "dune.moderation.ban": true,
+        "dune.moderation.protected": true,
+        "dune.moderation.unban": true,
+        "dune.quests.admin": true,
+        "dune.quests.view": true,
+        "dune.tickets.staff": true,
+        "dune.tickets.view": true,
+        "dune.unban.global": true,
+        "dune.unban.local": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.manage": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.colors": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.format": true,
+        "duneess.chat.imperial": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true,
+        "duneess.labels.hidden": true,
+        "duneitems.admin": true,
+        "duneprotect.inspect": true,
+        "duneprotect.lookup": true,
+        "duneprotect.regions": true,
+        "duneprotect.restore": true,
+        "duneprotect.rollback": true,
+        "duneprotect.worldedit": true,
+        "worldedit.*": true,
+        "worldguard.*": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_network",
+      "permissions": {
+        "coreprotect.inspect": true,
+        "coreprotect.lookup": true,
+        "dune.ban.global": true,
+        "dune.ban.local": true,
+        "dune.ban.protected": true,
+        "dune.clans.view": true,
+        "dune.moderation.ban": true,
+        "dune.moderation.protected": true,
+        "dune.moderation.unban": true,
+        "dune.quests.admin": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dune.unban.global": true,
+        "dune.unban.local": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.manage": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.colors": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.format": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true,
+        "duneprotect.inspect": true,
+        "duneprotect.lookup": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_sales",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_legal",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "web_appeal",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.moderation.unban": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dune.unban.local": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "game_mod",
+      "permissions": {
+        "coreprotect.inspect": true,
+        "coreprotect.lookup": true,
+        "dune.ban.local": true,
+        "dune.clans.view": true,
+        "dune.moderation.ban": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true,
+        "duneprotect.inspect": true,
+        "duneprotect.lookup": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "game_admin",
+      "permissions": {
+        "coreprotect.inspect": true,
+        "coreprotect.lookup": true,
+        "dune.ban.global": true,
+        "dune.ban.local": true,
+        "dune.ban.protected": true,
+        "dune.clans.view": true,
+        "dune.moderation.ban": true,
+        "dune.moderation.protected": true,
+        "dune.moderation.unban": true,
+        "dune.quests.admin": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dune.unban.global": true,
+        "dune.unban.local": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.colors": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.format": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true,
+        "duneprotect.inspect": true,
+        "duneprotect.lookup": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "game_support",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.staff": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "game_appeal",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.moderation.unban": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dune.unban.local": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "corestaff",
+      "permissions": {
+        "coreprotect.inspect": true,
+        "coreprotect.lookup": true,
+        "dune.ban.global": true,
+        "dune.ban.local": true,
+        "dune.ban.protected": true,
+        "dune.clans.view": true,
+        "dune.moderation.ban": true,
+        "dune.moderation.protected": true,
+        "dune.moderation.unban": true,
+        "dune.quests.admin": true,
+        "dune.quests.view": true,
+        "dune.tickets.staff": true,
+        "dune.tickets.view": true,
+        "dune.unban.global": true,
+        "dune.unban.local": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.manage": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.colors": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.format": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true,
+        "duneprotect.inspect": true,
+        "duneprotect.lookup": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "owners",
+      "permissions": {
+        "coreprotect.inspect": true,
+        "coreprotect.lookup": true,
+        "coreprotect.restore": true,
+        "coreprotect.rollback": true,
+        "dune.admin": true,
+        "dune.ban.global": true,
+        "dune.ban.local": true,
+        "dune.ban.protected": true,
+        "dune.clans.view": true,
+        "dune.moderation.ban": true,
+        "dune.moderation.protected": true,
+        "dune.moderation.unban": true,
+        "dune.quests.admin": true,
+        "dune.quests.view": true,
+        "dune.tickets.staff": true,
+        "dune.tickets.view": true,
+        "dune.unban.global": true,
+        "dune.unban.local": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.manage": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.colors": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.format": true,
+        "duneess.chat.imperial": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true,
+        "duneess.labels.hidden": true,
+        "duneitems.admin": true,
+        "duneprotect.inspect": true,
+        "duneprotect.lookup": true,
+        "duneprotect.regions": true,
+        "duneprotect.restore": true,
+        "duneprotect.rollback": true,
+        "duneprotect.worldedit": true,
+        "worldedit.*": true,
+        "worldguard.*": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "game_quests",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.admin": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "game_restoration",
+      "permissions": {
+        "coreprotect.inspect": true,
+        "coreprotect.lookup": true,
+        "coreprotect.restore": true,
+        "coreprotect.rollback": true,
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.staff.deposit": true,
+        "dunebank.staff.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true,
+        "duneprotect.inspect": true,
+        "duneprotect.lookup": true,
+        "duneprotect.restore": true,
+        "duneprotect.rollback": true
+      },
+      "scope": "network-global; local-only moderation requires a separate server-context design, not this global snapshot"
+    },
+    {
+      "id": "game_builder",
+      "permissions": {
+        "dune.clans.view": true,
+        "dune.quests.view": true,
+        "dune.tickets.view": true,
+        "dunebank.use": true,
+        "duneess.basics": true,
+        "duneess.chat.faction": true,
+        "duneess.chat.nearby": true,
+        "duneess.chat.network": true,
+        "duneess.chat.team": true
+      },
+      "scope": "Builder membership; ordinary player baseline only. Building tools require separate reviewed permissions."
+    }
+  ],
+  "bankLinkedNodes": [
+    "dunebank.use",
+    "dunebank.staff.view",
+    "dunebank.staff.deposit",
+    "dunebank.staff.manage"
+  ],
+  "notes": [
+    "Support GUI node is suggested only for Support Team and network supervisors, never Appeals/Legal/Sales/Forum/News by default. Website/API department visibility remains separately checked.",
+    "No op, *, luckperms.*, vault.* or arbitrary Minecraft commands are exported. Only explicit WorldEdit/WorldGuard plugin wildcards may be assigned to network administrator roles.",
+    "Core AdminGui and DuneNPC administrative tools require dune.admin, including fresh callback checks. This broad high-risk node is suggested only for Owner and Main Network Administrator; no NPC-only delegation is available.",
+    "No political office, house, elected stillsuit, smuggler career or clan authority is granted by these administrative team roles.",
+    "Website staff rank IDs remain canonical; missing function roles game_quests/game_items/game_history/game_restoration are suggested new cp_ranks entries, not separate native rank definitions."
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "master-imperial": {
+    "label": "DUNEREALMS",
+    "role": "IMPERIAL",
+    "src": "/assets/seals/master-imperial.png",
+    "footer150": "/assets/seals/master-imperial-150.png",
+    "footer300": "/assets/seals/master-imperial-300.png",
+    "original": "website/artwork/seals/master-imperial.png",
+    "alpha": true
+  },
+  "owner-dunerealms": {
+    "label": "dunerealms",
+    "role": "OWNER",
+    "src": "/assets/seals/owner-dunerealms.png",
+    "footer150": "/assets/seals/owner-dunerealms-150.png",
+    "footer300": "/assets/seals/owner-dunerealms-300.png",
+    "original": "website/artwork/seals/owner-dunerealms.png",
+    "alpha": true
+  },
+  "owner-unimatrix999": {
+    "label": "unimatrix999",
+    "role": "OWNER",
+    "src": "/assets/seals/owner-unimatrix999.png",
+    "footer150": "/assets/seals/owner-unimatrix999-150.png",
+    "footer300": "/assets/seals/owner-unimatrix999-300.png",
+    "original": "website/artwork/seals/owner-unimatrix999.png",
+    "alpha": true
+  },
+  "owner-grmacken": {
+    "label": "grmacken",
+    "role": "OWNER",
+    "src": "/assets/seals/owner-grmacken.png",
+    "footer150": "/assets/seals/owner-grmacken-150.png",
+    "footer300": "/assets/seals/owner-grmacken-300.png",
+    "original": "website/artwork/seals/owner-grmacken.png",
+    "alpha": true
+  },
+  "owner-richwjr": {
+    "label": "richwjr",
+    "role": "OWNER",
+    "src": "/assets/seals/owner-richwjr.png",
+    "footer150": "/assets/seals/owner-richwjr-150.png",
+    "footer300": "/assets/seals/owner-richwjr-300.png",
+    "original": "website/artwork/seals/owner-richwjr.png",
+    "alpha": true
+  },
+  "corestaff-racoonvibz": {
+    "label": "racoonvibz",
+    "role": "CORESTAFF",
+    "src": "/assets/seals/corestaff-racoonvibz.png",
+    "footer150": "/assets/seals/corestaff-racoonvibz-150.png",
+    "footer300": "/assets/seals/corestaff-racoonvibz-300.png",
+    "original": "website/artwork/seals/corestaff-racoonvibz.png",
+    "alpha": true
+  },
+  "department-support": {
+    "label": "SUPPORT",
+    "role": "",
+    "src": "/assets/seals/department-support.png",
+    "footer150": "/assets/seals/department-support-150.png",
+    "footer300": "/assets/seals/department-support-300.png",
+    "original": "website/artwork/seals/department-support.png",
+    "alpha": true
+  },
+  "department-ban-appeals": {
+    "label": "BAN APPEALS",
+    "role": "",
+    "src": "/assets/seals/department-ban-appeals.png",
+    "footer150": "/assets/seals/department-ban-appeals-150.png",
+    "footer300": "/assets/seals/department-ban-appeals-300.png",
+    "original": "website/artwork/seals/department-ban-appeals.png",
+    "alpha": true
+  },
+  "department-forum-support": {
+    "label": "FORUM SUPPORT",
+    "role": "",
+    "src": "/assets/seals/department-forum-support.png",
+    "footer150": "/assets/seals/department-forum-support-150.png",
+    "footer300": "/assets/seals/department-forum-support-300.png",
+    "original": "website/artwork/seals/department-forum-support.png",
+    "alpha": true
+  },
+  "department-legal": {
+    "label": "LEGAL",
+    "role": "",
+    "src": "/assets/seals/department-legal-v2.png",
+    "footer150": "/assets/seals/department-legal-v2-150.png",
+    "footer300": "/assets/seals/department-legal-v2-300.png",
+    "original": "website/artwork/seals/department-legal-v2.png",
+    "alpha": true
+  },
+  "department-sales": {
+    "label": "SALES",
+    "role": "",
+    "src": "/assets/seals/department-sales.png",
+    "footer150": "/assets/seals/department-sales-150.png",
+    "footer300": "/assets/seals/department-sales-300.png",
+    "original": "website/artwork/seals/department-sales.png",
+    "alpha": true
+  },
+  "department-network-staff": {
+    "label": "NETWORK STAFF",
+    "role": "",
+    "src": "/assets/seals/department-network-staff.png",
+    "footer150": "/assets/seals/department-network-staff-150.png",
+    "footer300": "/assets/seals/department-network-staff-300.png",
+    "original": "website\\artwork\\network-seals\\department-network-staff-master.png",
+    "alpha": true
+  },
+  "team-network-staff": {
+    "label": "NETWORK STAFF TEAM",
+    "role": "",
+    "src": "/assets/seals/team-network-staff.png",
+    "footer150": "/assets/seals/team-network-staff-150.png",
+    "footer300": "/assets/seals/team-network-staff-300.png",
+    "original": "website\\artwork\\network-seals\\team-network-staff-master.png",
+    "alpha": true
+  },
+  "rank-network-staff": {
+    "label": "Network Staff",
+    "role": "NETWORKSTAFF",
+    "src": "/assets/seals/rank-network-staff.png",
+    "footer150": "/assets/seals/rank-network-staff-150.png",
+    "footer300": "/assets/seals/rank-network-staff-300.png",
+    "original": "website\\artwork\\network-seals\\rank-network-staff-master.png",
+    "alpha": true
+  },
+  "main-network-admin-grmacken": {
+    "label": "grmacken",
+    "role": "MAINNETWORKADMIN",
+    "src": "/assets/seals/main-network-admin-grmacken.png",
+    "footer150": "/assets/seals/main-network-admin-grmacken-150.png",
+    "footer300": "/assets/seals/main-network-admin-grmacken-300.png",
+    "original": "website\\artwork\\network-seals\\main-network-admin-grmacken-master.png",
+    "alpha": true
+  },
+  "rank-streamer": {
+    "label": "Streamer",
+    "role": "STREAMER",
+    "src": "/assets/seals/rank-streamer.png",
+    "footer150": "/assets/seals/rank-streamer-150.png",
+    "footer300": "/assets/seals/rank-streamer-300.png",
+    "original": "website\\artwork\\streamer-seal\\rank-streamer-master.png",
+    "alpha": true
+  },
+  "network-staff-mr_blueray": {
+    "label": "mr_blueray",
+    "role": "NETWORKSTAFF",
+    "src": "/assets/seals/network-staff-mr_blueray-v2-150.png",
+    "footer150": "/assets/seals/network-staff-mr_blueray-v2-150.png",
+    "footer300": "/assets/seals/network-staff-mr_blueray-v2-150.png",
+    "alpha": true
+  },
+  "supporter-patron_caravan": {
+    "label": "Caravan Supporter",
+    "rank": "patron_caravan",
+    "category": "Community",
+    "footer150": "/assets/seals/supporter-patron-caravan-v1.png",
+    "src": "/assets/seals/supporter-patron-caravan-v1.png",
+    "alpha": true
+  },
+  "supporter-patron_guild": {
+    "label": "Guild Patron",
+    "rank": "patron_guild",
+    "category": "Community",
+    "footer150": "/assets/seals/supporter-patron-guild-v1.png",
+    "src": "/assets/seals/supporter-patron-guild-v1.png",
+    "alpha": true
+  },
+  "supporter-vip": {
+    "label": "Imperial Patron",
+    "rank": "vip",
+    "category": "Community",
+    "footer150": "/assets/seals/supporter-vip-v1.png",
+    "src": "/assets/seals/supporter-vip-v1.png",
+    "alpha": true
+  },
+  "supporter-patron_grand": {
+    "label": "Grand Benefactor",
+    "rank": "patron_grand",
+    "category": "Community",
+    "footer150": "/assets/seals/supporter-patron-grand-v1.png",
+    "src": "/assets/seals/supporter-patron-grand-v1.png",
+    "alpha": true
+  },
+  "supporter-council_member": {
+    "label": "Council Member",
+    "rank": "council_member",
+    "category": "Community",
+    "footer150": "/assets/seals/supporter-council-member-v1.png",
+    "src": "/assets/seals/supporter-council-member-v1.png",
+    "alpha": true
+  }
+}
