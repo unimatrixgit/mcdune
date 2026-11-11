@@ -29,14 +29,14 @@ export function createBankTransfers(db,settings={},deps={}){
   let recipient=null,fromNumber=null;
   if(external){
    if(typeof data.recipientAccount!=='string'||typeof data.recipientName!=='string'||data.recipientName.length>80)return reply({message:'Select a verified recipient.'},400);
-   recipient=await resolve(data.recipientAccount,data.recipientName);if(!recipient||!uuid.test(recipient.player)||recipient.player===player)return reply({message:'Recipient changed or invalid. Check the account again; use Current & Savings for your own accounts.'},409);
+   recipient=await resolve(data.recipientAccount,data.recipientName);if(!recipient||!['current','player'].includes(recipient.bank_type)||typeof recipient.player!=='string'||!uuid.test(recipient.player)||recipient.player.toLowerCase()===player)return reply({message:'Recipient changed or invalid. Check the account again; use Current & Savings for your own accounts.'},409);
    fromNumber=await(deps.accountNumber||imperialAccount)(db,data.source==='current'?'current':'player',player);
   }
   const current=await auth(request);if(!current||current.id!==user.id||!await permitted(current))return reply({message:'Account access changed. Refresh before submitting.'},409);
   const currentLink=await linked(current);if(typeof currentLink!=='string'||currentLink.toLowerCase()!==player)return reply({message:'Account access changed. Refresh before submitting.'},409);
   if(typeof settings.SERVER_CONTROL_TOKEN!=='string'||settings.SERVER_CONTROL_TOKEN.length<64)return reply({message:'Transfers unavailable.'},503);
   try{
-   const result=await(deps.fetcher||fetch)('http://127.0.0.1:15433/bank/'+(external?'remittance':'transfer-own'),{method:'POST',headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({player,source:data.source,amount:data.amount,request_id:data.requestId,memo:data.memo,...(external?{target:recipient.player,target_type:recipient.bank_type==='current'?'current':'savings',from_number:fromNumber,to_number:data.recipientAccount}:{})}),redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000)});
+   const result=await(deps.fetcher||fetch)('http://127.0.0.1:15433/bank/'+(external?'remittance':'transfer-own'),{method:'POST',headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({player,source:data.source,amount:data.amount,request_id:data.requestId,memo:data.memo,...(external?{target:recipient.player.toLowerCase(),target_type:recipient.bank_type==='current'?'current':'savings',from_number:fromNumber,to_number:data.recipientAccount}:{})}),redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000)});
    if(!result.ok||result.status!==200)return reply({message:result.status===409?'Transfer declined: insufficient funds, changed request or unavailable account. No transfer was confirmed.':'Transfer could not be confirmed. Retry the same request to check its result.'},result.status===409?409:503);
    const body=await result.json();if(!body||typeof body!=='object'||body.reference!==data.requestId)throw Error();return reply({transfer:body});
   }catch{return reply({message:'Confirmation unavailable. Retry this same request; do not create a replacement payment.'},503);}
