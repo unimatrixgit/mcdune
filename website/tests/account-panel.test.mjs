@@ -2,14 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {LocalD1} from './d1-adapter.mjs';
+import {TERMS_VERSION} from '../node/first-login.mjs';
+import {contactSchema} from '../node/contact-email.mjs';
 import {createPanel} from '../control-panel/server.mjs';
 const origin='https://cp.dunerealms.com',secret='test-bridge-secret-with-more-than-32-characters';
 const schema=`CREATE TABLE site_accounts(id TEXT PRIMARY KEY,username TEXT UNIQUE,display_name TEXT,password_salt TEXT,password_hash TEXT,role TEXT,created_at INTEGER);
 CREATE TABLE site_sessions(token_hash TEXT PRIMARY KEY,user_id TEXT,expires_at INTEGER);
 CREATE TABLE player_profiles(user_id TEXT PRIMARY KEY,display_name TEXT,minecraft_name TEXT,discord_name TEXT,created_at INTEGER,updated_at INTEGER);
-CREATE TABLE site_clan_members(user_id TEXT,minecraft_uuid TEXT);`+readFileSync(new URL('../node/schema.sql',import.meta.url),'utf8').split('CREATE TABLE IF NOT EXISTS site_game_links')[1].replace(/^/,'CREATE TABLE IF NOT EXISTS site_game_links').replace(/ ENGINE=InnoDB DEFAULT CHARSET=utf8mb4/g,'');
+CREATE TABLE site_clan_members(user_id TEXT,minecraft_uuid TEXT);`+readFileSync(new URL('../node/schema.sql',import.meta.url),'utf8').split('CREATE TABLE IF NOT EXISTS site_game_links')[1].replace(/^/,'CREATE TABLE IF NOT EXISTS site_game_links').replace(/ ENGINE=InnoDB DEFAULT CHARSET=utf8mb4/g,'')+';'+contactSchema;
 function setup(){const db=new LocalD1(schema),app=createPanel(db,{GAME_LINK_SECRET:secret});const req=async(path,body,headers={})=>app(new Request(origin+'/api/'+path,{method:body===undefined?'GET':'POST',headers:{Origin:origin,'Content-Type':'application/json',...headers},...(body===undefined?{}:{body:JSON.stringify(body)})}));return {db,req};}
-async function register(req,name){const response=await req('auth/register',{username:name,password:'long testing password 123',ageBand:'15plus'});assert.equal(response.status,200);return {Cookie:response.headers.get('set-cookie').split(';')[0]};}
+async function register(req,name){const response=await req('auth/register',{username:name,password:'long testing password 123',ageBand:'15plus',email:name+'@example.com',termsAccepted:'yes',termsVersion:TERMS_VERSION});assert.equal(response.status,200);return {Cookie:response.headers.get('set-cookie').split(';')[0]};}
 const uuid='12345678-1234-4234-9234-123456789012',otherUuid='22345678-1234-4234-9234-123456789012';
 test('Panel serves shared theme assets without exposing private source paths',async()=>{
  const db=new LocalD1(schema),app=createPanel(db,{GAME_LINK_SECRET:secret});try{

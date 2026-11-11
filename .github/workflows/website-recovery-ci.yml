@@ -1,0 +1,29 @@
+name: DuneRealms website recovery checks
+on:
+  pull_request:
+    paths:
+      - 'website/**'
+      - '.github/workflows/website-recovery-ci.yml'
+  push:
+    branches:
+      - 'fix/dunerealms-portal-recovery-20261111'
+    paths:
+      - 'website/**'
+      - '.github/workflows/website-recovery-ci.yml'
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-package-lock
+      - name: Build website bundle
+        run: npm run build
+      - name: Run regression tests
+        run: npm test

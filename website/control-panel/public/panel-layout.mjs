@@ -5,13 +5,13 @@ export const USER_GROUPS=[
  ['Profile',[
   item('Minecraft account','game','web.menu.game','nav-clan-v2.webp'),
   item('Personal information','site-profile','web.menu.security','nav-account-v2.webp',{aliases:['security','discord-link']}),
-  item('Personal Bank','personal-bank','web.bank.personal.view','nav-shop-v1.webp'),
+  item('Personal Bank','personal-bank','web.bank.personal.view','nav-exchange-v2.webp'),
   item('Support tickets','tickets','web.menu.tickets','nav-support-v2.webp'),
   item('Inventory','planetary-inventory','web.menu.inventory','nav-exchange-v2.webp')]],
  ['DuneRealms',[
   item('Imperial Tailor','kits-exchange','web.menu.inventory','clan-atelier-v1.webp'),
   item('Exchange settings','exchange-settings','web.menu.inventory','nav-exchange-v2.webp'),
-  item('Shop settings','shop-settings','web.menu.inventory','nav-shop-v1.webp'),
+  item('Shop settings','shop-settings','web.menu.inventory','nav-exchange-v2.webp'),
   item('Rewards & codes','rewards-codes','web.menu.rewards','seals/season-tavren-ii-150.png'),
   item('Transactions','transactions','web.menu.inventory','nav-exchange-v2.webp')]],
  ['Politics & Gameplay',[
@@ -25,7 +25,7 @@ export const USER_GROUPS=[
 export const STAFF_GROUPS=[
  ['Website Tools',[
   item('News center','website-posts','web.menu.posts','nav-discord-v2.webp'),
-  item('Shop management','shop-admin','web.shop.support','nav-shop-v1.webp'),
+  item('Shop management','shop-admin','web.shop.support','nav-exchange-v2.webp'),
   item('Support tickets','staff-tickets','web.tickets.staff','nav-support-v2.webp'),
   item('Bans & Appeals','bans','web.menu.bans','seals/department-ban-appeals-150.png',{aliases:['ban-evidence']}),
   item('Forum Moderation','forum-admin','web.menu.forum','seals/department-forum-support-150.png')]],
@@ -41,8 +41,8 @@ export const STAFF_GROUPS=[
   item('Kit management','server-kits','web.ranks.manage','clan-atelier-v1.webp'),
   item('Exchange management','exchange-admin','web.menu.exchange','nav-exchange-v2.webp',{aliases:['exchange-settings-admin']}),
   item('Git management','git-admin','web.git.admin','nav-manual-v2.webp'),
-  item('Community goals','community-goals','web.community.manage','nav-shop-v1.webp'),
-  item('Server bank','staff-bank','web.bank.staff.view','nav-shop-v1.webp'),
+  item('Community goals','community-goals','web.community.manage','nav-exchange-v2.webp'),
+  item('Server bank','staff-bank','web.bank.staff.view','nav-exchange-v2.webp'),
   item('Item management','items','web.menu.items','nav-clan-v2.webp')]]
 ];
 // Mirrors native Dev review policy; ordinary Dev/staff membership is not approval authority.
