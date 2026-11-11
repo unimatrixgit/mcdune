@@ -13,7 +13,7 @@ test('DR account numbers round trip for every supported account type',()=>{
 });
 test('DR account validation rejects modified checksums and invalid identifiers',()=>{
  const number=accountNumber('current',42);
- assert.equal(validAccountNumber(number.replace(/\\d$/,digit=>digit==='9'?'8':'9')),false);
+ assert.equal(validAccountNumber(number.replace(/\d$/,digit=>digit==='9'?'8':'9')),false);
  for(const invalid of ['',null,42,'DRCA000000000000','BE68000000000000'])assert.equal(validAccountNumber(invalid),false);
  for(const id of [0,-1,10000000,NaN])assert.throws(()=>accountNumber('player',id));
 });
