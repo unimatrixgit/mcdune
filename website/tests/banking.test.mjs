@@ -85,3 +85,27 @@ test('bank rejects duplicate ledger transaction IDs and malformed metadata',()=>
   assert.equal(projectBank({...bank,ledger:[invalid]},{playerUuid:player}),null);
  }
 });
+
+test('revoked bank access is denied after the upstream response',async()=>{
+ let checks=0;
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:++checks===1?['web.bank.personal.view']:[]}),
+  linked:async()=>player,
+  fetcher:async()=>Response.json(bank)
+ });
+ const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+ assert.equal(response.status,403);
+ assert.equal(checks,2);
+});
+test('changed Minecraft link prevents returning another account bank data',async()=>{
+ let links=0;
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>++links===1?player:'11111111-1111-1111-1111-111111111111',
+  fetcher:async()=>Response.json(bank)
+ });
+ const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+ assert.equal(response.status,409);
+});
