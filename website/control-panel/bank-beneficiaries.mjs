@@ -16,8 +16,17 @@ export function createBankBeneficiaries(db,deps={}){
   const user=await auth(request);if(!user)return reply({message:'Sign in first.'},401);
   if(!(await access(user))?.nodes?.includes('web.bank.personal.view'))return reply({message:'Bank access required.'},403);
   const number=/^DR[A-Z]{2}/.test(q);if(number&&(!validAccountNumber(q)||!/^DR(?:PL|CA)/.test(q)))return reply({message:'Enter a valid personal account number.'},400);
-  const rows=await search(q,number),current=await auth(request);
-  if(!current||current.id!==user.id||!(await access(current))?.nodes?.includes('web.bank.personal.view'))return reply({message:'Access changed. Sign in again.'},403);
-  return reply({beneficiaries:rows.filter(r=>['player','current'].includes(r.bank_type)&&typeof r.username==='string').map(r=>({name:r.username,type:r.bank_type==='current'?'Current account':'Savings account',accountNumber:accountNumber(r.bank_type,r.id)}))});
+  try{
+   const rows=await search(q,number),current=await auth(request);
+   if(!current||current.id!==user.id||!(await access(current))?.nodes?.includes('web.bank.personal.view'))return reply({message:'Access changed. Sign in again.'},403);
+   if(!Array.isArray(rows))throw Error('Invalid beneficiary result');
+   const beneficiaries=[];
+   for(const r of rows.slice(0,10)){
+    if(!r||!['player','current'].includes(r.bank_type)||typeof r.username!=='string'||!r.username||r.username.length>80)continue;
+    const id=Number(r.id);if(!Number.isSafeInteger(id)||id<1||id>9999999)continue;
+    beneficiaries.push({name:r.username,type:r.bank_type==='current'?'Current account':'Savings account',accountNumber:accountNumber(r.bank_type,id)});
+   }
+   return reply({beneficiaries});
+  }catch{return reply({message:'Beneficiary search temporarily unavailable.'},503);}
  };
 }
