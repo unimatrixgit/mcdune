@@ -12,7 +12,7 @@ on:
       - '.github/workflows/website-recovery-ci.yml'
 jobs:
   website:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 15
     defaults:
       run:
