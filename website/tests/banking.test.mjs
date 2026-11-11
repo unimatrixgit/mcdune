@@ -143,3 +143,23 @@ test('malformed upstream bank payload shapes fail closed',()=>{
   assert.equal(projectBank(payload,{playerUuid:player}),null);
  }
 });
+
+test('bank requires a stable authenticated website account ID',async()=>{
+ for(const user of [null,{}, {id:null},{id:''},{id:42}]){
+  const f=fixture({user});
+  assert.equal((await f.request()).status,401);
+  assert.equal(f.calls.length,0);
+ }
+});
+test('bank rejects a changed or missing account identity after upstream lookup',async()=>{
+ for(const second of [{},{id:null},{id:'different'}]){
+  let count=0;
+  const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+   authenticate:async()=>++count===1?{id:'account'}:second,
+   access:async()=>({nodes:['web.bank.personal.view']}),
+   linked:async()=>player,
+   fetcher:async()=>Response.json(bank)
+  });
+  assert.equal((await app(new Request('https://cp.dunerealms.com/api/bank/personal'))).status,401);
+ }
+});
