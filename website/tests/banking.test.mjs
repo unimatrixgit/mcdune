@@ -253,3 +253,30 @@ test('bank fails closed on malformed upstream JSON and server errors',async()=>{
   assert.doesNotMatch(JSON.stringify(await response.json()),/internal secret|not-json/);
  }
 });
+
+test('upstream permission_denied is reported as authorization failure, not a bank outage',async()=>{
+ for(const status of [401,403]){
+  const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+   authenticate:async()=>({id:'owner'}),
+   access:async()=>({nodes:['web.bank.personal.view']}),
+   linked:async()=>player,
+   fetcher:async()=>Response.json({message:'permission_denied',secret:'internal'},{status})
+  });
+  const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+  assert.equal(response.status,403);
+  assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+  const body=await response.json();
+  assert.match(body.message,/bank backend permissions/i);
+  assert.doesNotMatch(JSON.stringify(body),/permission_denied|internal/);
+ }
+});
+test('upstream server failure remains a private 503 outage response',async()=>{
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'owner'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>player,
+  fetcher:async()=>Response.json({message:'permission_denied'},{status:500})
+ });
+ const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+ assert.equal(response.status,503);
+});
