@@ -22,7 +22,7 @@ export function createBanking(db,settings={},dependencies={}){
   try{
    const player=staff?null:await linked(user);if(!staff&&!player)return reply({linked:false});if(!staff&&(typeof player!=='string'||!uuid.test(player)))throw Error();
    if(typeof settings.SERVER_CONTROL_TOKEN!=='string'||settings.SERVER_CONTROL_TOKEN.length<64)throw Error();
-   const r=await(dependencies.fetcher||fetch)('http://127.0.0.1:15433'+(staff?'/bank/staff':'/bank/player?uuid='+encodeURIComponent(player)),{headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN},signal:AbortSignal.timeout(8000)});
+   const r=await(dependencies.fetcher||fetch)('http://127.0.0.1:15433'+(staff?'/bank/staff':'/bank/player?uuid='+encodeURIComponent(player)),{headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN},redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8000)});
    if(!r.ok||r.status!==200)throw Error();const payload=await r.json();const bank=projectBank(payload,{playerUuid:player,staff});if(!bank)throw Error();
    const currentUser=await authenticate(request);if(!currentUser||typeof currentUser.id!=='string'||currentUser.id!==user.id)return reply({message:'Sign in again before viewing this bank.'},401);
    const currentRights=await access(currentUser);if(!Array.isArray(currentRights?.nodes)||!currentRights.nodes.includes(staff?'web.bank.staff.view':'web.bank.personal.view'))return reply({message:'Bank access is no longer available for this account.'},403);
