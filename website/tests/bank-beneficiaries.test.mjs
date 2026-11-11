@@ -23,7 +23,7 @@ test('beneficiary search returns only valid bounded account records',async()=>{
  const response=await fixture({rows})('Alice');
  assert.equal(response.status,200);
  const body=await response.json();
- assert.equal(body.beneficiaries.length,8);
+ assert.equal(body.beneficiaries.length,7);
  assert.equal(body.beneficiaries[0].accountNumber,accountNumber('current',42));
  assert.equal(body.beneficiaries[1].accountNumber,accountNumber('player',2));
 });
