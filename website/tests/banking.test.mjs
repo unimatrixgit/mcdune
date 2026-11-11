@@ -208,3 +208,20 @@ test('staff account cannot be queried using a personal bank permission',async()=
  assert.equal((await f.request('/api/bank/staff')).status,403);
  assert.equal(f.calls.length,0);
 });
+
+test('bank authentication and permission lookup failures return private 503 responses',async()=>{
+ for(const failing of ['authenticate','access']){
+  let upstream=0;
+  const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+   authenticate:async()=>{if(failing==='authenticate')throw Error('sensitive auth details');return{id:'account'};},
+   access:async()=>{if(failing==='access')throw Error('sensitive database details');return{nodes:['web.bank.personal.view']};},
+   linked:async()=>player,
+   fetcher:async()=>{upstream++;return Response.json(bank);}
+  });
+  const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+  assert.equal(response.status,503);
+  assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+  assert.equal(upstream,0);
+  assert.doesNotMatch(JSON.stringify(await response.json()),/sensitive/);
+ }
+});
