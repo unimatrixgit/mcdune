@@ -183,3 +183,11 @@ test('bank rejects unexpected upstream success status without disclosing data',a
  assert.equal(response.status,503);
  assert.equal(response.headers.get('Cache-Control'),'private, no-store');
 });
+
+test('bank upstream requests never follow redirects or use cached responses',async()=>{
+ const f=fixture();
+ assert.equal((await f.request()).status,200);
+ assert.equal(f.calls.length,1);
+ assert.equal(f.calls[0].options.redirect,'error');
+ assert.equal(f.calls[0].options.cache,'no-store');
+});
