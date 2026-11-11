@@ -10,6 +10,26 @@ export const NODES={
  'duneprotect.inspect':'Inspect block history','duneprotect.lookup':'Look up changes','duneprotect.rollback':'Roll back changes','duneprotect.restore':'Restore changes','duneprotect.regions':'Manage protected regions','duneprotect.worldedit':'Use WorldEdit tools',
  'dunelobby.visit':'Visit lobby','dunelobby.build':'Build in protected lobby','dunelobby.admin':'Lobby administration'
 };
+
+// Registered permissions; registration does not grant access.
+const EXTRA_PERMISSION_NODES = [
+ 'dune.atelier.redeem','dune.atelier.view',
+ 'dune.ban.global','dune.ban.local',
+ 'dune.moderation.ban','dune.moderation.unban',
+ 'dune.quests.admin','dune.quests.view',
+ 'dune.tickets.staff','dune.tickets.view',
+ 'dune.unban.global','dune.unban.local',
+ 'web.accounts.assign','web.community.manage',
+ 'web.items.manage','web.luckperms.edit','web.luckperms.view',
+ 'web.menu.inventory','web.menu.items','web.menu.luckperms',
+ 'web.menu.permissions','web.menu.servers',
+ 'web.ranks.manage','web.servers.console',
+ 'web.servers.logs','web.servers.power','web.servers.view'
+];
+for (const node of EXTRA_PERMISSION_NODES) {
+ if (!Object.hasOwn(NODES,node)) NODES[node] = node;
+}
+
 const basic=['cp.menu.game','cp.menu.inventory','cp.menu.rewards','cp.menu.security','duneess.basics','duneess.travel','duneess.tokens.buy','duneess.exchange','duneess.shops.use','duneess.chat.network','duneess.chat.nearby','duneess.chat.team','duneess.chat.faction','dunelobby.visit'];
 const staff=[...basic,'cp.menu.staffmanual','cp.menu.administration','cp.accounts.view','cp.accounts.revoke','cp.community.manage','dune.staff.open','dune.staff.history','dune.staff.kick','dune.staff.warn','dune.staff.mute','duneprotect.inspect','duneprotect.lookup'];
 const core=[...staff,'cp.menu.items','cp.items.manage','dune.items.give','cp.menu.servers','cp.menu.permissions','cp.accounts.assign','cp.ranks.manage','cp.servers.view','cp.servers.logs','cp.servers.power','cp.servers.console','dune.admin','dune.staff.ban.local','dune.staff.ban.network','duneess.chat.imperial','duneess.chat.colors','duneess.chat.format','duneprotect.rollback','duneprotect.restore','duneprotect.regions','duneprotect.worldedit','dunelobby.build','dunelobby.admin'];
@@ -33,9 +53,18 @@ export async function accessFor(db,user){
  if(!user)return null;
  const rank=await rankFor(db,user.role);
  const nodes=rank.key==='owners'?Object.keys(NODES):rank.nodes.filter(n=>Object.hasOwn(NODES,n));
- return{rank:rank.key,label:rank.label,level:rank.level,nodes};
+ return{rank:rank.key,ranks:[rank.key],label:rank.label,level:rank.level,nodes};
 }
-export async function can(db,user,node){return !!user&&(await accessFor(db,user)).nodes.includes(node);}
+export async function can(db,user,node){
+ if(!user)return false;
+ const access=await accessFor(db,user);
+ if(access.nodes.includes(node))return true;
+ if(node.startsWith('web.')){
+  const equivalent='cp.'+node.slice(4);
+  return Object.hasOwn(NODES,equivalent)&&access.nodes.includes(equivalent);
+ }
+ return false;
+}
 export async function publicUser(db,user){if(!user)return null;const access=await accessFor(db,user);return{username:user.username,staff:access.nodes.includes('cp.menu.administration'),rank:access.rank,rankLabel:access.label,rankLevel:access.level,permissions:access.nodes};}
 export async function initializeRanks(db){
  for(const rank of DEFAULT_RANKS)await db.prepare('INSERT INTO cp_ranks(rank_key,label,rank_level,kind,permissions_json,version) VALUES(?,?,?,?,?,1) ON CONFLICT(rank_key) DO UPDATE SET rank_key=excluded.rank_key').bind(rank.key,rank.label,rank.level,rank.kind,JSON.stringify(rank.nodes)).run();

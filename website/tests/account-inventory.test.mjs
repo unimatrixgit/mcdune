@@ -1,10 +1,11 @@
+import {FIRST_LOGIN_SCHEMA} from '../node/first-login.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {LocalD1} from './d1-adapter.mjs';
 import {createPanel} from '../control-panel/server.mjs';
 const origin='https://cp.dunerealms.com';
-const schema=`CREATE TABLE site_accounts(id TEXT PRIMARY KEY,username TEXT UNIQUE,display_name TEXT,password_salt TEXT,password_hash TEXT,role TEXT,created_at INTEGER);CREATE TABLE site_sessions(token_hash TEXT PRIMARY KEY,user_id TEXT,expires_at INTEGER);CREATE TABLE player_profiles(user_id TEXT PRIMARY KEY,display_name TEXT,minecraft_name TEXT,discord_name TEXT,created_at INTEGER,updated_at INTEGER);`+readFileSync(new URL('../node/schema.sql',import.meta.url),'utf8').split('CREATE TABLE IF NOT EXISTS site_game_links')[1].replace(/^/,'CREATE TABLE IF NOT EXISTS site_game_links').replace(/ ENGINE=InnoDB DEFAULT CHARSET=utf8mb4/g,'');
+const schema=FIRST_LOGIN_SCHEMA+';'+'CREATE TABLE IF NOT EXISTS site_age_declarations(user_id TEXT PRIMARY KEY,age_band TEXT,declared_at INTEGER);'+`CREATE TABLE site_accounts(id TEXT PRIMARY KEY,username TEXT UNIQUE,display_name TEXT,password_salt TEXT,password_hash TEXT,role TEXT,created_at INTEGER);CREATE TABLE site_sessions(token_hash TEXT PRIMARY KEY,user_id TEXT,expires_at INTEGER);CREATE TABLE player_profiles(user_id TEXT PRIMARY KEY,display_name TEXT,minecraft_name TEXT,discord_name TEXT,created_at INTEGER,updated_at INTEGER);`+readFileSync(new URL('../node/schema.sql',import.meta.url),'utf8').split('CREATE TABLE IF NOT EXISTS site_game_links')[1].replace(/^/,'CREATE TABLE IF NOT EXISTS site_game_links').replace(/ ENGINE=InnoDB DEFAULT CHARSET=utf8mb4/g,'');
 const aliceUuid='12345678-1234-4234-9234-123456789012',bobUuid='22345678-1234-4234-9234-123456789012';
 test('Real panel session and verified-link schema isolate inventory/sales; unlink and logout revoke reads',async()=>{
  const db=new LocalD1(schema),queries=[];
@@ -14,7 +15,7 @@ test('Real panel session and verified-link schema isolate inventory/sales; unlin
   assert.equal((await req('/api/inventory')).status,401);
   const cookies=[];
   for(const [username,uuid]of [['alice',aliceUuid],['bobby',bobUuid]]){
-   const r=await req('/api/auth/register',null,{username,password:'long test password 123'});assert.equal(r.status,200);const cookie=r.headers.get('set-cookie').split(';')[0];cookies.push(cookie);
+   const r=await req('/api/auth/register',null,{username,password:'long test password 123',ageBand:'18plus'});assert.equal(r.status,200);const cookie=r.headers.get('set-cookie').split(';')[0];cookies.push(cookie);
    const account=await db.prepare('SELECT id FROM site_accounts WHERE username=?').bind(username).first();
    await db.prepare('INSERT INTO site_game_links(user_id,minecraft_uuid,minecraft_name,linked_at) VALUES(?,?,?,?)').bind(account.id,uuid,username,1).run();
   }

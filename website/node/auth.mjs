@@ -40,11 +40,14 @@ export function createAuth(db,origin){
     if(!/^[a-z0-9_]{3,32}$/.test(username)||typeof password!=='string'||password.length<12||password.length>256)return json({message:'Use a username of 3–32 letters, numbers or underscores and a password of 12–256 characters.'},400);
     if(!allowed(username)||!allowed('global',120,60000))return json({message:'Too many attempts. Please try again later.'},429);
     if(path==='/api/auth/register'){
+      if(!['under15','15to17','18plus'].includes(data?.ageBand))
+        return json({message:'Select a valid age category.'},400);
       if(!allowed('registrations',60,3600000))return json({message:'Registration is temporarily limited. Please try later.'},429);
       const salt=randomBytes(16).toString('hex'),hash=(await scrypt(password,salt,64)).toString('hex'),id=randomUUID(),now=Date.now();
       try{await db.batch([
         db.prepare('INSERT INTO site_accounts(id,username,display_name,password_salt,password_hash,role,created_at) VALUES(?,?,?,?,?,?,?)').bind(id,username,username,salt,hash,'user',now),
-        db.prepare('INSERT INTO player_profiles(user_id,display_name,minecraft_name,discord_name,created_at,updated_at) VALUES(?,?,?,?,?,?)').bind(id,username,'','',now,now)
+        db.prepare('INSERT INTO player_profiles(user_id,display_name,minecraft_name,discord_name,created_at,updated_at) VALUES(?,?,?,?,?,?)').bind(id,username,'','',now,now),
+        db.prepare('INSERT INTO site_age_declarations(user_id,age_band,declared_at) VALUES(?,?,?)').bind(id,data.ageBand,now)
       ]);}catch(error){if(error.code==='ER_DUP_ENTRY'||String(error.message).includes('UNIQUE constraint'))return json({message:'That username is unavailable.'},409);throw error;}
       return issue({id,username,role:'user'});
     }
