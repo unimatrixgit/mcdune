@@ -43,3 +43,36 @@ test('malformed permission node types do not grant bank access',async()=>{
   assert.equal(f.calls.length,0);
  }
 });
+
+test('bank access is revoked if permissions change during the upstream request',async()=>{
+ let checks=0;
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:++checks===1?['web.bank.personal.view']:[]}),
+  linked:async()=>player,
+  fetcher:async()=>Response.json(bank)
+ });
+ assert.equal((await app(new Request('https://cp.dunerealms.com/api/bank/personal'))).status,403);
+});
+test('bank refuses to disclose data when Minecraft link changes mid-request',async()=>{
+ let checks=0;
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>++checks===1?player:'11111111-1111-1111-1111-111111111111',
+  fetcher:async()=>Response.json(bank)
+ });
+ assert.equal((await app(new Request('https://cp.dunerealms.com/api/bank/personal'))).status,409);
+});
+test('upstream bank failures do not leak internal details or cached balances',async()=>{
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>player,
+  fetcher:async()=>{throw Error('secret internal bank failure');}
+ });
+ const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+ assert.equal(response.status,503);
+ assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+ assert.doesNotMatch(JSON.stringify(await response.json()),/secret internal bank failure/);
+});
