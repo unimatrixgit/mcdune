@@ -41,3 +41,7 @@ export async function initializeRanks(db){
  for(const rank of DEFAULT_RANKS)await db.prepare('INSERT INTO cp_ranks(rank_key,label,rank_level,kind,permissions_json,version) VALUES(?,?,?,?,?,1) ON CONFLICT(rank_key) DO UPDATE SET rank_key=excluded.rank_key').bind(rank.key,rank.label,rank.level,rank.kind,JSON.stringify(rank.nodes)).run();
  await db.prepare("UPDATE site_accounts SET role='user' WHERE role='player'").run();
 }
+
+export const isOwnerRank = rank =>
+  ['owners', 'official_account', 'web_net_admin', 'network_admin']
+    .includes(typeof rank === 'string' ? rank : rank?.key);
