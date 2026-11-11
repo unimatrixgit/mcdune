@@ -1,0 +1,12 @@
+{
+  "roles": [{"key":"rank-builder","rank":"game_builder","label":"Builder Team","file":"rank-builder-150.png"}],
+  "manual": [{"key":"builder-award","label":"Builder Award","file":"builder-award-150.png"}],
+  "forum": [
+    {"key":"forum-posts-1","threshold":1,"label":"First Post","colour":"Bronze","file":"forum-posts-1-300.png"},
+    {"key":"forum-posts-10","threshold":10,"label":"10 Posts","colour":"Silver","file":"forum-posts-10-300.png"},
+    {"key":"forum-posts-50","threshold":50,"label":"50 Posts","colour":"Emerald","file":"forum-posts-50-300.png"},
+    {"key":"forum-posts-100","threshold":100,"label":"100 Posts","colour":"Sapphire","file":"forum-posts-100-300.png"},
+    {"key":"forum-posts-1000","threshold":1000,"label":"1,000 Posts","colour":"Purple","file":"forum-posts-1000-300.png"},
+    {"key":"forum-legend","threshold":1001,"label":"Forum Legend","colour":"Imperial purple & gold","file":"forum-legend-300.png"}
+  ]
+}
