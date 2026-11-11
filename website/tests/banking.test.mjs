@@ -163,3 +163,11 @@ test('bank rejects a changed or missing account identity after upstream lookup',
   assert.equal((await app(new Request('https://cp.dunerealms.com/api/bank/personal'))).status,401);
  }
 });
+
+test('personal bank projection requires valid UUID syntax on both sides',()=>{
+ for(const invalid of ['not-a-uuid','', '00000000-0000-0000-0000-00000000000z']){
+  assert.equal(projectBank({...bank,playerUuid:invalid},{playerUuid:invalid}),null);
+  assert.equal(projectBank(bank,{playerUuid:invalid}),null);
+ }
+ assert(projectBank(bank,{playerUuid:player.toUpperCase()}));
+});
