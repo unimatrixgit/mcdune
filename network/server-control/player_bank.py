@@ -4,8 +4,13 @@ import uuid
 from decimal import Decimal
 
 def money(value,signed=False):
- value=Decimal(value)
- if not value.is_finite() or abs(value)>Decimal('1000000000000') or (not signed and value<0) or value!=value.quantize(Decimal('0.01')): raise RuntimeError('Invalid Dunemarks amount')
+ # Database DECIMAL values must be exact; never accept binary floats or booleans.
+ if isinstance(value,(float,bool)) or value is None: raise RuntimeError('Invalid Dunemarks amount')
+ try:
+  value=Decimal(value)
+  if not value.is_finite() or abs(value)>Decimal('1000000000000') or (not signed and value<0) or value!=value.quantize(Decimal('0.01')): raise RuntimeError('Invalid Dunemarks amount')
+ except (ArithmeticError,ValueError,TypeError):
+  raise RuntimeError('Invalid Dunemarks amount') from None
  return format(value,'.2f')
 def identity(value):
  if not isinstance(value,str) or not re.fullmatch(r'[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}',value) or str(uuid.UUID(value))!=value: raise ValueError('Invalid player UUID')
