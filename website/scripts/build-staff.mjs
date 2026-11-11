@@ -1,4 +1,9 @@
 import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
+// This legacy generator mutates every HTML footer. Never run it implicitly.
+if(!process.argv.includes('--regenerate-staff')){
+ console.log('Preserving authored staff roster and page footers; pass --regenerate-staff to rebuild.');
+ process.exit(0);
+}
 const web=new URL('../web/',import.meta.url),data=JSON.parse(readFileSync(new URL('staff-data.json',web),'utf8'));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 for(const file of readdirSync(web).filter(x=>x.endsWith('.html'))){let text=readFileSync(new URL(file,web),'utf8');text=text.replace(/<footer>[\s\S]*?<\/footer>/,footer=>footer.includes('href="staff.html"')?footer:footer.replace('<a href="manual.html">','<a href="staff.html">Staff & contributors →</a><a href="manual.html">'));writeFileSync(new URL(file,web),text)}
