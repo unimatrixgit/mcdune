@@ -68,3 +68,23 @@ test('remittance refuses self-payments and unknown beneficiary account types',as
   assert.equal(upstream,0);
  }
 });
+
+test('transfer handler rejects unknown routes without upstream activity',async()=>{
+ let upstream=0;
+ const handler=createBankTransfers({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>player,excluded:async()=>false,
+  fetcher:async()=>{upstream++;return Response.json({reference:requestId});}
+ });
+ const response=await handler(new Request('https://cp.dunerealms.com/api/bank/unrecognized',{
+  method:'POST',headers:{origin:'https://cp.dunerealms.com','content-type':'application/json'},body:JSON.stringify(payload)
+ }));
+ assert.equal(response.status,404);assert.equal(upstream,0);
+});
+test('array-shaped transfer confirmations never count as success',async()=>{
+ const f=setup({fetcher:async()=>Response.json([{reference:requestId}])});
+ const response=await f.send();
+ assert.equal(response.status,503);
+ assert.match((await response.json()).message,/Retry this same request/);
+});
