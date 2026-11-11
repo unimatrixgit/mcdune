@@ -1,8 +1,20 @@
-import{withCanonicalMenu}from'./main-menu.mjs';
+import{withCanonicalMenu,MAIN_MENU}from'./main-menu.mjs';
 import{recordPageUpdates,patchMenuBadges}from'./menu-updates.mjs';
 // Package the authored web and worker sources without rewriting their content.
 import {readFileSync,writeFileSync,readdirSync,statSync,mkdirSync,existsSync,rmSync,cpSync} from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),web=path.join(root,'web'),dist=path.join(root,'dist');
+// Fail before packaging if a public menu destination or illustration is missing.
+for(const [label,href,icon] of MAIN_MENU){
+ const url=new URL(href);
+ if(url.hostname==='www.dunerealms.com'){
+  const relative=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname.slice(1));
+  if(!existsSync(path.join(web,relative)))throw Error('Broken public menu link: '+label+' -> '+relative);
+ }
+ if(!existsSync(path.join(web,'assets',icon)))throw Error('Missing menu artwork: '+label+' -> '+icon);
+}
+for(const [page,dependencies] of [['shop.html',['shop-landing.css','shop-embed.js']],['kits.html',['kits.css','kits.js']]]){
+ for(const file of dependencies)if(!existsSync(path.join(web,file)))throw Error('Missing '+page+' dependency: '+file);
+}
 recordPageUpdates({root});patchMenuBadges(root);writeFileSync(path.join(web,'portal-navigation.js'),withCanonicalMenu(readFileSync(path.join(web,'portal-navigation.js'),'utf8')));
 const assets={};const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.webp':'image/webp','.png':'image/png','.mp4':'video/mp4','.zip':'application/zip','.svg':'image/svg+xml'};
 function collect(directory){for(const entry of readdirSync(directory).sort()){const p=path.join(directory,entry);if(statSync(p).isDirectory())collect(p);else{const relative=path.relative(web,p).split(path.sep).join('/');if(/^assets\/seals\/[^/]+-provenance\.txt$/.test(relative))continue;const type=types[path.extname(entry)];if(!type)throw Error('Unexpected asset: '+entry);assets['/'+relative]=[type,readFileSync(p).toString('base64')]}}}collect(web);
