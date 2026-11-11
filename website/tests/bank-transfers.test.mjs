@@ -42,3 +42,29 @@ test('transfer rejects invalid upstream confirmation without implying success',a
  const f=setup({fetcher:async()=>Response.json({reference:'different'})});
  const r=await f.send();assert.equal(r.status,503);assert.match((await r.json()).message,/Retry this same request/);
 });
+
+test('remittance refuses self-payments and unknown beneficiary account types',async()=>{
+ const recipientAccount='DRCA 1020 0000 0100';
+ const recipientName='Recipient';
+ const data={...payload,recipientAccount,recipientName};
+ for(const recipient of [
+  {player:player.toUpperCase(),bank_type:'current'},
+  {player:'11111111-1111-1111-1111-111111111111',bank_type:'unknown'},
+  {player:null,bank_type:'current'}
+ ]){
+  let upstream=0;
+  const handler=createBankTransfers({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+   authenticate:async()=>({id:'account'}),
+   access:async()=>({nodes:['web.bank.personal.view']}),
+   linked:async()=>player,excluded:async()=>false,
+   resolve:async()=>recipient,accountNumber:async()=>recipientAccount,
+   fetcher:async()=>{upstream++;return Response.json({reference:requestId});}
+  });
+  const response=await handler(new Request('https://cp.dunerealms.com/api/bank/remittance',{
+   method:'POST',headers:{origin:'https://cp.dunerealms.com','content-type':'application/json'},
+   body:JSON.stringify(data)
+  }));
+  assert.equal(response.status,409);
+  assert.equal(upstream,0);
+ }
+});
