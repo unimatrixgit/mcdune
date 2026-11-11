@@ -1,3 +1,4 @@
+import {nativeSyncChange} from './native-sync-outbox.mjs';
 import {randomBytes,createHash,timingSafeEqual} from 'node:crypto';
 import {identity} from './auth.mjs';
 export const digest=value=>createHash('sha256').update(value).digest('hex');
@@ -18,7 +19,8 @@ export function createGameLink(db,settings,origin){
     const result=await db.batch([
      db.prepare('INSERT INTO site_game_links(user_id,minecraft_uuid,minecraft_name,linked_at) SELECT user_id,?,?,? FROM site_link_challenges WHERE token_hash=? AND expires_at>?').bind(body.uuid,body.name,now,token,now),
      db.prepare('INSERT INTO site_game_identities(minecraft_uuid,first_linked_at,last_name) SELECT minecraft_uuid,linked_at,minecraft_name FROM site_game_links WHERE minecraft_uuid=? ON CONFLICT(minecraft_uuid) DO UPDATE SET last_name=excluded.last_name').bind(body.uuid),
-     db.prepare('DELETE FROM site_link_challenges WHERE token_hash=?').bind(token)
+     db.prepare('UPDATE site_clan_members SET minecraft_uuid=(SELECT minecraft_uuid FROM site_game_links WHERE user_id=site_clan_members.user_id) WHERE user_id IN (SELECT user_id FROM site_link_challenges WHERE token_hash=? AND expires_at>?)').bind(token,now),
+     db.prepare('DELETE FROM site_link_challenges WHERE token_hash=?').bind(token),nativeSyncChange(db)
     ]);
     return result[0].meta.changes?json({ok:true}):json({message:'Code expired, used or invalid.'},409);
    }catch(error){if(error.code==='ER_DUP_ENTRY'||String(error.message).includes('UNIQUE'))return json({message:'This website or game account is already linked. Unlink before linking again.'},409);throw error;}
@@ -32,7 +34,7 @@ export function createGameLink(db,settings,origin){
   if(request.headers.get('origin')!==origin)return json({message:'Origin rejected'},403);
   const now=Date.now();for(const [key,time]of attempts)if(now-time>60000)attempts.delete(key);
   if(path==='/api/game-link/unlink'){
-   await db.batch([db.prepare('DELETE FROM site_game_links WHERE user_id=?').bind(user.id),db.prepare('DELETE FROM site_link_challenges WHERE user_id=?').bind(user.id)]);return json({ok:true});
+   await db.batch([db.prepare('UPDATE site_clan_members SET minecraft_uuid=NULL WHERE user_id=?').bind(user.id),db.prepare('DELETE FROM site_game_links WHERE user_id=?').bind(user.id),db.prepare('DELETE FROM site_link_challenges WHERE user_id=?').bind(user.id),nativeSyncChange(db)]);return json({ok:true});
   }
   if(path!=='/api/game-link')return json({message:'Not found'},404);
   if(attempts.size>=5000||now-(attempts.get(user.id)||0)<30000)return json({message:'Wait 30 seconds before trying again.'},429);

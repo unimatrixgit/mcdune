@@ -1,0 +1,10 @@
+:root{color-scheme:dark;--dune-bg:#0c1c1a;--dune-panel:#142c28;--dune-gold:#d6b46a;--dune-ink:#eee7d2}
+html,body{background:var(--dune-bg)!important;color:var(--dune-ink)!important;font:15px/1.6 system-ui,sans-serif!important}
+a,a:visited{color:var(--dune-gold)!important}a:hover{color:#ffe1a2!important}
+#container,#wrapper,#content,.tborder,#navigation,#nav,#sub_nav,.container{background:var(--dune-bg)!important;color:var(--dune-ink)!important;border-color:#365047!important;box-shadow:none!important}
+.thead,.tcat,#header,#header ul.menu,#panel .upper,#panel .lower,.table-header,.table-header a{background:#203d35!important;color:#f0d89d!important;border-color:#987e45!important}
+.trow1,.trow2,.trow_shaded,.table tbody tr,.ticket_info,table.list tbody tr,#ticketInfo,#reply,.thread-entry,.form_table{background:var(--dune-panel)!important;color:var(--dune-ink)!important}
+input,select,textarea,.redactor-editor{background:#091915!important;color:#eee7d2!important;border:1px solid #56705e!important;border-radius:5px;padding:8px!important}
+button,input.button,input[type=submit],.button,.button:visited{background:#c5a15b!important;color:#14231b!important;border:1px solid #e3c988!important;border-radius:5px;padding:9px 15px!important;font-weight:650!important;text-shadow:none!important}
+th,td{border-color:#365047!important}h1,h2,h3{color:#f2dbab!important}#logo{display:none!important}.smalltext,.smalltext a,.description,.faded{color:#b8c7b4!important}
+#container{width:96%!important;max-width:1400px;margin:auto!important}#footer,#copyright,.poweredby{background:transparent!important;color:#bdc8b7!important}

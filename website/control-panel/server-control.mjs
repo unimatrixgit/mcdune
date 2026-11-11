@@ -9,11 +9,9 @@ export function createServerControl(db,settings,{fetcher=fetch}={}){
   const user=await identity(request,db);
   if(!user)return json({message:'Sign in to the account panel first.'},401);
   const path=new URL(request.url).pathname;
-  let node=path.endsWith('/logs')?'cp.servers.logs':path.endsWith('/action')?'cp.servers.power':'cp.servers.view';
-  const operators=(settings.SERVER_CONTROL_OPERATORS||'').split(',').map(v=>v.trim().toLowerCase()).filter(Boolean);
-  if(!operators.includes(String(user.username||'').toLowerCase()))return json({message:'Server operator access is required.'},403);
-  if(!await can(db,user,'cp.menu.servers'))return json({message:'Server operator access is required.'},403);
-  if(path.endsWith('/action')){try{if((await request.clone().json()).action==='command')node='cp.servers.console';}catch{}}
+  let node=path.endsWith('/logs')?'web.servers.logs':path.endsWith('/action')?'web.servers.power':'web.servers.view';
+  if(!await can(db,user,'web.menu.servers'))return json({message:'Server operator access is required.'},403);
+  if(path.endsWith('/action')){try{if((await request.clone().json()).action==='command')node='web.servers.console';}catch{}}
   if(!await can(db,user,node))return json({message:'Permission required: '+node},403);
   if(!settings.SERVER_CONTROL_TOKEN||settings.SERVER_CONTROL_TOKEN.length<64)return json({message:'Server controls are not configured.'},503);
   const url=new URL(request.url);let target,body;

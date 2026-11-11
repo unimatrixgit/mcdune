@@ -1,0 +1,10 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+const release=process.argv[2];if(!release)throw Error('Release directory required');
+const file=release+'/dist/server/index.js',source=readFileSync(file,'utf8'),prefix='const ASSET_DATA=',end=source.indexOf(';\n');if(!source.startsWith(prefix)||end<0)throw Error('Unexpected asset bundle');
+const assets=JSON.parse(source.slice(prefix.length,end));
+for(const[name,mime]of [['item-catalogue.js','text/javascript'],['item-catalogue.css','text/css']])assets['/'+name]=[mime+'; charset=utf-8',readFileSync(new URL('../web/'+name,import.meta.url)).toString('base64')];
+if(!assets['/armoury.html'])throw Error('Armoury page missing');
+const add=html=>html.includes('/item-catalogue.js')?html:html.replace('</head>','<link rel="stylesheet" href="/item-catalogue.css?v=1"><script src="/item-catalogue.js?v=1" defer></script></head>');
+assets['/armoury.html'][1]=Buffer.from(add(Buffer.from(assets['/armoury.html'][1],'base64').toString('utf8'))).toString('base64');
+writeFileSync(file,prefix+JSON.stringify(assets)+source.slice(end));
+console.log('Item catalogue added; existing assets and runtime preserved');

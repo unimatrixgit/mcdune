@@ -1,0 +1,298 @@
+TAP version 13
+# Subtest: Contact email requires an authentic, unexpired, single-use CAPTCHA proof
+ok 1 - Contact email requires an authentic, unexpired, single-use CAPTCHA proof
+  ---
+  duration_ms: 21.261475
+  type: 'test'
+  ...
+# Subtest: Forged proof and concurrent replay never reveal the email twice
+ok 2 - Forged proof and concurrent replay never reveal the email twice
+  ---
+  duration_ms: 4.58435
+  type: 'test'
+  ...
+# Subtest: Retired journal routes and data are no longer served
+ok 3 - Retired journal routes and data are no longer served
+  ---
+  duration_ms: 19.741853
+  type: 'test'
+  ...
+# Subtest: Every public page has one visible notice and no retired story content
+ok 4 - Every public page has one visible notice and no retired story content
+  ---
+  duration_ms: 27.508708
+  type: 'test'
+  ...
+# Subtest: Live legacy feed labels display original names without mutating identifiers
+ok 5 - Live legacy feed labels display original names without mutating identifiers
+  ---
+  duration_ms: 1.48448
+  type: 'test'
+  ...
+# Subtest: Diplomacy is honestly disconnected without its configured channel
+ok 6 - Diplomacy is honestly disconnected without its configured channel
+  ---
+  duration_ms: 16.445529
+  type: 'test'
+  ...
+# Subtest: Fresh verified snapshots return public offices only
+ok 7 - Fresh verified snapshots return public offices only
+  ---
+  duration_ms: 9.169093
+  type: 'test'
+  ...
+# Subtest: Wrong publishers, stale data and invalid offices are rejected
+ok 8 - Wrong publishers, stale data and invalid offices are rejected
+  ---
+  duration_ms: 1.963554
+  type: 'test'
+  ...
+# Subtest: Exchange and diplomacy payloads cannot cross feed types
+ok 9 - Exchange and diplomacy payloads cannot cross feed types
+  ---
+  duration_ms: 0.472398
+  type: 'test'
+  ...
+# Subtest: Demo market covers every category and planet, with enough listings for pagination
+ok 10 - Demo market covers every category and planet, with enough listings for pagination
+  ---
+  duration_ms: 0.888091
+  type: 'test'
+  ...
+# Subtest: Search includes material names, categories, planets and sellers without mutating source
+ok 11 - Search includes material names, categories, planets and sellers without mutating source
+  ---
+  duration_ms: 0.855512
+  type: 'test'
+  ...
+# Subtest: Live validation rejects invalid data and duplicate IDs; empty live market stays empty
+ok 12 - Live validation rejects invalid data and duplicate IDs; empty live market stays empty
+  ---
+  duration_ms: 0.230264
+  type: 'test'
+  ...
+# Subtest: Unconnected API stays unavailable, never fabricates live listings or allows trading
+ok 13 - Unconnected API stays unavailable, never fabricates live listings or allows trading
+  ---
+  duration_ms: 16.780077
+  type: 'test'
+  ...
+# Subtest: Connected gateway sends the token only upstream and exposes sanitized read-only offers
+ok 14 - Connected gateway sends the token only upstream and exposes sanitized read-only offers
+  ---
+  duration_ms: 0.8726
+  type: 'test'
+  ...
+# Subtest: Unconfigured feeds return no fabricated data
+ok 15 - Unconfigured feeds return no fabricated data
+  ---
+  duration_ms: 24.909172
+  type: 'test'
+  ...
+# Subtest: multipart snapshots assemble in reverse Discord order with correct prices
+ok 16 - multipart snapshots assemble in reverse Discord order with correct prices
+  ---
+  duration_ms: 9.727294
+  type: 'test'
+  ...
+# Subtest: Incomplete and forged snapshots are rejected
+ok 17 - Incomplete and forged snapshots are rejected
+  ---
+  duration_ms: 0.431032
+  type: 'test'
+  ...
+# Subtest: Stale snapshots do not masquerade as live offers
+ok 18 - Stale snapshots do not masquerade as live offers
+  ---
+  duration_ms: 1.393958
+  type: 'test'
+  ...
+# Subtest: Malformed offers cannot inject prices or unsupported types
+ok 19 - Malformed offers cannot inject prices or unsupported types
+  ---
+  duration_ms: 0.176065
+  type: 'test'
+  ...
+# Subtest: Announcements are assigned concrete categories
+ok 20 - Announcements are assigned concrete categories
+  ---
+  duration_ms: 0.207971
+  type: 'test'
+  ...
+# Subtest: Forgejo subpath streams git bodies, preserves auth, strips website identity and cookies
+ok 21 - Forgejo subpath streams git bodies, preserves auth, strips website identity and cookies
+  ---
+  duration_ms: 28.857996
+  type: 'test'
+  ...
+# (node:2493035) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Anonymous readers can browse but cannot post
+ok 22 - Anonymous readers can browse but cannot post
+  ---
+  duration_ms: 18.363247
+  type: 'test'
+  ...
+# Subtest: Topics and replies persist, with public identity IDs excluded
+ok 23 - Topics and replies persist, with public identity IDs excluded
+  ---
+  duration_ms: 380.948422
+  type: 'test'
+  ...
+# Subtest: Cross-site writes and forged management attempts fail
+ok 24 - Cross-site writes and forged management attempts fail
+  ---
+  duration_ms: 3.201705
+  type: 'test'
+  ...
+# Subtest: Closed topics reject replies and can be reopened by their owner
+ok 25 - Closed topics reject replies and can be reopened by their owner
+  ---
+  duration_ms: 1.897904
+  type: 'test'
+  ...
+# Subtest: Post validation, rate limits and parameterized search resist abuse
+ok 26 - Post validation, rate limits and parameterized search resist abuse
+  ---
+  duration_ms: 1.293113
+  type: 'test'
+  ...
+# Subtest: Reports are visible only to moderators; removal hides rather than erases
+ok 27 - Reports are visible only to moderators; removal hides rather than erases
+  ---
+  duration_ms: 1.808506
+  type: 'test'
+  ...
+# (node:2493041) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: External hosting rejects forged identity, protects sessions and keeps private data private
+ok 28 - External hosting rejects forged identity, protects sessions and keeps private data private
+  ---
+  duration_ms: 116.665489
+  type: 'test'
+  ...
+# Subtest: MySQL profile upserts retain bound values
+ok 29 - MySQL profile upserts retain bound values
+  ---
+  duration_ms: 0.421263
+  type: 'test'
+  ...
+# Subtest: Normal bundles reject four and eleven tasks, accepting five and ten
+ok 30 - Normal bundles reject four and eleven tasks, accepting five and ten
+  ---
+  duration_ms: 3.52646
+  type: 'test'
+  ...
+# Subtest: A release moves selected products once and preserves later pending work
+ok 31 - A release moves selected products once and preserves later pending work
+  ---
+  duration_ms: 0.454685
+  type: 'test'
+  ...
+# Subtest: Workflow agreements and unfinished tasks cannot inflate a release
+ok 32 - Workflow agreements and unfinished tasks cannot inflate a release
+  ---
+  duration_ms: 0.305839
+  type: 'test'
+  ...
+# Subtest: Duplicate prompt identities and colliding version filenames are rejected
+ok 33 - Duplicate prompt identities and colliding version filenames are rejected
+  ---
+  duration_ms: 0.430864
+  type: 'test'
+  ...
+# Subtest: A single urgent bugfix publishes independently with problem, repair and checks
+ok 34 - A single urgent bugfix publishes independently with problem, repair and checks
+  ---
+  duration_ms: 0.499794
+  type: 'test'
+  ...
+# Subtest: Urgent fixes cannot be held in a normal feature queue
+ok 35 - Urgent fixes cannot be held in a normal feature queue
+  ---
+  duration_ms: 0.336731
+  type: 'test'
+  ...
+# Subtest: Future normal and urgent records generate safe pages and one urgent news card per surface
+ok 36 - Future normal and urgent records generate safe pages and one urgent news card per surface
+  ---
+  duration_ms: 60.083739
+  type: 'test'
+  ...
+# (node:2493059) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Portal data requires authentication and same-origin writes
+ok 37 - Portal data requires authentication and same-origin writes
+  ---
+  duration_ms: 26.405
+  type: 'test'
+  ...
+# Subtest: Tickets are tied to profiles and appeals require a Minecraft name
+ok 38 - Tickets are tied to profiles and appeals require a Minecraft name
+  ---
+  duration_ms: 2.424618
+  type: 'test'
+  ...
+# Subtest: Other players cannot read or alter a private ticket
+ok 39 - Other players cannot read or alter a private ticket
+  ---
+  duration_ms: 3.55406
+  type: 'test'
+  ...
+# Subtest: Only authorised staff can triage; replies carry verified staff roles
+ok 40 - Only authorised staff can triage; replies carry verified staff roles
+  ---
+  duration_ms: 3.352678
+  type: 'test'
+  ...
+# Subtest: Owners close and reopen tickets; closed cases block replies and rate limits apply
+ok 41 - Owners close and reopen tickets; closed cases block replies and rate limits apply
+  ---
+  duration_ms: 3.348049
+  type: 'test'
+  ...
+# Subtest: Private profiles and ticket history persist after database restart
+ok 42 - Private profiles and ticket history persist after database restart
+  ---
+  duration_ms: 561.835442
+  type: 'test'
+  ...
+# Subtest: Built Worker serves all seventeen separate pages and site assets
+ok 43 - Built Worker serves all seventeen separate pages and site assets
+  ---
+  duration_ms: 47.347007
+  type: 'test'
+  ...
+# Subtest: Built Worker retains unconnected feed state without leaking secrets
+ok 44 - Built Worker retains unconnected feed state without leaking secrets
+  ---
+  duration_ms: 0.41437
+  type: 'test'
+  ...
+# Subtest: Unsupported paths and write requests are rejected
+ok 45 - Unsupported paths and write requests are rejected
+  ---
+  duration_ms: 0.251061
+  type: 'test'
+  ...
+# Subtest: Live status is cached and only known server fields reach the browser
+ok 46 - Live status is cached and only known server fields reach the browser
+  ---
+  duration_ms: 18.99732
+  type: 'test'
+  ...
+# Subtest: Missing, failed and stale monitoring never invent online or offline status
+ok 47 - Missing, failed and stale monitoring never invent online or offline status
+  ---
+  duration_ms: 0.95978
+  type: 'test'
+  ...
+1..47
+# tests 47
+# suites 0
+# pass 47
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 672.280184

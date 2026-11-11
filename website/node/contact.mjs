@@ -19,7 +19,7 @@ export function createContact(settings={},options={}){
     }
     if(url.pathname!=='/api/contact/reveal')return reply({error:'not_found'},404);
     if(request.method!=='POST')return reply({error:'method_not_allowed'},405);
-    if(request.headers.get('Origin')!==url.origin)return reply({error:'origin_required'},403);
+    if(![url.origin,'https://wiki.dunerealms.com'].includes(request.headers.get('Origin')))return reply({error:'origin_required'},403);
     if(!request.headers.get('Content-Type')?.startsWith('application/json'))return reply({error:'json_required'},415);
     try{
       const text=await request.text();if(text.length>8192)return reply({error:'payload_too_large'},413);

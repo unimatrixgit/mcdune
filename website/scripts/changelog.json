@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "version": "alpha-website-stage-2026-10-28",
+    "date": "2026-10-28T17:31:50Z",
+    "title": "Website update: shared welcome banners and news portal",
+    "synopsis": "The latest website stage is live. Work on the full Alpha release continues.",
+    "tasks": [
+      {
+        "title": "Shared website presentation",
+        "changes": [
+          "Matching illustrated navigation and welcome banners across the main site and community centres.",
+          "Signed-in usernames and section-specific caravan lore.",
+          "Compact live world status inside the welcome banner.",
+          "Normal page scrolling restored and duplicate welcome blocks removed."
+        ]
+      },
+      {
+        "title": "News and community portal",
+        "changes": [
+          "Original Get the plugin hero preserved; house and planet cards removed from the homepage.",
+          "News cards support nine items per page across five pages.",
+          "Latest MyBB discussions support three items per page across three pages and respect guest forum visibility.",
+          "Chronological news archive supports 25 items per page."
+        ]
+      },
+      {
+        "title": "Field manual",
+        "changes": [
+          "Removed forced chapter scrolling.",
+          "Expanded the full chapter menu without an inner scrollbar."
+        ]
+      }
+    ]
+  }
+]

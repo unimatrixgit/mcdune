@@ -1,15 +1,14 @@
-import {FIRST_LOGIN_SCHEMA} from '../node/first-login.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {LocalD1} from './d1-adapter.mjs';
 import {createPanel} from '../control-panel/server.mjs';
 const origin='https://cp.dunerealms.com',secret='test-bridge-secret-with-more-than-32-characters';
-const schema=FIRST_LOGIN_SCHEMA+';'+'CREATE TABLE IF NOT EXISTS site_age_declarations(user_id TEXT PRIMARY KEY,age_band TEXT,declared_at INTEGER);'+`CREATE TABLE site_accounts(id TEXT PRIMARY KEY,username TEXT UNIQUE,display_name TEXT,password_salt TEXT,password_hash TEXT,role TEXT,created_at INTEGER);
+const schema=`CREATE TABLE site_accounts(id TEXT PRIMARY KEY,username TEXT UNIQUE,display_name TEXT,password_salt TEXT,password_hash TEXT,role TEXT,created_at INTEGER);
 CREATE TABLE site_sessions(token_hash TEXT PRIMARY KEY,user_id TEXT,expires_at INTEGER);
 CREATE TABLE player_profiles(user_id TEXT PRIMARY KEY,display_name TEXT,minecraft_name TEXT,discord_name TEXT,created_at INTEGER,updated_at INTEGER);`+readFileSync(new URL('../node/schema.sql',import.meta.url),'utf8').split('CREATE TABLE IF NOT EXISTS site_game_links')[1].replace(/^/,'CREATE TABLE IF NOT EXISTS site_game_links').replace(/ ENGINE=InnoDB DEFAULT CHARSET=utf8mb4/g,'');
 function setup(){const db=new LocalD1(schema),app=createPanel(db,{GAME_LINK_SECRET:secret});const req=async(path,body,headers={})=>app(new Request(origin+'/api/'+path,{method:body===undefined?'GET':'POST',headers:{Origin:origin,'Content-Type':'application/json',...headers},...(body===undefined?{}:{body:JSON.stringify(body)})}));return {db,req};}
-async function register(req,name){const response=await req('auth/register',{username:name,password:'long testing password 123',ageBand:'18plus'});assert.equal(response.status,200);return {Cookie:response.headers.get('set-cookie').split(';')[0]};}
+async function register(req,name){const response=await req('auth/register',{username:name,password:'long testing password 123',ageBand:'15plus'});assert.equal(response.status,200);return {Cookie:response.headers.get('set-cookie').split(';')[0]};}
 const uuid='12345678-1234-4234-9234-123456789012',otherUuid='22345678-1234-4234-9234-123456789012';
 test('Panel serves shared theme assets without exposing private source paths',async()=>{
  const db=new LocalD1(schema),app=createPanel(db,{GAME_LINK_SECRET:secret});try{
@@ -58,12 +57,12 @@ test('Personal rewards start after UUID link, are private, and move to history o
 });
 test('Password changes require current password and revoke other sessions; staff actions reject player injection',async()=>{
  const {db,req}=setup();try{
- const alice=await register(req,'alice');const second=await req('auth/login',{username:'alice',password:'long testing password 123',ageBand:'18plus'});const oldCookie={Cookie:second.headers.get('set-cookie').split(';')[0]};
+ const alice=await register(req,'alice');const second=await req('auth/login',{username:'alice',password:'long testing password 123',ageBand:'15plus'});const oldCookie={Cookie:second.headers.get('set-cookie').split(';')[0]};
  assert.equal((await req('community/campaigns',{month:'2026-12',targetCents:100,rewardAmount:50,role:'staff'},alice)).status,403);
  assert.equal((await req('auth/password',{currentPassword:'wrong',newPassword:'new long password 123'},alice)).status,403);
  const change=await req('auth/password',{currentPassword:'long testing password 123',newPassword:'new long password 123'},alice);assert.equal(change.status,200);
  assert.equal((await (await req('auth/session',undefined,oldCookie)).json()).authenticated,false);
- assert.equal((await req('auth/login',{username:'alice',password:'new long password 123',ageBand:'18plus'})).status,200);
+ assert.equal((await req('auth/login',{username:'alice',password:'new long password 123'})).status,200);
  }finally{db.close();}
 });
 test('Staff goals are fixed, audited, month-bound and unreached codes remain private',async()=>{

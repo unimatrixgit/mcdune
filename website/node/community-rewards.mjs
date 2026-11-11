@@ -1,3 +1,4 @@
+import {badgesFor} from './community-badges.mjs';
 import {can} from './permissions.mjs';
 import {randomBytes,randomUUID} from 'node:crypto';
 import {identity} from './auth.mjs';
@@ -15,6 +16,8 @@ export function createCommunityRewards(db,settings,origin){
    if(path==='/api/community/game/ack'){
     if(!/^[a-f0-9]{64}$/.test(data.receipt||''))return json({message:'Invalid receipt'},400);
     const now=Date.now();
+    await db.prepare('UPDATE season_rewards SET delivered_at=COALESCE(delivered_at,?) WHERE minecraft_uuid=? AND receipt=?').bind(now,data.uuid,data.receipt).run();
+    const seasonAck=await db.prepare('SELECT delivered_at FROM season_rewards WHERE minecraft_uuid=? AND receipt=?').bind(data.uuid,data.receipt).first();if(seasonAck?.delivered_at)return json({ok:true});
     const result=await db.batch([
      db.prepare('UPDATE community_claims SET delivered_at=COALESCE(delivered_at,?) WHERE minecraft_uuid=? AND receipt=?').bind(now,data.uuid,data.receipt),
      db.prepare('UPDATE community_rewards SET used_at=COALESCE(used_at,?) WHERE minecraft_uuid=? AND month IN (SELECT month FROM community_claims WHERE minecraft_uuid=? AND receipt=? AND delivered_at IS NOT NULL)').bind(now,data.uuid,data.uuid,data.receipt)
@@ -25,6 +28,8 @@ export function createCommunityRewards(db,settings,origin){
    }
    if(path!=='/api/community/game/prepare')return json({message:'Not found'},404);
    if(!/^[A-Z0-9-]{4,48}$/.test(data.code||''))return json({message:'Invalid code'},400);
+   const season=await db.prepare('SELECT * FROM season_rewards WHERE minecraft_uuid=? AND personal_code=?').bind(data.uuid,data.code).first();
+   if(season)return json({month:'S000001',amount:season.amount,receipt:season.receipt,delivered:!!season.delivered_at});
    const campaign=await db.prepare('SELECT c.* FROM community_campaigns c WHERE c.reached_at IS NOT NULL AND (c.public_code=? OR EXISTS (SELECT 1 FROM community_rewards r WHERE r.month=c.month AND r.minecraft_uuid=? AND r.personal_code=?))').bind(data.code,data.uuid,data.code).first();
    if(!campaign)return json({message:'Code unavailable or not earned by this UUID.'},404);
    await db.prepare('INSERT INTO community_claims(minecraft_uuid,month,receipt,amount,prepared_at) VALUES(?,?,?,?,?) ON CONFLICT(minecraft_uuid,month) DO UPDATE SET minecraft_uuid=excluded.minecraft_uuid').bind(data.uuid,campaign.month,randomBytes(32).toString('hex'),campaign.reward_amount,Date.now()).run();
@@ -42,9 +47,11 @@ export function createCommunityRewards(db,settings,origin){
    for(const campaign of earned)await db.prepare('INSERT INTO community_rewards(minecraft_uuid,month,personal_code,issued_at) VALUES(?,?,?,?) ON CONFLICT(minecraft_uuid,month) DO UPDATE SET minecraft_uuid=excluded.minecraft_uuid').bind(link.minecraft_uuid,campaign.month,code(),Date.now()).run();
    // Public-code claims and personal-code claims share exactly one UUID/month ledger.
    const {results}=await db.prepare('SELECT r.month,r.personal_code,r.issued_at,c.reward_amount,q.delivered_at FROM community_rewards r JOIN community_campaigns c ON c.month=r.month LEFT JOIN community_claims q ON q.minecraft_uuid=r.minecraft_uuid AND q.month=r.month WHERE r.minecraft_uuid=? ORDER BY r.month DESC').bind(link.minecraft_uuid).all();
+   const badges=await badgesFor(db,user.id);if(badges.includes('season-tavren-ii'))await db.prepare("INSERT INTO season_rewards(minecraft_uuid,season_key,personal_code,receipt,amount,issued_at) VALUES(?,'season-tavren-ii',?,?,5000,?) ON CONFLICT(minecraft_uuid,season_key) DO UPDATE SET minecraft_uuid=excluded.minecraft_uuid").bind(link.minecraft_uuid,'SEASON-'+code(),randomBytes(32).toString('hex'),Date.now()).run();
+   const {results:seasonRows}=await db.prepare('SELECT season_key AS month,personal_code,issued_at,amount AS reward_amount,delivered_at FROM season_rewards WHERE minecraft_uuid=?').bind(link.minecraft_uuid).all();const ready=await db.prepare("SELECT setting_value FROM website_settings WHERE setting_key='season-game-redemption-ready'").first();results.push(...seasonRows.map(r=>({...r,delivery_ready:ready?.setting_value==='1'})));
    return json({linked:true,eligibleSince:link.first_linked_at,available:results.filter(r=>!r.delivered_at),history:results.filter(r=>r.delivered_at).map(({personal_code,...row})=>row)});
   }
-  if(!await can(db,user,'cp.community.manage'))return json({message:'Community management permission required.'},403);
+  if(!await can(db,user,'web.community.manage'))return json({message:'Community management permission required.'},403);
   if(request.method!=='POST')return json({message:'Method not allowed'},405);
   if(request.headers.get('origin')!==origin)return json({message:'Origin rejected'},403);
   let data;try{data=await request.json();}catch{return json({message:'Invalid request'},400);}

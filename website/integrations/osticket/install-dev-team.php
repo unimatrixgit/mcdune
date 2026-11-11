@@ -1,0 +1,19 @@
+<?php
+if(PHP_SAPI!=='cli')exit(1);
+$c=json_decode(file_get_contents('/home/dunerealms/.config/integrations.json'),true);
+$p=new PDO('mysql:host='.$c['host'].';dbname='.$c['database'].';charset=utf8mb4',$c['username'],$c['password'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);
+$dir='/home/dunerealms/.config/dev-team-20261102';if(!is_dir($dir))throw new RuntimeException('Private backup directory required.');
+if(!is_file($dir.'/before-native.json')){file_put_contents($dir.'/before-native.json',json_encode(['departments'=>$p->query('SELECT * FROM drsupport_department')->fetchAll(),'teams'=>$p->query('SELECT * FROM drsupport_team')->fetchAll(),'topics'=>$p->query('SELECT * FROM drsupport_help_topic')->fetchAll()],JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR));chmod($dir.'/before-native.json',0600);}
+$p->exec("CREATE TABLE IF NOT EXISTS dune_dev_tasks(task_key VARCHAR(180) PRIMARY KEY,ticket_id INT UNSIGNED NOT NULL UNIQUE,submitter_id CHAR(36) NOT NULL,title VARCHAR(200) NOT NULL,prompt_json MEDIUMTEXT NOT NULL,approval VARCHAR(20) NOT NULL,priority VARCHAR(10) NOT NULL DEFAULT 'Medium',task_type VARCHAR(40) NOT NULL DEFAULT 'Feature',queue_order INT NOT NULL DEFAULT 10000,approved_by CHAR(36) NULL,decision_note TEXT NOT NULL,created_at DATETIME NOT NULL,updated_at DATETIME NOT NULL,INDEX dev_submitter(submitter_id),INDEX dev_approval(approval)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+$p->exec("CREATE TABLE IF NOT EXISTS dune_dev_task_events(id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,ticket_id INT UNSIGNED NOT NULL,actor_id CHAR(36) NOT NULL,action VARCHAR(40) NOT NULL,note TEXT NOT NULL,created_at DATETIME NOT NULL,INDEX dev_ticket_events(ticket_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+function dev_insert($p,$table,$row){$q=$p->prepare('INSERT INTO '.$table.' (`'.implode('`,`',array_keys($row)).'`) VALUES('.implode(',',array_fill(0,count($row),'?')).')');$q->execute(array_values($row));return(int)$p->lastInsertId();}
+$p->beginTransaction();try{
+ $q=$p->query("SELECT id FROM drsupport_department WHERE name='Dev team'");$dept=$q->fetchColumn();
+ if(!$dept){$row=$p->query("SELECT * FROM drsupport_department WHERE name='Support'")->fetch();unset($row['id']);$row['name']='Dev team';$row['ispublic']=0;$row['signature']='';$row['ticket_auto_response']=0;$row['message_auto_response']=0;$row['created']=$row['updated']=gmdate('Y-m-d H:i:s');$dept=dev_insert($p,'drsupport_department',$row);}
+ $p->exec("UPDATE drsupport_department SET ispublic=0,ticket_auto_response=0 WHERE name='Dev team'");
+ $q=$p->prepare("INSERT INTO drsupport_team(name,notes,flags,created,updated) SELECT 'Dev team','Private development queue; membership follows Dev or protected leadership ranks.',1,NOW(),NOW() WHERE NOT EXISTS(SELECT 1 FROM drsupport_team WHERE name='Dev team')");$q->execute();$team=$p->query("SELECT team_id FROM drsupport_team WHERE name='Dev team'")->fetchColumn();
+ $topic=$p->query("SELECT topic_id FROM drsupport_help_topic WHERE topic='Development task'")->fetchColumn();
+ if(!$topic){$row=$p->query("SELECT * FROM drsupport_help_topic WHERE ispublic=1 ORDER BY topic_id LIMIT 1")->fetch();unset($row['topic_id']);$row['topic']='Development task';$row['ispublic']=0;$row['noautoresp']=1;$row['topic_pid']=0;$row['dept_id']=$dept;$row['team_id']=$team;$row['staff_id']=0;$row['notes']='Use /dev-tasks.php. Private staff/VIP submission; only unimatrix999 Owner approves. Not a public help topic.';$row['created']=$row['updated']=gmdate('Y-m-d H:i:s');$topic=dev_insert($p,'drsupport_help_topic',$row);}
+ $q=$p->prepare('UPDATE drsupport_help_topic SET ispublic=0,noautoresp=1,dept_id=?,team_id=? WHERE topic_id=?');$q->execute([$dept,$team,$topic]);$p->commit();
+}catch(Throwable$e){$p->rollBack();throw$e;}
+echo json_encode(['department'=>(int)$dept,'team'=>(int)$team,'privateTopic'=>(int)$topic],JSON_PRETTY_PRINT);

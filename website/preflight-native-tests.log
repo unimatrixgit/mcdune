@@ -1,0 +1,466 @@
+TAP version 13
+# (node:3989715) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Real panel session and verified-link schema isolate inventory/sales; unlink and logout revoke reads
+ok 1 - Real panel session and verified-link schema isolate inventory/sales; unlink and logout revoke reads
+  ---
+  duration_ms: 79.33162
+  type: 'test'
+  ...
+# Subtest: Inventory module assets are served with safe MIME; private runtime adapters stay inaccessible
+ok 2 - Inventory module assets are served with safe MIME; private runtime adapters stay inaccessible
+  ---
+  duration_ms: 2.029782
+  type: 'test'
+  ...
+# (node:3989716) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Panel serves shared theme assets without exposing private source paths
+ok 3 - Panel serves shared theme assets without exposing private source paths
+  ---
+  duration_ms: 7.960214
+  type: 'test'
+  ...
+# Subtest: Panel verifies UUID ownership, consumes private links once and preserves eligibility on relink
+ok 4 - Panel verifies UUID ownership, consumes private links once and preserves eligibility on relink
+  ---
+  duration_ms: 83.999279
+  type: 'test'
+  ...
+# Subtest: Personal rewards start after UUID link, are private, and move to history only after delivery
+ok 5 - Personal rewards start after UUID link, are private, and move to history only after delivery
+  ---
+  duration_ms: 68.815577
+  type: 'test'
+  ...
+# Subtest: Password changes require current password and revoke other sessions; staff actions reject player injection
+ok 6 - Password changes require current password and revoke other sessions; staff actions reject player injection
+  ---
+  duration_ms: 161.009701
+  type: 'test'
+  ...
+# Subtest: Staff goals are fixed, audited, month-bound and unreached codes remain private
+ok 7 - Staff goals are fixed, audited, month-bound and unreached codes remain private
+  ---
+  duration_ms: 36.478399
+  type: 'test'
+  ...
+# Subtest: Contact email requires an authentic, unexpired, single-use CAPTCHA proof
+ok 8 - Contact email requires an authentic, unexpired, single-use CAPTCHA proof
+  ---
+  duration_ms: 29.387264
+  type: 'test'
+  ...
+# Subtest: Forged proof and concurrent replay never reveal the email twice
+ok 9 - Forged proof and concurrent replay never reveal the email twice
+  ---
+  duration_ms: 5.054898
+  type: 'test'
+  ...
+# Subtest: Retired journal routes and data are no longer served
+ok 10 - Retired journal routes and data are no longer served
+  ---
+  duration_ms: 29.25126
+  type: 'test'
+  ...
+# Subtest: Every public page has one visible notice and no retired story content
+ok 11 - Every public page has one visible notice and no retired story content
+  ---
+  duration_ms: 52.395412
+  type: 'test'
+  ...
+# Subtest: Live legacy feed labels display original names without mutating identifiers
+ok 12 - Live legacy feed labels display original names without mutating identifiers
+  ---
+  duration_ms: 2.600258
+  type: 'test'
+  ...
+# Subtest: Diplomacy is honestly disconnected without its configured channel
+ok 13 - Diplomacy is honestly disconnected without its configured channel
+  ---
+  duration_ms: 23.021867
+  type: 'test'
+  ...
+# Subtest: Fresh verified snapshots return public offices only
+ok 14 - Fresh verified snapshots return public offices only
+  ---
+  duration_ms: 22.472239
+  type: 'test'
+  ...
+# Subtest: Wrong publishers, stale data and invalid offices are rejected
+ok 15 - Wrong publishers, stale data and invalid offices are rejected
+  ---
+  duration_ms: 3.007162
+  type: 'test'
+  ...
+# Subtest: Exchange and diplomacy payloads cannot cross feed types
+ok 16 - Exchange and diplomacy payloads cannot cross feed types
+  ---
+  duration_ms: 0.740917
+  type: 'test'
+  ...
+# Subtest: All Vaerkring denominations have full artwork, downloadable GUI sizes and the imperial seal
+ok 17 - All Vaerkring denominations have full artwork, downloadable GUI sizes and the imperial seal
+  ---
+  duration_ms: 2.333863
+  type: 'test'
+  ...
+# Subtest: The zero Leto II tribute is explicitly a separate non-game design
+ok 18 - The zero Leto II tribute is explicitly a separate non-game design
+  ---
+  duration_ms: 1.780189
+  type: 'test'
+  ...
+# Subtest: Demo market covers every category and planet, with enough listings for pagination
+ok 19 - Demo market covers every category and planet, with enough listings for pagination
+  ---
+  duration_ms: 0.891204
+  type: 'test'
+  ...
+# Subtest: Search includes material names, categories, planets and sellers without mutating source
+ok 20 - Search includes material names, categories, planets and sellers without mutating source
+  ---
+  duration_ms: 0.874572
+  type: 'test'
+  ...
+# Subtest: Live validation rejects invalid data and duplicate IDs; empty live market stays empty
+ok 21 - Live validation rejects invalid data and duplicate IDs; empty live market stays empty
+  ---
+  duration_ms: 0.229207
+  type: 'test'
+  ...
+# Subtest: Unconnected API stays unavailable, never fabricates live listings or allows trading
+ok 22 - Unconnected API stays unavailable, never fabricates live listings or allows trading
+  ---
+  duration_ms: 18.552804
+  type: 'test'
+  ...
+# Subtest: Connected gateway sends the token only upstream and exposes sanitized read-only offers
+ok 23 - Connected gateway sends the token only upstream and exposes sanitized read-only offers
+  ---
+  duration_ms: 1.202803
+  type: 'test'
+  ...
+# Subtest: Unconfigured feeds return no fabricated data
+ok 24 - Unconfigured feeds return no fabricated data
+  ---
+  duration_ms: 21.310683
+  type: 'test'
+  ...
+# Subtest: multipart snapshots assemble in reverse Discord order with correct prices
+ok 25 - multipart snapshots assemble in reverse Discord order with correct prices
+  ---
+  duration_ms: 8.206168
+  type: 'test'
+  ...
+# Subtest: Incomplete and forged snapshots are rejected
+ok 26 - Incomplete and forged snapshots are rejected
+  ---
+  duration_ms: 0.589782
+  type: 'test'
+  ...
+# Subtest: Stale snapshots do not masquerade as live offers
+ok 27 - Stale snapshots do not masquerade as live offers
+  ---
+  duration_ms: 1.65024
+  type: 'test'
+  ...
+# Subtest: Malformed offers cannot inject prices or unsupported types
+ok 28 - Malformed offers cannot inject prices or unsupported types
+  ---
+  duration_ms: 0.206205
+  type: 'test'
+  ...
+# Subtest: Announcements are assigned concrete categories
+ok 29 - Announcements are assigned concrete categories
+  ---
+  duration_ms: 0.246455
+  type: 'test'
+  ...
+# Subtest: Forgejo subpath streams git bodies, preserves auth, strips website identity and cookies
+ok 30 - Forgejo subpath streams git bodies, preserves auth, strips website identity and cookies
+  ---
+  duration_ms: 32.799566
+  type: 'test'
+  ...
+# (node:3989759) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Anonymous readers can browse but cannot post
+ok 31 - Anonymous readers can browse but cannot post
+  ---
+  duration_ms: 29.149542
+  type: 'test'
+  ...
+# Subtest: Topics and replies persist, with public identity IDs excluded
+ok 32 - Topics and replies persist, with public identity IDs excluded
+  ---
+  duration_ms: 390.637951
+  type: 'test'
+  ...
+# Subtest: Cross-site writes and forged management attempts fail
+ok 33 - Cross-site writes and forged management attempts fail
+  ---
+  duration_ms: 2.023447
+  type: 'test'
+  ...
+# Subtest: Closed topics reject replies and can be reopened by their owner
+ok 34 - Closed topics reject replies and can be reopened by their owner
+  ---
+  duration_ms: 2.850019
+  type: 'test'
+  ...
+# Subtest: Post validation, rate limits and parameterized search resist abuse
+ok 35 - Post validation, rate limits and parameterized search resist abuse
+  ---
+  duration_ms: 2.277266
+  type: 'test'
+  ...
+# Subtest: Reports are visible only to moderators; removal hides rather than erases
+ok 36 - Reports are visible only to moderators; removal hides rather than erases
+  ---
+  duration_ms: 3.05063
+  type: 'test'
+  ...
+# Subtest: LuckPerms live groups require a session and the page permission
+ok 37 - LuckPerms live groups require a session and the page permission
+  ---
+  duration_ms: 32.243006
+  type: 'test'
+  ...
+# Subtest: full editor is owner-only even when a custom rank has every editor node
+ok 38 - full editor is owner-only even when a custom rank has every editor node
+  ---
+  duration_ms: 1.061723
+  type: 'test'
+  ...
+# Subtest: editor creation enforces Origin and returns only an official session URL
+ok 39 - editor creation enforces Origin and returns only an official session URL
+  ---
+  duration_ms: 6.426094
+  type: 'test'
+  ...
+# Subtest: only exact editor apply/trust commands reach the private game agent
+ok 40 - only exact editor apply/trust commands reach the private game agent
+  ---
+  duration_ms: 3.813818
+  type: 'test'
+  ...
+# Subtest: LuckPerms rejects malformed groups and unsupported routes
+ok 41 - LuckPerms rejects malformed groups and unsupported routes
+  ---
+  duration_ms: 3.657558
+  type: 'test'
+  ...
+# (node:3989761) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: External hosting rejects forged identity, protects sessions and keeps private data private
+ok 42 - External hosting rejects forged identity, protects sessions and keeps private data private
+  ---
+  duration_ms: 126.444564
+  type: 'test'
+  ...
+# Subtest: MySQL profile upserts retain bound values
+ok 43 - MySQL profile upserts retain bound values
+  ---
+  duration_ms: 0.503934
+  type: 'test'
+  ...
+# Subtest: Normal bundles reject four and eleven tasks, accepting five and ten
+ok 44 - Normal bundles reject four and eleven tasks, accepting five and ten
+  ---
+  duration_ms: 3.26881
+  type: 'test'
+  ...
+# Subtest: A release moves selected products once and preserves later pending work
+ok 45 - A release moves selected products once and preserves later pending work
+  ---
+  duration_ms: 0.46814
+  type: 'test'
+  ...
+# Subtest: Workflow agreements and unfinished tasks cannot inflate a release
+ok 46 - Workflow agreements and unfinished tasks cannot inflate a release
+  ---
+  duration_ms: 0.315689
+  type: 'test'
+  ...
+# Subtest: Duplicate prompt identities and colliding version filenames are rejected
+ok 47 - Duplicate prompt identities and colliding version filenames are rejected
+  ---
+  duration_ms: 0.459455
+  type: 'test'
+  ...
+# Subtest: A single urgent bugfix publishes independently with problem, repair and checks
+ok 48 - A single urgent bugfix publishes independently with problem, repair and checks
+  ---
+  duration_ms: 0.500137
+  type: 'test'
+  ...
+# Subtest: Urgent fixes cannot be held in a normal feature queue
+ok 49 - Urgent fixes cannot be held in a normal feature queue
+  ---
+  duration_ms: 0.35228
+  type: 'test'
+  ...
+# Subtest: Future normal and urgent records generate safe pages and one urgent news card per surface
+ok 50 - Future normal and urgent records generate safe pages and one urgent news card per surface
+  ---
+  duration_ms: 84.111361
+  type: 'test'
+  ...
+# (node:3989812) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Portal data requires authentication and same-origin writes
+ok 51 - Portal data requires authentication and same-origin writes
+  ---
+  duration_ms: 19.0722
+  type: 'test'
+  ...
+# Subtest: Tickets are tied to profiles and appeals require a Minecraft name
+ok 52 - Tickets are tied to profiles and appeals require a Minecraft name
+  ---
+  duration_ms: 2.920874
+  type: 'test'
+  ...
+# Subtest: Other players cannot read or alter a private ticket
+ok 53 - Other players cannot read or alter a private ticket
+  ---
+  duration_ms: 3.653516
+  type: 'test'
+  ...
+# Subtest: Only authorised staff can triage; replies carry verified staff roles
+ok 54 - Only authorised staff can triage; replies carry verified staff roles
+  ---
+  duration_ms: 3.916799
+  type: 'test'
+  ...
+# Subtest: Owners close and reopen tickets; closed cases block replies and rate limits apply
+ok 55 - Owners close and reopen tickets; closed cases block replies and rate limits apply
+  ---
+  duration_ms: 4.091271
+  type: 'test'
+  ...
+# Subtest: Private profiles and ticket history persist after database restart
+ok 56 - Private profiles and ticket history persist after database restart
+  ---
+  duration_ms: 548.06131
+  type: 'test'
+  ...
+# (node:3989818) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: staff guides use feature categories and documented permission nodes
+ok 57 - staff guides use feature categories and documented permission nodes
+  ---
+  duration_ms: 0.705005
+  type: 'test'
+  ...
+# Subtest: staff manual is protected on the server and responds to permission revocation
+ok 58 - staff manual is protected on the server and responds to permission revocation
+  ---
+  duration_ms: 97.604628
+  type: 'test'
+  ...
+# Subtest: session exports effective rank/node permissions; unprivileged rank requests fail
+ok 59 - session exports effective rank/node permissions; unprivileged rank requests fail
+  ---
+  duration_ms: 81.308087
+  type: 'test'
+  ...
+# Subtest: corestaff creates lower ranks but cannot edit owners or assign owner access
+ok 60 - corestaff creates lower ranks but cannot edit owners or assign owner access
+  ---
+  duration_ms: 77.048075
+  type: 'test'
+  ...
+# Subtest: matrix edits change backend access immediately and stale saves cannot overwrite
+ok 61 - matrix edits change backend access immediately and stale saves cannot overwrite
+  ---
+  duration_ms: 80.745061
+  type: 'test'
+  ...
+# Subtest: rank assignment invalidates the target sessions and owner accounts remain protected
+ok 62 - rank assignment invalidates the target sessions and owner accounts remain protected
+  ---
+  duration_ms: 72.423565
+  type: 'test'
+  ...
+# Subtest: website matrix contains only web nodes; game export is retired
+ok 63 - website matrix contains only web nodes; game export is retired
+  ---
+  duration_ms: 72.583447
+  type: 'test'
+  ...
+# Subtest: legacy cp assignments migrate once without granting game nodes
+ok 64 - legacy cp assignments migrate once without granting game nodes
+  ---
+  duration_ms: 72.802207
+  type: 'test'
+  ...
+# Subtest: native editor assets require owner and both website editor gates
+ok 65 - native editor assets require owner and both website editor gates
+  ---
+  duration_ms: 74.191208
+  type: 'test'
+  ...
+# Subtest: server controls require session, staff role and explicit operator allowlist
+ok 66 - server controls require session, staff role and explicit operator allowlist
+  ---
+  duration_ms: 15.511532
+  type: 'test'
+  ...
+# Subtest: operator status/log paths are fixed and reject arbitrary targets
+ok 67 - operator status/log paths are fixed and reject arbitrary targets
+  ---
+  duration_ms: 2.499936
+  type: 'test'
+  ...
+# Subtest: mutations enforce origin and single command, overwrite spoofed actor, and audit intent
+ok 68 - mutations enforce origin and single command, overwrite spoofed actor, and audit intent
+  ---
+  duration_ms: 3.847796
+  type: 'test'
+  ...
+# Subtest: upstream failures do not expose secrets
+ok 69 - upstream failures do not expose secrets
+  ---
+  duration_ms: 0.540319
+  type: 'test'
+  ...
+# Subtest: Built Worker serves all seventeen separate pages and site assets
+ok 70 - Built Worker serves all seventeen separate pages and site assets
+  ---
+  duration_ms: 47.972236
+  type: 'test'
+  ...
+# Subtest: Built Worker retains unconnected feed state without leaking secrets
+ok 71 - Built Worker retains unconnected feed state without leaking secrets
+  ---
+  duration_ms: 0.440933
+  type: 'test'
+  ...
+# Subtest: Unsupported paths and write requests are rejected
+ok 72 - Unsupported paths and write requests are rejected
+  ---
+  duration_ms: 0.273674
+  type: 'test'
+  ...
+# Subtest: Live status is cached and only known server fields reach the browser
+ok 73 - Live status is cached and only known server fields reach the browser
+  ---
+  duration_ms: 22.532193
+  type: 'test'
+  ...
+# Subtest: Missing, failed and stale monitoring never invent online or offline status
+ok 74 - Missing, failed and stale monitoring never invent online or offline status
+  ---
+  duration_ms: 1.088635
+  type: 'test'
+  ...
+1..74
+# tests 74
+# suites 0
+# pass 74
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 808.356487

@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "qualityTiers": [
+    {
+      "key": "common",
+      "label": "Common",
+      "color": "#e3e3dc"
+    },
+    {
+      "key": "uncommon",
+      "label": "Uncommon",
+      "color": "#58be87"
+    },
+    {
+      "key": "rare",
+      "label": "Rare",
+      "color": "#65a9ff"
+    },
+    {
+      "key": "very_rare",
+      "label": "Very Rare",
+      "color": "#b78bed"
+    },
+    {
+      "key": "legendary",
+      "label": "Legendary",
+      "color": "#edc363"
+    }
+  ],
+  "items": [
+    {
+      "id": "water_vial",
+      "name": "Vial of Water",
+      "quality": "common",
+      "image": "/assets/items/water_vial.png",
+      "model": "dunerealms:water_vial",
+      "lore": [
+        "Water is the gift of life."
+      ],
+      "baseMaterial": "POTION",
+      "maxStackSize": 16
+    },
+    {
+      "id": "smugglers_water_vial",
+      "name": "Smugglerâ€™s Vial of Water",
+      "quality": "uncommon",
+      "image": "/assets/items/smugglers_water_vial.png",
+      "model": "dunerealms:smugglers_water_vial",
+      "lore": [
+        "Water is the gift of life.",
+        "A precious measure carried beyond the official water ledger."
+      ],
+      "baseMaterial": "POTION",
+      "maxStackSize": 16
+    },
+    {
+      "id": "stillsuit",
+      "name": "Stillsuit",
+      "quality": "common",
+      "image": "/assets/items/office_water.png",
+      "lore": [
+        "A fitted reclamation suit for life beneath the desert sun."
+      ],
+      "appearance": "Faction-dyed leather armor; existing armor attributes and trims retained."
+    },
+    {
+      "id": "political_stillsuit",
+      "name": "Political Office Stillsuit",
+      "quality": "uncommon",
+      "image": "/assets/items/office_crown.png",
+      "lore": [
+        "The colors of office, worn in service to the realm."
+      ],
+      "appearance": "Office-colored leather armor; current-term eligibility enforced by the server."
+    },
+    {
+      "id": "clan_stillsuit",
+      "name": "Clan Stillsuit",
+      "quality": "uncommon",
+      "image": "/assets/items/office_water.png",
+      "lore": [
+        "The colors of a sworn clan, carried into the desert."
+      ],
+      "appearance": "Clan-designed colors on existing leather armor."
+    },
+    {
+      "id": "spice_common",
+      "name": "Spice",
+      "quality": "common",
+      "image": "/assets/items/spice_common.png",
+      "model": "dunerealms:spice_common",
+      "lore": [
+        "Amber spice harvested under the official licence of the realm."
+      ],
+      "baseMaterial": "ORANGE_DYE",
+      "maxStackSize": 64
+    },
+    {
+      "id": "spice_smuggled",
+      "name": "Smuggled Spice",
+      "quality": "uncommon",
+      "image": "/assets/items/spice_smuggled.png",
+      "model": "dunerealms:spice_smuggled",
+      "lore": [
+        "Amber spice carried beyond the official harvest ledger."
+      ],
+      "baseMaterial": "ORANGE_DYE",
+      "maxStackSize": 64
+    },
+    {
+      "id": "spice_dense",
+      "name": "Dense Spice",
+      "quality": "rare",
+      "image": "/assets/items/spice_dense.png",
+      "model": "dunerealms:spice_dense",
+      "lore": [
+        "A concentrated seam of precious desert spice."
+      ],
+      "baseMaterial": "ORANGE_DYE",
+      "maxStackSize": 64
+    }
+  ]
+}

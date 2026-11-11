@@ -1,0 +1,6 @@
+{
+  "source": "/opt/dunerealms-staging-tests",
+  "featureFlag": "DUNE_API_V1_BANK_STAGING",
+  "enabledByDefault": false,
+  "productionActivated": false
+}
