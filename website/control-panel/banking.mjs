@@ -5,7 +5,7 @@ const reply=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Contro
 export function projectBank(data,{playerUuid,staff=false}={}){
  if(data?.currency!=='dunemarks'||typeof data.balanceDunemarks!=='string'||!money.test(data.balanceDunemarks)||!Array.isArray(data.ledger)||data.ledger.length>200)return null;
  if(staff?data.account!=='server':data.playerUuid?.toLowerCase()!==playerUuid?.toLowerCase()||typeof data.walletDunemarks!=='string'||!signed.test(data.walletDunemarks))return null;
- if(data.ledger.some(r=>typeof r.id!=='string'||typeof r.action!=='string'||typeof r.amountDunemarks!=='string'||!signed.test(r.amountDunemarks)||typeof r.balanceDunemarks!=='string'||!money.test(r.balanceDunemarks)||!Number.isFinite(Number(r.createdAt))))return null;
+ if(data.ledger.some(r=>typeof r.id!=='string'||typeof r.action!=='string'||typeof r.amountDunemarks!=='string'||!signed.test(r.amountDunemarks)||typeof r.balanceDunemarks!=='string'||!money.test(r.balanceDunemarks)||!(typeof r.createdAt==='number'&&Number.isSafeInteger(r.createdAt)&&r.createdAt>=0)))return null;
  return{currency:'dunemarks',balanceDunemarks:data.balanceDunemarks,...(staff?{account:'server'}:{walletDunemarks:data.walletDunemarks}),ledger:data.ledger.slice(0,100).map(r=>({id:r.id,action:r.action,amountDunemarks:r.amountDunemarks,balanceDunemarks:r.balanceDunemarks,createdAt:r.createdAt,...(staff?{actorName:typeof r.actorName==='string'?r.actorName.slice(0,80):''}:{})}))};
 }
 export function createBanking(db,settings={},dependencies={}){
@@ -17,7 +17,7 @@ export function createBanking(db,settings={},dependencies={}){
   if(request.method!=='GET')return reply({message:'Bank transfers are handled in game.'},405);
   if(url.search)return reply({message:'This bank does not accept account or player overrides.'},400);
   const user=await authenticate(request);if(!user)return reply({message:'Sign in to view your bank.'},401);
-  const rights=await access(user);if(!rights?.nodes.includes(staff?'web.bank.staff.view':'web.bank.personal.view'))return reply({message:'Bank access is not available for this account.'},403);
+  const rights=await access(user);if(!rights?.nodes?.includes(staff?'web.bank.staff.view':'web.bank.personal.view'))return reply({message:'Bank access is not available for this account.'},403);
   try{
    const player=await linked(user);if(!player)return reply({linked:false});if(!uuid.test(player))throw Error();
    if((settings.SERVER_CONTROL_TOKEN||'').length<64)throw Error();
