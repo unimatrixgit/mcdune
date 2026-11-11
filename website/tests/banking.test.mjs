@@ -129,3 +129,11 @@ test('invalid server control token types never reach upstream bank',async()=>{
   assert.equal(calls,0);
  }
 });
+
+test('invalid linked account identifiers never reach upstream bank',async()=>{
+ for(const linked of [42,{},[],true,'not-a-uuid']){
+  const f=fixture({linked});
+  assert.equal((await f.request()).status,503);
+  assert.equal(f.calls.length,0);
+ }
+});
