@@ -1,0 +1,3 @@
+.article-video{margin:24px 0;max-width:100%;min-width:0}
+.article-video video{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:16/9;box-sizing:border-box;border:1px solid #9c8448;border-radius:10px;background:#0b2019}
+.article-video figcaption{margin-top:8px;color:#d8c58e;font-size:13px}
