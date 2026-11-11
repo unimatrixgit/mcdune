@@ -225,3 +225,31 @@ test('bank authentication and permission lookup failures return private 503 resp
   assert.doesNotMatch(JSON.stringify(await response.json()),/sensitive/);
  }
 });
+
+test('bank refuses redirect responses even when a fetch stub returns one',async()=>{
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>player,
+  fetcher:async()=>new Response(null,{status:302,headers:{Location:'https://example.invalid/'}})
+ });
+ const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+ assert.equal(response.status,503);
+ assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+});
+test('bank fails closed on malformed upstream JSON and server errors',async()=>{
+ for(const fetcher of [
+  async()=>new Response('not-json',{status:200}),
+  async()=>Response.json({message:'internal secret'},{status:500}),
+  async()=>Response.json({...bank,balanceDunemarks:'invalid'})
+ ]){
+  const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+   authenticate:async()=>({id:'account'}),
+   access:async()=>({nodes:['web.bank.personal.view']}),
+   linked:async()=>player,fetcher
+  });
+  const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+  assert.equal(response.status,503);
+  assert.doesNotMatch(JSON.stringify(await response.json()),/internal secret|not-json/);
+ }
+});
