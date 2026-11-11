@@ -5,7 +5,8 @@ const reply=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Contro
 export function projectBank(data,{playerUuid,staff=false}={}){
  if(data?.currency!=='dunemarks'||typeof data.balanceDunemarks!=='string'||!money.test(data.balanceDunemarks)||!Array.isArray(data.ledger)||data.ledger.length>200)return null;
  if(staff?data.account!=='server':typeof data.playerUuid!=='string'||typeof playerUuid!=='string'||data.playerUuid.toLowerCase()!==playerUuid.toLowerCase()||typeof data.walletDunemarks!=='string'||!signed.test(data.walletDunemarks))return null;
- if(data.ledger.some(r=>typeof r.id!=='string'||typeof r.action!=='string'||typeof r.amountDunemarks!=='string'||!signed.test(r.amountDunemarks)||typeof r.balanceDunemarks!=='string'||!money.test(r.balanceDunemarks)||!(typeof r.createdAt==='number'&&Number.isSafeInteger(r.createdAt)&&r.createdAt>=0)))return null;
+ if(data.ledger.some(r=>typeof r.id!=='string'||r.id.length<1||r.id.length>128||typeof r.action!=='string'||r.action.length<1||r.action.length>80||typeof r.amountDunemarks!=='string'||!signed.test(r.amountDunemarks)||typeof r.balanceDunemarks!=='string'||!money.test(r.balanceDunemarks)||!(typeof r.createdAt==='number'&&Number.isSafeInteger(r.createdAt)&&r.createdAt>=0)))return null;
+ if(new Set(data.ledger.map(r=>r.id)).size!==data.ledger.length)return null;
  return{currency:'dunemarks',balanceDunemarks:data.balanceDunemarks,...(staff?{account:'server'}:{walletDunemarks:data.walletDunemarks}),ledger:data.ledger.slice(0,100).map(r=>({id:r.id,action:r.action,amountDunemarks:r.amountDunemarks,balanceDunemarks:r.balanceDunemarks,createdAt:r.createdAt,...(staff?{actorName:typeof r.actorName==='string'?r.actorName.slice(0,80):''}:{})}))};
 }
 export function createBanking(db,settings={},dependencies={}){
