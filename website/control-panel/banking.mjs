@@ -17,14 +17,14 @@ export function createBanking(db,settings={},dependencies={}){
   if(!['/api/bank/personal','/api/bank/staff'].includes(url.pathname))return reply({message:'Not found.'},404);
   if(request.method!=='GET')return reply({message:'Bank transfers are handled in game.'},405);
   if(url.search)return reply({message:'This bank does not accept account or player overrides.'},400);
-  const user=await authenticate(request);if(!user)return reply({message:'Sign in to view your bank.'},401);
+  const user=await authenticate(request);if(!user||typeof user.id!=='string'||!user.id)return reply({message:'Sign in to view your bank.'},401);
   const rights=await access(user);if(!Array.isArray(rights?.nodes)||!rights.nodes.includes(staff?'web.bank.staff.view':'web.bank.personal.view'))return reply({message:'Bank access is not available for this account.'},403);
   try{
    const player=staff?null:await linked(user);if(!staff&&!player)return reply({linked:false});if(!staff&&(typeof player!=='string'||!uuid.test(player)))throw Error();
    if(typeof settings.SERVER_CONTROL_TOKEN!=='string'||settings.SERVER_CONTROL_TOKEN.length<64)throw Error();
    const r=await(dependencies.fetcher||fetch)('http://127.0.0.1:15433'+(staff?'/bank/staff':'/bank/player?uuid='+encodeURIComponent(player)),{headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN},signal:AbortSignal.timeout(8000)});
    if(!r.ok)throw Error();const bank=projectBank(await r.json(),{playerUuid:player,staff});if(!bank)throw Error();
-   const currentUser=await authenticate(request);if(!currentUser||currentUser.id!==user.id)return reply({message:'Sign in again before viewing this bank.'},401);
+   const currentUser=await authenticate(request);if(!currentUser||typeof currentUser.id!=='string'||currentUser.id!==user.id)return reply({message:'Sign in again before viewing this bank.'},401);
    const currentRights=await access(currentUser);if(!Array.isArray(currentRights?.nodes)||!currentRights.nodes.includes(staff?'web.bank.staff.view':'web.bank.personal.view'))return reply({message:'Bank access is no longer available for this account.'},403);
    if(!staff){const currentPlayer=await linked(currentUser);if(typeof currentPlayer!=='string'||!uuid.test(currentPlayer)||currentPlayer.toLowerCase()!==player.toLowerCase())return reply({message:'Your linked Minecraft account changed. Refresh before viewing this bank.'},409);}
    return reply({linked:staff?undefined:true,bank,canManage:staff?currentRights.nodes.includes('web.bank.staff.manage'):true});
