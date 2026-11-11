@@ -1,0 +1,27 @@
+import {randomBytes,randomUUID,randomInt,createHash} from 'node:crypto';
+import {identity} from '../node/auth.mjs';
+import {accessFor} from '../node/permissions.mjs';
+import {UPGRADE_PRICE,rollUpgrade} from './upgrade-policy.mjs';
+const uuid=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
+const reply=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'private, no-store',Vary:'Cookie'}});
+const hash=code=>createHash('sha256').update(code).digest('hex');
+export function createUpgradeTokens(db,settings={},deps={}){const auth=deps.authenticate||(r=>identity(r,db)),access=deps.access||(u=>accessFor(db,u));return async request=>{
+ const url=new URL(request.url);if(url.search)return reply({message:'Account overrides are not accepted.'},400);
+ const user=await auth(request);if(!user)return reply({message:'Sign in first.'},401);
+ if(!(await access(user)).nodes.includes('web.menu.inventory'))return reply({message:'Inventory access required.'},403);
+ const link=await db.prepare('SELECT minecraft_uuid FROM site_game_links WHERE user_id=?').bind(user.id).first();if(!link||!uuid.test(link.minecraft_uuid))return reply({message:'Link Minecraft before using Upgrade Tokens.'},409);
+ if(request.method==='GET'){const {results}=await db.prepare('SELECT id,private_code,created_at,used_at,blueprint_id,result_json FROM site_upgrade_tokens WHERE owner_user_id=? AND minecraft_uuid=? ORDER BY created_at DESC LIMIT 100').bind(user.id,link.minecraft_uuid).all();return reply({priceDunemarks:UPGRADE_PRICE,tokens:results.map(t=>({id:t.id,code:t.used_at?undefined:t.private_code,createdAt:Number(t.created_at),usedAt:t.used_at?Number(t.used_at):null,blueprintId:t.blueprint_id,result:typeof t.result_json==='string'?JSON.parse(t.result_json):t.result_json})),gameDeliveryReady:false});}
+ if(request.method!=='POST')return reply({message:'Method not allowed.'},405);
+ if(request.headers.get('origin')!==new URL(settings.CP_ORIGIN||'https://cp.dunerealms.com').origin)return reply({message:'Origin rejected.'},403);
+ let b;try{const raw=await request.text();if(Buffer.byteLength(raw)>1024)throw Error();b=JSON.parse(raw);}catch{return reply({message:'Invalid token request.'},400);}
+ if(b?.action==='purchase'&&Object.keys(b).length===2&&uuid.test(b.requestId||'')){
+  const code='DRU-'+randomBytes(24).toString('hex').toUpperCase();let result;
+  try{await db.batch([{async run(c){const [sets]=await c.execute('CALL website.dune_upgrade_purchase(?,?,?,?,?,?)',[user.id,link.minecraft_uuid,b.requestId,code,hash(code),Date.now()]);result=sets[0]?.[0];if(!result?.private_code)throw Error('purchase');return{meta:{changes:1}};}}]);return reply({ok:true,code:result.private_code,id:result.id,priceDunemarks:UPGRADE_PRICE});}catch(e){if(e.sqlState==='45000')return reply({message:'Purchase refused: check your linked account and available 5,000 Dunemarks. No payment was committed.'},409);throw e;}
+ }
+ if(b?.action==='roll'&&Object.keys(b).length===4&&uuid.test(b.blueprintId||'')&&Number.isSafeInteger(b.version)&&b.version>0&&/^DRU-[A-F0-9]{48}$/.test(b.code||'')){
+  let outcome;try{await db.batch([{async run(c){const q=async(s,v=[]) =>(await c.execute(s,v))[0];const linked=await q('SELECT minecraft_uuid FROM site_game_links WHERE user_id=? FOR SHARE',[user.id]);if(linked[0]?.minecraft_uuid.toLowerCase()!==link.minecraft_uuid.toLowerCase())throw Error('conflict');const tokens=await q('SELECT id,owner_user_id,minecraft_uuid,used_at,blueprint_id,result_json FROM site_upgrade_tokens WHERE code_hash=? FOR UPDATE',[hash(b.code)]),t=tokens[0];if(!t||t.owner_user_id!==user.id||t.minecraft_uuid.toLowerCase()!==link.minecraft_uuid.toLowerCase())throw Error('token');if(t.used_at){if(t.blueprint_id!==b.blueprintId)throw Error('token');outcome={replayed:true,result:typeof t.result_json==='string'?JSON.parse(t.result_json):t.result_json};return{meta:{changes:0}};}
+   const designs=await q('SELECT owner_user_id,quality,commerce_kind,version,active FROM site_kit_blueprints WHERE id=? FOR UPDATE',[b.blueprintId]),d=designs[0];if(!d||d.owner_user_id!==user.id||d.quality!=='legendary'||d.commerce_kind!=='personal_sale'||!d.active)throw Error('design');if(Number(d.version)!==b.version)throw Error('conflict');
+   const result=rollUpgrade(deps.randomInt||randomInt),now=Date.now();await q('UPDATE site_kit_blueprints SET upgrade_json=?,version=version+1,updated_at=? WHERE id=?',[JSON.stringify(result),now,b.blueprintId]);await q('UPDATE site_kit_listings SET published=0,version=version+1,updated_at=? WHERE blueprint_id=? AND published=1',[now,b.blueprintId]);await q('UPDATE site_upgrade_tokens SET used_at=?,blueprint_id=?,result_json=? WHERE id=?',[now,b.blueprintId,JSON.stringify(result),t.id]);await q('INSERT INTO account_audit(id,actor_id,action,details,created_at) VALUES(?,?,?,?,?)',[randomUUID(),user.id,'legendary-upgrade-roll',JSON.stringify({tokenId:t.id,blueprintId:b.blueprintId,result}),now]);outcome={result,version:b.version+1};return{meta:{changes:1}};}}]);return reply({ok:true,...outcome});}catch(e){if(['token','design','conflict'].includes(e.message))return reply({message:e.message==='conflict'?'Your kit changed. Refresh before using this code. The code was not consumed.':e.message==='design'?'Only your saved Legendary Player Kit can be upgraded.':'This Upgrade Token is unavailable for this linked account.'},409);throw e;}
+ }
+ return reply({message:'Use a valid purchase or saved Legendary Player Kit and private token code.'},400);
+};}

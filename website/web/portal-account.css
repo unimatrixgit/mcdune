@@ -1,0 +1,41 @@
+.dune-page-marker.portal-account-welcome{display:grid;grid-template-columns:140px minmax(160px,1fr) 240px 300px;gap:22px;align-items:center}.portal-account-card{box-sizing:border-box;padding:20px 16px;border:1px solid #b89c50;border-radius:10px;background:linear-gradient(145deg,#204335eb,#0c2722ef),url('/assets/ornament.webp') center/cover;text-align:center;box-shadow:inset 0 0 0 4px #d6b86c0b}.portal-account-card>img{display:block!important;width:80px!important;height:80px!important;object-fit:contain;margin:0 auto 10px}.portal-account-card h2{font:700 20px/1.3 Manrope,system-ui,sans-serif;color:#edd18d;margin:6px 0}.portal-account-card p{font:14px/1.6 Manrope,system-ui,sans-serif;color:#dedac1;margin:10px 0 16px}.portal-account-card>div{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.portal-account-card a{padding:10px 16px;border:1px solid #bba054;border-radius:7px;background:#183b2c;color:#f1d78c;font-weight:700;text-decoration:none}.portal-account-card a:hover{background:#36543a}.portal-account-card a:focus-visible{outline:3px solid #f0d58d;outline-offset:3px}@media(max-width:1150px){.dune-page-marker.portal-account-welcome{grid-template-columns:120px 1fr}.portal-account-card{grid-column:1}.portal-account-welcome .world-status{grid-column:2;width:100%;max-width:340px;justify-self:end}}@media(max-width:600px){.dune-page-marker.portal-account-welcome{grid-template-columns:1fr}.portal-account-card,.portal-account-welcome .world-status{grid-column:1;width:100%;max-width:none;justify-self:stretch}.portal-account-welcome>img{justify-self:center}}
+
+.portal-account-card>img.imperial-postbox-art{width:200px!important;max-width:100%;height:260px!important;object-fit:contain;border-radius:9px;margin-bottom:14px}.portal-account-card .postbox-status{font-size:11px;color:#c4c8af;margin:12px 0 0}.portal-account-welcome>.portal-account-card{align-self:center}@media(max-width:600px){.portal-account-card>img.imperial-postbox-art{height:220px!important}}
+
+/* Independent welcome, postbox and server-status cards. */
+.dune-page-marker.portal-account-welcome:has(.portal-welcome-card){grid-template-columns:100px minmax(140px,1fr) 200px 220px 280px;gap:16px}
+.portal-welcome-card{box-sizing:border-box;padding:22px 16px;border:1px solid #b89c50;border-radius:10px;background:linear-gradient(145deg,#204335eb,#0c2722ef),url('https://www.dunerealms.com/assets/ornament.webp') center/cover;text-align:center;align-self:center}
+.portal-welcome-card>img{display:block!important;width:80px!important;height:80px!important;object-fit:contain;margin:0 auto 12px}
+.portal-welcome-card h2{font:700 20px/1.3 Manrope,system-ui,sans-serif;color:#edd18d;margin:8px 0}
+.portal-welcome-card p{font:14px/1.6 Manrope,system-ui,sans-serif;color:#dedac1;margin:12px 0 20px}
+.portal-welcome-card a{display:inline-block;padding:10px 14px;border:1px solid #bba054;border-radius:7px;background:#183b2c;color:#f1d78c;font-weight:700;text-decoration:none}
+.portal-welcome-card a:focus-visible{outline:3px solid #f0d58d;outline-offset:3px}
+@media(max-width:1250px){.dune-page-marker.portal-account-welcome:has(.portal-welcome-card){grid-template-columns:repeat(3,minmax(0,1fr))}.portal-account-welcome>img{grid-column:1}.portal-account-welcome>.page-marker-copy{grid-column:2 / -1}.portal-welcome-card{grid-column:1}.portal-account-welcome .portal-account-card{grid-column:2}.portal-account-welcome .world-status{grid-column:3;width:100%;max-width:none}}
+@media(max-width:700px){.dune-page-marker.portal-account-welcome:has(.portal-welcome-card){grid-template-columns:1fr}.portal-account-welcome>.portal-welcome-card,.portal-account-welcome>.portal-account-card,.portal-account-welcome>.world-status,.portal-account-welcome>.page-marker-copy{grid-column:1}}
+
+/* Keep utility cards compact despite the welcome banner's large paragraph rule. */
+.dune-page-marker.portal-account-welcome .portal-account-card{padding:12px 10px}
+.dune-page-marker.portal-account-welcome .portal-account-card>img.imperial-postbox-art{height:130px!important;width:110px!important;margin:0 auto 8px}
+.dune-page-marker.portal-account-welcome .portal-account-card h2{font:700 16px/1.25 Manrope,system-ui,sans-serif;margin:4px 0}
+.dune-page-marker.portal-account-welcome .portal-account-card p{font:400 12px/1.4 Manrope,system-ui,sans-serif;margin:6px 0 9px}
+.dune-page-marker.portal-account-welcome .portal-account-card .postbox-status{font-size:10px;line-height:1.35;margin:8px 0 0}
+.dune-page-marker.portal-account-welcome .portal-account-card a{font:700 12px/1.3 Manrope,system-ui,sans-serif;padding:8px 10px}
+.dune-page-marker.portal-account-welcome .portal-welcome-card{padding:16px 12px}
+.dune-page-marker.portal-account-welcome .portal-welcome-card p{font:400 13px/1.5 Manrope,system-ui,sans-serif;margin:10px 0 14px}
+.dune-page-marker.portal-account-welcome .portal-welcome-card h2{font:700 17px/1.3 Manrope,system-ui,sans-serif}
+.dune-page-marker.portal-account-welcome .portal-welcome-card a{font:700 12px/1.3 Manrope,system-ui,sans-serif;padding:8px 10px}
+
+.dune-page-marker.portal-account-welcome .portal-account-card p{font:400 12px/1.4 Manrope,system-ui,sans-serif!important;margin:6px 0 9px!important}
+.dune-page-marker.portal-account-welcome .portal-account-card .postbox-status{font:400 10px/1.35 Manrope,system-ui,sans-serif!important;margin:8px 0 0!important}
+.dune-page-marker.portal-account-welcome .portal-welcome-card p{font:400 13px/1.5 Manrope,system-ui,sans-serif!important;margin:10px 0 14px!important}
+
+.cp-panel-sidebar>.cp-sidebar-postbox{width:100%;max-width:100%;margin:12px 0 18px;padding:12px 10px;box-sizing:border-box}
+.cp-panel-sidebar>.cp-sidebar-postbox>img.imperial-postbox-art{width:90px!important;height:120px!important;margin:0 auto 8px}
+.cp-panel-sidebar>.cp-sidebar-postbox h2{font:700 15px/1.3 Manrope,system-ui,sans-serif!important;margin:4px 0}
+.cp-panel-sidebar>.cp-sidebar-postbox p{font:400 11px/1.4 Manrope,system-ui,sans-serif!important;margin:7px 0}
+.cp-panel-sidebar>.cp-sidebar-postbox .postbox-status{font-size:10px!important}
+.cp-panel-sidebar>.cp-sidebar-postbox a{display:block;width:100%;box-sizing:border-box;padding:8px 6px;font:700 11px/1.3 Manrope,system-ui,sans-serif;text-align:center}
+
+.portal-account-card{position:relative}.portal-account-card .postbox-new-ribbon{position:absolute;top:8px;right:8px;padding:2px 7px;border:1px solid #e7c979;border-radius:3px;background:linear-gradient(110deg,#ddbe69,#a68437);color:#10291e;font:800 9px/1.3 system-ui,sans-serif;letter-spacing:.08em}
+
+.portal-account-card.has-unread-mail{border-color:#d8b85d;box-shadow:0 0 18px #c9a44a35}.has-unread-mail .postbox-status{color:#f4da83;font-weight:700}

@@ -1,0 +1,7 @@
+export const UPGRADE_PRICE=5000;
+export const ARMOUR=['helmet','chestplate','leggings','boots'];
+export const LEGENDARY={helmet:{protection:4,unbreaking:3,mending:1,thorns:3,respiration:3,aqua_affinity:1},chestplate:{protection:4,unbreaking:3,mending:1,thorns:3},leggings:{protection:4,unbreaking:3,mending:1,thorns:3,swift_sneak:3},boots:{protection:4,unbreaking:3,mending:1,thorns:3,feather_falling:4,depth_strider:3,soul_speed:3}};
+// Spend one to three points; repeated picks add to the same piece/enchantment.
+// Every reroll replaces the old distribution rather than adding to it.
+export function rollUpgrade(randomInt){const slots=ARMOUR.flatMap(piece=>Object.keys(LEGENDARY[piece]).map(enchantment=>({piece,enchantment})));const budget=randomInt(1,4),bonuses=[];for(let i=0;i<budget;i++){const slot=slots[randomInt(0,slots.length)];const old=bonuses.find(b=>b.piece===slot.piece&&b.enchantment===slot.enchantment);if(old)old.levels++;else bonuses.push({...slot,levels:1});}return{policy:'legendary-player-v1',points:budget,bonuses};}
+export function validUpgrade(v){return v?.policy==='legendary-player-v1'&&Number.isInteger(v.points)&&v.points>=1&&v.points<=3&&Array.isArray(v.bonuses)&&v.bonuses.length>0&&v.bonuses.length<=3&&new Set(v.bonuses.map(b=>b.piece+':'+b.enchantment)).size===v.bonuses.length&&v.bonuses.every(b=>ARMOUR.includes(b.piece)&&Object.hasOwn(LEGENDARY[b.piece],b.enchantment)&&Number.isInteger(b.levels)&&b.levels>=1&&b.levels<=3)&&v.bonuses.reduce((n,b)=>n+b.levels,0)===v.points;}
