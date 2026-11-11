@@ -109,3 +109,9 @@ test('changed Minecraft link prevents returning another account bank data',async
  const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
  assert.equal(response.status,409);
 });
+
+test('malformed ledger records are rejected without throwing',()=>{
+ for(const entry of [null,undefined,false,42,'invalid']){
+  assert.equal(projectBank({...bank,ledger:[entry]},{playerUuid:player}),null);
+ }
+});
