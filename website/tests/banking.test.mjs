@@ -191,3 +191,20 @@ test('bank upstream requests never follow redirects or use cached responses',asy
  assert.equal(f.calls[0].options.redirect,'error');
  assert.equal(f.calls[0].options.cache,'no-store');
 });
+
+test('bank rejects upstream redirect responses without returning account data',async()=>{
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>player,
+  fetcher:async()=>Response.redirect('https://example.invalid/collect',302)
+ });
+ const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+ assert.equal(response.status,503);
+ assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+});
+test('staff account cannot be queried using a personal bank permission',async()=>{
+ const f=fixture({nodes:['web.bank.personal.view']});
+ assert.equal((await f.request('/api/bank/staff')).status,403);
+ assert.equal(f.calls.length,0);
+});
