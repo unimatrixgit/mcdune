@@ -23,17 +23,18 @@ export function createBankTransfers(db,settings={},deps={}){
   if(!await permitted(user))return reply({message:'Personal bank access required.'},403);
   const text=await request.text();if(text.length>2000)return reply({message:'Request too large.'},413);
   let data;try{data=JSON.parse(text);}catch{return reply({message:'Invalid transfer.'},400);}
-  if(!data||Object.keys(data).some(k=>!['source','amount','requestId','memo','confirmed',...(external?['recipientAccount','recipientName']:[])].includes(k))||data.confirmed!==true||!['current','savings'].includes(data.source)||typeof data.amount!=='string'||! /^(?:0|[1-9]\d{0,6})(?:\.\d{1,2})?$/.test(data.amount)||Number(data.amount)<=0||Number(data.amount)>1000000||!uuid.test(data.requestId||'')||typeof data.memo!=='string'||data.memo.length>140||/[\x00-\x1f]/.test(data.memo))return reply({message:'Check the amount, reference and confirmation.'},400);
+  if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!['source','amount','requestId','memo','confirmed',...(external?['recipientAccount','recipientName']:[])].includes(k))||data.confirmed!==true||!['current','savings'].includes(data.source)||typeof data.amount!=='string'||! /^(?:0|[1-9]\d{0,6})(?:\.\d{1,2})?$/.test(data.amount)||Number(data.amount)<=0||Number(data.amount)>1000000||!uuid.test(data.requestId||'')||typeof data.memo!=='string'||data.memo.length>140||/[\x00-\x1f]/.test(data.memo))return reply({message:'Check the amount, reference and confirmation.'},400);
   if(external&&data.source!=='current')return reply({message:'Use your current account for payments to other accounts.'},400);
-  const player=(await linked(user))?.toLowerCase();if(!uuid.test(player||''))return reply({message:'Link your Minecraft account first.'},403);
+  const linkedPlayer=await linked(user);const player=typeof linkedPlayer==='string'?linkedPlayer.toLowerCase():null;if(!player||!uuid.test(player))return reply({message:'Link your Minecraft account first.'},403);
   let recipient=null,fromNumber=null;
   if(external){
    if(typeof data.recipientAccount!=='string'||typeof data.recipientName!=='string'||data.recipientName.length>80)return reply({message:'Select a verified recipient.'},400);
    recipient=await resolve(data.recipientAccount,data.recipientName);if(!recipient||!uuid.test(recipient.player)||recipient.player===player)return reply({message:'Recipient changed or invalid. Check the account again; use Current & Savings for your own accounts.'},409);
    fromNumber=await(deps.accountNumber||imperialAccount)(db,data.source==='current'?'current':'player',player);
   }
-  const current=await auth(request);if(!current||current.id!==user.id||!await permitted(current)||(await linked(current))?.toLowerCase()!==player)return reply({message:'Account access changed. Refresh before submitting.'},409);
-  if((settings.SERVER_CONTROL_TOKEN||'').length<64)return reply({message:'Transfers unavailable.'},503);
+  const current=await auth(request);if(!current||current.id!==user.id||!await permitted(current))return reply({message:'Account access changed. Refresh before submitting.'},409);
+  const currentLink=await linked(current);if(typeof currentLink!=='string'||currentLink.toLowerCase()!==player)return reply({message:'Account access changed. Refresh before submitting.'},409);
+  if(typeof settings.SERVER_CONTROL_TOKEN!=='string'||settings.SERVER_CONTROL_TOKEN.length<64)return reply({message:'Transfers unavailable.'},503);
   try{
    const result=await(deps.fetcher||fetch)('http://127.0.0.1:15433/bank/'+(external?'remittance':'transfer-own'),{method:'POST',headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({player,source:data.source,amount:data.amount,request_id:data.requestId,memo:data.memo,...(external?{target:recipient.player,target_type:recipient.bank_type==='current'?'current':'savings',from_number:fromNumber,to_number:data.recipientAccount}:{})}),redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000)});
    if(!result.ok||result.status!==200)return reply({message:result.status===409?'Transfer declined: insufficient funds, changed request or unavailable account. No transfer was confirmed.':'Transfer could not be confirmed. Retry the same request to check its result.'},result.status===409?409:503);
