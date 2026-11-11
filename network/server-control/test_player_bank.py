@@ -15,8 +15,15 @@ class PlayerBankTest(unittest.TestCase):
    with self.assertRaises(ValueError):player_bank.read_player(con,v)
    con.assert_not_called()
  def test_invalid_money_rejected(self):
-  for v in ['-1','NaN','Infinity','1.001']:
-   with self.assertRaises(RuntimeError):player_bank.money(v)
+  for v in ['-1','NaN','Infinity','1.001','not-a-number',None,True,False,1.1,object()]:
+   with self.subTest(value=repr(v)):
+    with self.assertRaises(RuntimeError):player_bank.money(v)
+ def test_exact_money_boundaries(self):
+  self.assertEqual(player_bank.money(Decimal('0.01')),'0.01')
+  self.assertEqual(player_bank.money(Decimal('1000000000000.00')),'1000000000000.00')
+  self.assertEqual(player_bank.money(Decimal('-0.01'),True),'-0.01')
+  for v in ['1000000000000.01','-1000000000000.01']:
+   with self.assertRaises(RuntimeError):player_bank.money(v,True)
 
  def test_debtor_wallet_is_projected_without_allowing_negative_bank(self):
   con,c=self.fixture();c.fetchone.side_effect=[{'balance':Decimal('20.00')},{'balance':Decimal('-15.25')}]
