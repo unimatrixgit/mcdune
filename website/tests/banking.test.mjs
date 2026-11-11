@@ -137,3 +137,9 @@ test('invalid linked account identifiers never reach upstream bank',async()=>{
   assert.equal(f.calls.length,0);
  }
 });
+
+test('malformed upstream bank payload shapes fail closed',()=>{
+ for(const payload of [null,undefined,false,42,'invalid',[],[bank]]){
+  assert.equal(projectBank(payload,{playerUuid:player}),null);
+ }
+});
