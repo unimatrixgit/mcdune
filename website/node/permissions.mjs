@@ -47,3 +47,26 @@ export const isOwnerRank = rank =>
     .includes(typeof rank === 'string' ? rank : rank?.key);
 
 export async function initializeBankAccess(db){const key='bank-access-v1';if(await db.prepare('SELECT setting_value FROM website_settings WHERE setting_key=?').bind(key).first())return;const statements=[];for(const rank of DEFAULT_RANKS){const stored=await rankFor(db,rank.key);const additions=['web.bank.personal.view',...(rank.nodes.includes('web.menu.staffmanual')?['web.bank.staff.view','web.bank.staff.deposit']:[]),...(['owners','corestaff','network_admin','web_net_admin'].includes(rank.key)?['web.bank.staff.manage']:[])];const nodes=[...new Set([...stored.nodes,...additions])];statements.push(db.prepare('UPDATE cp_ranks SET permissions_json=?,version=version+1 WHERE rank_key=? AND version=?').bind(JSON.stringify(nodes),rank.key,stored.version));}statements.push(db.prepare('INSERT INTO website_settings(setting_key,setting_value,updated_at) VALUES(?,?,?)').bind(key,'complete',Date.now()));await db.batch(statements);}
+
+
+export async function initializeCommunityAccess(db){
+ const key='community-access-v1';
+ if(await db.prepare('SELECT setting_value FROM website_settings WHERE setting_key=?').bind(key).first())return;
+ const statements=[];
+ for(const rank of DEFAULT_RANKS){
+  const stored=await rankFor(db,rank.key);
+  const additions=rank.nodes.filter(node=>/^web\.(?:menu\.(?:tickets|forum|exchange|posts)|tickets\.|forum\.|exchange\.|posts\.)/.test(node));
+  const nodes=[...new Set([...stored.nodes,...additions])];
+  statements.push(db.prepare('UPDATE cp_ranks SET permissions_json=?,version=version+1 WHERE rank_key=?').bind(JSON.stringify(nodes),rank.key));
+ }
+ statements.push(db.prepare('INSERT INTO website_settings(setting_key,setting_value,updated_at) VALUES(?,?,?)').bind(key,'complete',Date.now()));
+ await db.batch(statements);
+}
+
+
+export async function initializeQuestAccess(db){
+ const key='quest-access-v1';if(await db.prepare('SELECT setting_value FROM website_settings WHERE setting_key=?').bind(key).first())return;
+ const statements=[];
+ for(const rank of DEFAULT_RANKS){const stored=await rankFor(db,rank.key);const additions=rank.nodes.filter(n=>n==='cp.quests.view'||n==='cp.quests.manage');const nodes=[...new Set([...stored.nodes,...additions])];statements.push(db.prepare('UPDATE cp_ranks SET permissions_json=?,version=version+1 WHERE rank_key=? AND version=?').bind(JSON.stringify(nodes),rank.key,stored.version));}
+ statements.push(db.prepare('INSERT INTO website_settings(setting_key,setting_value,updated_at) VALUES(?,?,?)').bind(key,'complete',Date.now()));await db.batch(statements);
+}
