@@ -50,7 +50,7 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p 22 162.55.87.104 >> ~/.ssh/known_hosts
+          printf '%s\n' '162.55.87.104 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILy1N6Eo+BMRgstSpYc90ZHDQtm+8iTYiNMTI3XMVi5h root@Debian-bookworm-latest-amd64-base' >> ~/.ssh/known_hosts
           ssh -p 22 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes dunedeploy@162.55.87.104 "$GITHUB_SHA"
 
       - name: Trigger deployment after successful CI
@@ -61,6 +61,6 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p 22 162.55.87.104 >> ~/.ssh/known_hosts
+          printf '%s\n' '162.55.87.104 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILy1N6Eo+BMRgstSpYc90ZHDQtm+8iTYiNMTI3XMVi5h root@Debian-bookworm-latest-amd64-base' >> ~/.ssh/known_hosts
           ssh -p 22 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes dunedeploy@162.55.87.104 "$GITHUB_SHA"
           rm -f ~/.ssh/deploy_key
