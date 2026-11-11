@@ -18,5 +18,6 @@ for(const page of ['index.html','staff.html','shop.html','kits.html']){
 }
 test('production build uses canonical portal injection when packaging HTML',()=>{
  const source=readFileSync(new URL('../scripts/build.mjs',import.meta.url),'utf8');
- assert.match(source,/updatePortalNavigation\(bytes\.toString\('utf8'\)\)/);
+ assert.match(source,/preparePublicHtml\(bytes\.toString\('utf8'\)\)/);
+ assert.match(source,/result\.includes\('class="legal-notice"'\)/);
 });
