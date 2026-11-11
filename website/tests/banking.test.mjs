@@ -115,3 +115,17 @@ test('malformed ledger records are rejected without throwing',()=>{
   assert.equal(projectBank({...bank,ledger:[entry]},{playerUuid:player}),null);
  }
 });
+
+test('invalid server control token types never reach upstream bank',async()=>{
+ for(const token of [null,{},[],42,true,'short']){
+  let calls=0;
+  const app=createBanking({}, {SERVER_CONTROL_TOKEN:token},{
+   authenticate:async()=>({id:'account'}),
+   access:async()=>({nodes:['web.bank.personal.view']}),
+   linked:async()=>player,
+   fetcher:async()=>{calls++;return Response.json(bank);}
+  });
+  assert.equal((await app(new Request('https://cp.dunerealms.com/api/bank/personal'))).status,503);
+  assert.equal(calls,0);
+ }
+});
