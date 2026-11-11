@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {LocalD1} from './d1-adapter.mjs';
+import {TERMS_VERSION} from '../node/first-login.mjs';
+import {contactSchema} from '../node/contact-email.mjs';
 import {createApplication} from '../node/server.mjs';
 import {mysqlSql} from '../node/mysql.mjs';
 // Include current account-rank and badge tables used by session responses.
@@ -13,10 +15,10 @@ const oldSchema=schema;
 const origin='https://dunerealms.com';
 function request(path,method='GET',body,headers={}){return new Request(origin+path,{method,headers:{Origin:origin,'Content-Type':'application/json',...headers},...(body?{body:JSON.stringify(body)}:{})});}
 test('External hosting rejects forged identity, protects sessions and keeps private data private',async()=>{
- const db=new LocalD1(schema+`CREATE TABLE cp_ranks(rank_key TEXT PRIMARY KEY,label TEXT,rank_level INTEGER,kind TEXT,permissions_json TEXT,version INTEGER);`),app=createApplication(db);
+ const db=new LocalD1(schema+';'+contactSchema+';'+`CREATE TABLE cp_ranks(rank_key TEXT PRIMARY KEY,label TEXT,rank_level INTEGER,kind TEXT,permissions_json TEXT,version INTEGER);`),app=createApplication(db);
  try{
   assert.equal((await app(request('/api/profile','GET',null,{'oai-authenticated-user-id':'admin','oai-authenticated-user-email':'verified-staff@dunerealms.internal'}))).status,401);
-  const account={username:'desert_test',password:'A long test password 123',ageBand:'15plus',role:'staff'};
+  const account={username:'desert_test',password:'A long test password 123',ageBand:'15plus',role:'staff',email:'desert_test@example.com',termsAccepted:'yes',termsVersion:TERMS_VERSION};
   assert.equal((await app(request('/api/auth/register','POST',account,{Origin:'https://evil.test'}))).status,403);
   const created=await app(request('/api/auth/register','POST',account));assert.equal(created.status,200);
   const cookie=created.headers.get('set-cookie');assert.match(cookie,/HttpOnly; Secure; SameSite=Lax/);
