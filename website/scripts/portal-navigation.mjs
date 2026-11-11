@@ -22,7 +22,7 @@ export const PORTAL_SCRIPT=`(()=>{let menuIndex=0;for(const header of document.q
 export function updatePortalNavigation(html){
  if(!html.includes('aria-label="Main navigation"'))return html;
  let updated=html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/,SHARED_HEADER);
- updated=updated.replace(/<link rel="stylesheet" href="(?:https:\/\/www\.dunerealms\.com)?\/?portal-navigation\.css(?:\?[^"<>]*)?">/g,'').replace(/<script src="https:\/\/www\.dunerealms\.com\/portal-navigation\.js(?:\?[^"<>]*)?" defer><\/script>/g,'');
+ updated=updated.replace(/<link rel="stylesheet" href="(?:https:\/\/www\.dunerealms\.com)?\/?portal-navigation\.css(?:\?[^"<>]*)?">/g,'').replace(/<script src="(?:https:\/\/www\.dunerealms\.com)?\/?portal-navigation\.js(?:\?[^"<>]*)?" defer><\/script>/g,'');
  return updated.replace('</head>',SHARED_HEAD+'</head>');
 }
 export function pageContextFor(value,links=PORTAL_LINKS){
