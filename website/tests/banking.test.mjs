@@ -30,3 +30,16 @@ test('authorized treasury access does not depend on a personal Minecraft link',a
  assert.equal(f.calls.length,1);
  assert(f.calls[0].url.endsWith('/bank/staff'));
 });
+
+test('malformed linked player identity is rejected without throwing',()=>{
+ for(const playerUuid of [null,{},42,[],true]){
+  assert.equal(projectBank({...bank,playerUuid},{playerUuid:player}),null);
+ }
+});
+test('malformed permission node types do not grant bank access',async()=>{
+ for(const nodes of [null,{},'web.bank.personal.view',true]){
+  const f=fixture({nodes});
+  assert.equal((await f.request()).status,403);
+  assert.equal(f.calls.length,0);
+ }
+});
