@@ -13,7 +13,9 @@ export function createBankTransfers(db,settings={},deps={}){
   return db.prepare("SELECT b.owner_key AS player,b.bank_type,a.username FROM imperial_bank_accounts b JOIN site_game_links l ON l.minecraft_uuid=b.owner_key JOIN site_accounts a ON a.id=l.user_id WHERE b.id=? AND b.bank_type=? AND a.username=? AND a.role NOT IN ('official_account','memorial') AND a.password_hash NOT LIKE '!%' AND NOT EXISTS(SELECT 1 FROM site_account_policies p WHERE p.user_id=a.id AND p.game_link_exempt=1)").bind(Number(raw.slice(7,14)),raw.startsWith('DRCA')?'current':'player',name).first();
  });
  return async request=>{
-  const external=new URL(request.url).pathname==='/api/bank/remittance';
+  const path=new URL(request.url).pathname;
+  if(path!=='/api/bank/remittance'&&path!=='/api/bank/transfer-own')return reply({message:'Not found.'},404);
+  const external=path==='/api/bank/remittance';
   if(request.method!=='POST')return reply({message:'Method not allowed.'},405);
   if(new URL(request.url).search)return reply({message:'Account overrides are not accepted.'},400);
   if(request.headers.get('origin')!==origin)return reply({message:'Invalid request origin.'},403);
@@ -38,7 +40,7 @@ export function createBankTransfers(db,settings={},deps={}){
   try{
    const result=await(deps.fetcher||fetch)('http://127.0.0.1:15433/bank/'+(external?'remittance':'transfer-own'),{method:'POST',headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({player,source:data.source,amount:data.amount,request_id:data.requestId,memo:data.memo,...(external?{target:recipient.player.toLowerCase(),target_type:recipient.bank_type==='current'?'current':'savings',from_number:fromNumber,to_number:data.recipientAccount}:{})}),redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000)});
    if(!result.ok||result.status!==200)return reply({message:result.status===409?'Transfer declined: insufficient funds, changed request or unavailable account. No transfer was confirmed.':'Transfer could not be confirmed. Retry the same request to check its result.'},result.status===409?409:503);
-   const body=await result.json();if(!body||typeof body!=='object'||body.reference!==data.requestId)throw Error();return reply({transfer:body});
+   const body=await result.json();if(!body||typeof body!=='object'||Array.isArray(body)||body.reference!==data.requestId)throw Error();return reply({transfer:body});
   }catch{return reply({message:'Confirmation unavailable. Retry this same request; do not create a replacement payment.'},503);}
  };
 }
