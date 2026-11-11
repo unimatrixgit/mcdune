@@ -7,7 +7,7 @@ import {contactSchema} from '../node/contact-email.mjs';
 import {createApplication} from '../node/server.mjs';
 import {mysqlSql} from '../node/mysql.mjs';
 // Include current account-rank and badge tables used by session responses.
-const accountSchema=`CREATE TABLE site_terms_acceptances(user_id TEXT,version TEXT,accepted_at INTEGER);CREATE TABLE cp_account_ranks(user_id TEXT,rank_key TEXT,PRIMARY KEY(user_id,rank_key));CREATE TABLE website_badges(user_id TEXT,badge_key TEXT,earned_at INTEGER,PRIMARY KEY(user_id,badge_key));CREATE TABLE website_settings(setting_key TEXT PRIMARY KEY,setting_value TEXT,updated_at INTEGER);`;
+const accountSchema=`CREATE TABLE site_first_login(user_id TEXT PRIMARY KEY,password_changed INTEGER NOT NULL DEFAULT 0,created_at INTEGER NOT NULL);CREATE TABLE site_terms_acceptances(user_id TEXT,version TEXT,accepted_at INTEGER);CREATE TABLE cp_account_ranks(user_id TEXT,rank_key TEXT,PRIMARY KEY(user_id,rank_key));CREATE TABLE website_badges(user_id TEXT,badge_key TEXT,earned_at INTEGER,PRIMARY KEY(user_id,badge_key));CREATE TABLE website_settings(setting_key TEXT PRIMARY KEY,setting_value TEXT,updated_at INTEGER);`;
 const schema=['0000_forums','0001_profiles_tickets'].map(n=>readFileSync(new URL('../drizzle/'+n+'.sql',import.meta.url),'utf8')).join('\n')+accountSchema+`
 CREATE TABLE site_age_declarations(user_id TEXT PRIMARY KEY,age_band TEXT,declared_at INTEGER);CREATE TABLE site_accounts(id TEXT PRIMARY KEY,username TEXT UNIQUE,display_name TEXT,password_salt TEXT,password_hash TEXT,role TEXT,created_at INTEGER);
 CREATE TABLE site_sessions(token_hash TEXT PRIMARY KEY,user_id TEXT,expires_at INTEGER);`;
