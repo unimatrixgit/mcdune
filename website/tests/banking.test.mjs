@@ -76,3 +76,12 @@ test('upstream bank failures do not leak internal details or cached balances',as
  assert.equal(response.headers.get('Cache-Control'),'private, no-store');
  assert.doesNotMatch(JSON.stringify(await response.json()),/secret internal bank failure/);
 });
+
+test('bank rejects duplicate ledger transaction IDs and malformed metadata',()=>{
+ const entry={id:'tx-1',action:'deposit',amountDunemarks:'1.00',balanceDunemarks:'12.30',createdAt:1730000000000};
+ assert(projectBank({...bank,ledger:[entry]},{playerUuid:player}));
+ assert.equal(projectBank({...bank,ledger:[entry,{...entry,createdAt:1730000000001}]},{playerUuid:player}),null);
+ for(const invalid of [{...entry,id:''},{...entry,id:'x'.repeat(129)},{...entry,action:''},{...entry,action:'x'.repeat(81)}]){
+  assert.equal(projectBank({...bank,ledger:[invalid]},{playerUuid:player}),null);
+ }
+});
