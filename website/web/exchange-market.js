@@ -65,3 +65,6 @@ $('market-prev').addEventListener('click',()=>{state.page--;render();});
 $('market-next').addEventListener('click',()=>{state.page++;render();});
 // Render the demonstration immediately while the first connection check is in flight.
 state.items=demoListings; render(); load();
+
+function exchangeLogisticsFooter(){const footer=document.createElement('footer');footer.className='exchange-logistics-provider';const label=document.createElement('span');label.textContent='Exchange logistics supplied by';const brands=document.createElement('div');brands.className='exchange-logistics-brands';const spice=document.createElement('img');spice.src='/assets/spicepost-logo-v2.svg';spice.alt='SpicePost';spice.width=130;spice.height=43;const parent=document.createElement('div');parent.className='exchange-logistics-parent';const part=document.createElement('span');part.textContent='part of';const group=document.createElement('img');group.src='/assets/corrino-group-logo.svg';group.alt='Corrino Group';group.width=116;group.height=28;parent.append(part,group);brands.append(spice,parent);footer.append(label,brands);return footer;}
+const logisticsBoard=document.querySelector('.exchange-content, .market-board');if(logisticsBoard)logisticsBoard.after(exchangeLogisticsFooter());
