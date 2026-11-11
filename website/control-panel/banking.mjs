@@ -19,13 +19,13 @@ export function createBanking(db,settings={},dependencies={}){
   const user=await authenticate(request);if(!user)return reply({message:'Sign in to view your bank.'},401);
   const rights=await access(user);if(!rights?.nodes?.includes(staff?'web.bank.staff.view':'web.bank.personal.view'))return reply({message:'Bank access is not available for this account.'},403);
   try{
-   const player=await linked(user);if(!player)return reply({linked:false});if(!uuid.test(player))throw Error();
+   const player=staff?null:await linked(user);if(!staff&&!player)return reply({linked:false});if(!staff&&!uuid.test(player))throw Error();
    if((settings.SERVER_CONTROL_TOKEN||'').length<64)throw Error();
    const r=await(dependencies.fetcher||fetch)('http://127.0.0.1:15433'+(staff?'/bank/staff':'/bank/player?uuid='+encodeURIComponent(player)),{headers:{Authorization:'Bearer '+settings.SERVER_CONTROL_TOKEN},signal:AbortSignal.timeout(8000)});
    if(!r.ok)throw Error();const bank=projectBank(await r.json(),{playerUuid:player,staff});if(!bank)throw Error();
    const currentUser=await authenticate(request);if(!currentUser||currentUser.id!==user.id)return reply({message:'Sign in again before viewing this bank.'},401);
    const currentRights=await access(currentUser);if(!currentRights?.nodes?.includes(staff?'web.bank.staff.view':'web.bank.personal.view'))return reply({message:'Bank access is no longer available for this account.'},403);
-   const currentPlayer=await linked(currentUser);if(typeof currentPlayer!=='string'||!uuid.test(currentPlayer)||currentPlayer.toLowerCase()!==player.toLowerCase())return reply({message:'Your linked Minecraft account changed. Refresh before viewing this bank.'},409);
+   if(!staff){const currentPlayer=await linked(currentUser);if(typeof currentPlayer!=='string'||!uuid.test(currentPlayer)||currentPlayer.toLowerCase()!==player.toLowerCase())return reply({message:'Your linked Minecraft account changed. Refresh before viewing this bank.'},409);}
    return reply({linked:staff?undefined:true,bank,canManage:staff?currentRights.nodes.includes('web.bank.staff.manage'):true});
   }catch{return reply({message:'The Dunemarks bank is temporarily unavailable. Refresh to check the current balance.'},503);}
  };
