@@ -7,5 +7,6 @@ test('release badge metadata does not contaminate navigation tuples',()=>{
  const start=js.lastIndexOf('(()=>{let items=')+'(()=>{let items='.length;
  const items=JSON.parse(js.slice(start,js.indexOf(';function mark()',start)));
  assert(items.every(i=>!Array.isArray(i)&&typeof i.href==='string'));
- for(const href of ['https://www.dunerealms.com/','https://support.dunerealms.com/'])assert.equal(items.find(i=>i.href===href)?.updatedIn,'1.0.0.3');
+ assert.equal(items.find(i=>i.href==='https://www.dunerealms.com/')?.introducedIn,'1.0.0.3');
+ assert.equal(items.find(i=>i.href==='https://support.dunerealms.com/')?.updatedIn,'1.0.0.3');
 });
