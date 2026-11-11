@@ -6,3 +6,17 @@ test('bank reads require current permission and linked UUID for personal and sta
 test('personal bank identity comes only from the verified session link',async()=>{const f=fixture();assert.equal((await f.request('/api/bank/personal?uuid=other')).status,400);assert.equal(f.calls.length,0);assert.equal((await f.request()).status,200);assert(f.calls[0].url.endsWith('/bank/player?uuid='+player));assert.equal((await f.request('/api/bank/personal','POST')).status,405);});
 test('wrong identity, old currencies and numeric balances fail closed',()=>{assert(projectBank(bank,{playerUuid:player}));assert.equal(projectBank({...bank,playerUuid:'other'},{playerUuid:player}),null);assert.equal(projectBank({...bank,currency:'spice'},{playerUuid:player}),null);assert.equal(projectBank({...bank,balanceDunemarks:12.30},{playerUuid:player}),null);});
 test('staff bank has one fixed server account and no caller-supplied account selector',async()=>{const f=fixture({nodes:['web.bank.staff.view'],response:{account:'server',currency:'dunemarks',balanceDunemarks:'0.00',ledger:[]}});const r=await f.request('/api/bank/staff');assert.equal(r.status,200);assert.equal((await r.json()).canManage,false);assert(f.calls[0].url.endsWith('/bank/staff'));assert.equal((await f.request('/api/bank/staff?account=someone')).status,400);});
+
+test('missing permission nodes fail closed instead of crashing',async()=>{
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),access:async()=>({}),linked:async()=>player
+ });
+ assert.equal((await app(new Request('https://cp.dunerealms.com/api/bank/personal'))).status,403);
+});
+test('ledger timestamps must be valid nonnegative integer epoch values',()=>{
+ const entry={id:'tx-1',action:'deposit',amountDunemarks:'1.00',balanceDunemarks:'12.30',createdAt:1730000000000};
+ assert(projectBank({...bank,ledger:[entry]},{playerUuid:player}));
+ for(const createdAt of [null,'1730000000000','',-1,1.5,NaN,Infinity]){
+  assert.equal(projectBank({...bank,ledger:[{...entry,createdAt}]},{playerUuid:player}),null);
+ }
+});
