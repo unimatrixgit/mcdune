@@ -171,3 +171,15 @@ test('personal bank projection requires valid UUID syntax on both sides',()=>{
  }
  assert(projectBank(bank,{playerUuid:player.toUpperCase()}));
 });
+
+test('bank rejects unexpected upstream success status without disclosing data',async()=>{
+ const app=createBanking({}, {SERVER_CONTROL_TOKEN:'s'.repeat(64)},{
+  authenticate:async()=>({id:'account'}),
+  access:async()=>({nodes:['web.bank.personal.view']}),
+  linked:async()=>player,
+  fetcher:async()=>new Response(null,{status:204})
+ });
+ const response=await app(new Request('https://cp.dunerealms.com/api/bank/personal'));
+ assert.equal(response.status,503);
+ assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+});
