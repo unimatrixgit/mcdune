@@ -132,6 +132,40 @@ button,a,input{touch-action:manipulation}button:focus-visible,a:focus-visible{ou
  .alpha-page-hero{background-image:linear-gradient(90deg,#0a2a1c,#18452d)!important}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* ALPHASTYLE V3 — unified illustrated imperial command deck */
+:root{--bg:#06170f;--side:#0b2719;--panel:#133b26;--line:#aa884c;--gold:#f0cf84;--muted:#bdc9b6;--text:#f4ead1;--green:#8ad09b}
+body{background:radial-gradient(ellipse at 45% 0%,#1b412a,#07180f 68%);font-family:Georgia,"Times New Roman",serif;color:var(--text)}
+.portal-ribbon{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:13px;padding:21px 3%;background:linear-gradient(180deg,#102e1f,#06190f);border-bottom:3px double #c2a363}
+.portal-card{position:relative;min-height:155px;border:3px double #cba967;border-radius:8px;background:linear-gradient(155deg,#315a37,#102b1b 80%);box-shadow:inset 0 0 0 4px #173e27,0 8px 18px #0009;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;overflow:hidden}
+.portal-card::before{content:"";position:absolute;inset:7px;border:1px solid #c8a45a66;pointer-events:none}.portal-card::after{content:"✦";position:absolute;right:12px;top:7px;color:#d5b76a;font-size:12px}
+.portal-card.selected{background:linear-gradient(155deg,#536d3e,#193a25);border-color:#ffe09c;box-shadow:inset 0 0 0 4px #27492d,0 0 18px #d4ad5755}.portal-card:hover{filter:brightness(1.14)}
+.portal-art{width:82px;height:82px;filter:drop-shadow(0 5px 4px #000a)}.portal-card strong{font:16px Georgia,serif;color:#ffe4a5;text-shadow:0 2px 4px #000;z-index:1}
+.layout{display:grid;grid-template-columns:265px minmax(0,1fr) 265px;gap:0;min-width:0}
+.side{padding:17px 12px 24px;background:linear-gradient(180deg,#133924,#092419);border-right:2px solid #997b43;box-shadow:inset -5px 0 13px #0005}
+.rightside{border-left:2px solid #997b43;border-right:0;box-shadow:inset 5px 0 13px #0005}
+.category-banner{min-height:126px;padding:17px 10px;border:3px double #d2aa5e;border-radius:8px;background:linear-gradient(95deg,#153a25,#2e5732);box-shadow:inset 0 0 0 4px #102b1c,0 7px 15px #0007}
+.category-banner strong{font:22px Georgia,serif;color:#ffe0a0}.category-banner>span{font-size:43px}.sidehead{color:#edcb7e;letter-spacing:.17em}
+.group{margin:19px 6px 7px;color:#c2cbb6;font:11px system-ui,sans-serif;letter-spacing:.1em}
+.category-art{min-height:55px;margin:0 0 8px;padding:10px 8px;border:2px ridge #c6a05c;border-radius:6px;background:linear-gradient(90deg,#58643a,#1a432a 70%);box-shadow:inset 0 0 0 2px #193a24;color:#f6d895;font:14px Georgia,serif;letter-spacing:.02em}
+.navitem{min-height:54px;margin:5px 0;padding:8px;border:1px solid #789055;border-radius:6px;background:linear-gradient(90deg,#244b30,#0d2a1b);box-shadow:inset 0 1px #ffffff16;color:#f2e9ce;font:12px system-ui,sans-serif;gap:5px}
+.navitem:hover{background:#315e3b;border-color:#e3c277}.navitem[aria-current=page]{background:linear-gradient(90deg,#746238,#2d472c);border-color:#f2d48a;box-shadow:inset 3px 0 #f6d38a}
+.menu-art{width:39px;height:39px;object-fit:contain;filter:drop-shadow(0 3px 3px #0009)}
+.mailalert{border:2px ridge #d1ac63;background:linear-gradient(110deg,#4d5935,#173925);color:#ffe2a5;padding:14px;font:14px Georgia,serif}
+.main{background:radial-gradient(ellipse at 50% 0%,#234d32,#081d13 74%)}.content{max-width:1600px;padding:26px 30px}
+.alpha-page-hero{min-height:210px;padding:32px 36px;margin-bottom:21px;border:4px double #d4ad63;border-radius:9px;background:linear-gradient(90deg,#0b2b1c 0%,#1d5132d8 65%,#0b291b88),var(--alpha-page-art) right 9% center/auto 170px no-repeat,#153c26;box-shadow:inset 0 0 0 5px #183c26,0 12px 24px #0008}
+.alpha-page-hero::after{content:"✦";position:absolute;bottom:12px;right:16px;color:#d8b76b;opacity:.7}.alpha-kicker{font:11px system-ui,sans-serif;letter-spacing:.2em;color:#e9cd89}.alpha-page-hero h1{font:normal clamp(27px,3vw,42px) Georgia,serif;color:#ffe4a5;text-shadow:0 3px 4px #000;margin:12px 0}.alpha-page-hero p{font:14px system-ui,sans-serif;color:#e0e7d2}
+.alpha-panel{border:3px double #bd9955;border-radius:8px;background:linear-gradient(140deg,#204c30,#0b2b1c);box-shadow:inset 0 0 0 4px #173c26,0 8px 18px #0008;padding:24px}
+.alpha-panel h2{font:normal 24px Georgia,serif;color:#f5d48d;border-bottom:1px solid #b99b5a;padding-bottom:14px}.alpha-panel h2::first-letter{color:#ffe7a8}
+.alpha-kpis{gap:17px;margin-bottom:17px}.alpha-kpi{min-height:118px}.alpha-kpi strong{font:25px Georgia,serif;color:#ffe4a4}
+.alpha-page-grid{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:17px}.alpha-table-head{background:#34573a}.alpha-table>div{min-height:48px;align-items:center}.alpha-table{border-color:#8d7c4b}
+.alpha-btn{min-height:45px;border:2px ridge #d5b16b;border-radius:5px;background:linear-gradient(#50643b,#243b28);color:#ffe4a6;font:14px Georgia,serif;opacity:.85}.alpha-btn-gold{background:linear-gradient(#ae8e47,#574b2c)}
+.alpha-feature{margin-top:18px}.alpha-feature-card{border:2px double #bd9b59;background:linear-gradient(145deg,#255035,#0d2c1d);box-shadow:inset 0 0 0 3px #183d27}.alpha-feature-card strong{font:18px Georgia,serif;color:#f5d890}
+.alpha-announcements{margin-top:17px}.alpha-dispatch{min-height:45px}.alpha-dot{background:#93d783;box-shadow:0 0 9px #7cca68}
+.statusbar{background:#0c2b1c;border-bottom:2px solid #897544;color:#cfdbcb}
+@media(max-width:1250px){.layout{grid-template-columns:220px minmax(0,1fr)}.rightside{grid-column:1/-1}.portal-ribbon{grid-template-columns:repeat(3,minmax(0,1fr))}.alpha-page-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.layout{display:flex;flex-direction:column}.portal-ribbon{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px}.portal-card{min-height:100px}.portal-art{width:47px;height:47px}.portal-card strong{font-size:11px}.side,.rightside{display:none!important}.side.alpha-mobile-open,.rightside.alpha-mobile-open{display:block!important}.content{padding:12px}.alpha-page-hero{min-height:140px;padding:18px;background-size:auto 95px}.alpha-page-hero h1{font-size:27px}.alpha-kpis,.alpha-feature-grid{grid-template-columns:1fr}.alpha-panel{padding:16px}.alpha-page-grid{grid-template-columns:1fr}.alpha-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:390px){.portal-ribbon{grid-template-columns:repeat(2,minmax(0,1fr))}.alpha-actions{grid-template-columns:1fr}}
 </style><link rel="stylesheet" href="https://www.dunerealms.com/portal-navigation.css"><script src="https://www.dunerealms.com/portal-navigation.js" defer></script><style>/* Canonical public-site chrome is owned by portal-navigation.css and portal-navigation.js. */
 body>header.dune-site-header{position:relative!important;display:flex!important;min-height:82px!important;height:auto!important;padding:14px 3%!important;gap:24px!important;align-items:center!important;justify-content:space-between!important;background:#10251f!important;border-bottom:1px solid #806e45!important}
 body>header.dune-site-header>.wordmark{margin:0!important}.dune-site-header .masthead-logo{width:360px!important;max-width:100%!important;max-height:142px!important;height:auto!important}
