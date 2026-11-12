@@ -34,4 +34,6 @@ jobs:
         run: corepack pnpm build
       - name: Full website test suite
         working-directory: source/website
-        run: corepack pnpm test
+        run: node --test --test-concurrency=1 tests/*.test.mjs
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
