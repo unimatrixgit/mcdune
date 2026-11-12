@@ -56,9 +56,18 @@ export function menuGroupsFor(user,panel){
 }
 export function menuItemFor(page){return[...USER_GROUPS,...STAFF_GROUPS].flatMap(([,items])=>items).find(i=>i.page===page||i.aliases?.includes(page));}
 export function splitMenuGroups(groups){
- const midpoint=Math.ceil(groups.reduce((n,[,items])=>n+items.length,0)/2),left=[],right=[];let used=0;
- for(const[label,items]of groups){const take=Math.max(0,Math.min(items.length,midpoint-used));if(take)left.push([label,items.slice(0,take)]);if(take<items.length)right.push([take?label+' · continued':label,items.slice(take)]);used+=items.length;}
- return[left,right];
+ // Keep each category intact: a section must never continue in the opposite sidebar.
+ // Choose the closest item-count balance while retaining the original group order.
+ if(!groups.length)return[[],[]];
+ if(groups.length===1)return[groups,[]];
+ const total=groups.reduce((sum,[,items])=>sum+items.length,0);
+ let leftCount=0,bestCut=1,bestDifference=Infinity;
+ for(let cut=1;cut<groups.length;cut++){
+  leftCount+=groups[cut-1][1].length;
+  const difference=Math.abs(total-2*leftCount);
+  if(difference<bestDifference){bestDifference=difference;bestCut=cut;}
+ }
+ return[groups.slice(0,bestCut),groups.slice(bestCut)];
 }
 
 export const DEV_ITEMS=[['Overview','dev-panel','overview'],['Development Queue','dev-queue','queue'],['Approvals','dev-approvals','approvals'],['New Request','dev-new','new'],['Archive','dev-archive','archive']].map(([label,page,view])=>({label,page,view,art:'seals/team-dev-150.png'}));
