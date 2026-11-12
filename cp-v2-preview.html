@@ -91,8 +91,33 @@ const V1_SUBMENU_ART=[
 [/inventory|kit|item|reward|quest|adventure|crysknife/i,'items/office_water.png'],
 [/identity|profile|personal|security|registration/i,'nav-account-v2.webp']
 ];
-function submenuArtwork(item,group,workspace){for(const [pattern,assetName] of V1_SUBMENU_ART)if(pattern.test(item.label))return image(assetName);const kind=NEW_CATEGORY_SYMBOLS[group.label]||'shield';const icon=el('img');icon.src=generatedCategoryArt(kind);icon.alt='';icon.width=48;icon.height=48;return icon}
-function categoryTitleImage(label,workspace){const kind=NEW_CATEGORY_SYMBOLS[label];if(!kind)return image(categoryArtwork(label,workspace));const img=el('img');img.src=generatedCategoryArt(kind);img.alt='';img.width=48;img.height=48;return img}
+/* Distinct icon per menu item, including Identity. Existing V1 artwork stays for
+   top-level workspace cards and page banners; repeated submenu icons are replaced
+   with individually generated gold/green emblems, keyed by stable page ID.
+   Art generation: 48x48 SVG, forest-green backing, antique gold outlines,
+   warm sand highlights, transparent exterior, no words, deterministic ID seed.
+   A new icon is generated for every distinct submenu ID; no identical repeats. */
+function uniqueMenuIcon(key){
+ const str=String(key);let hash=2166136261;for(let i=0;i<str.length;i++)hash=Math.imul(hash^str.charCodeAt(i),16777619)>>>0;
+ const motifs=[
+ '<path d="M24 10 37 17v14L24 39 11 31V17Z" fill="#94632b" stroke="#ffe0a0" stroke-width="2"/><path d="M24 13v23M13 19l11 6 11-6" stroke="#ffdc91" stroke-width="2" fill="none"/>',
+ '<circle cx="24" cy="24" r="13" fill="#a67636" stroke="#f9d58b" stroke-width="2"/><path d="M14 24h20M24 14v20M17 17l14 14" stroke="#ffe7ae" stroke-width="2"/>',
+ '<path d="M11 34 17 13h14l6 21Z" fill="#986c36" stroke="#f9d68c" stroke-width="2"/><path d="m17 27 7-9 7 9-7 6Z" fill="#e9ba65"/>',
+ '<rect x="12" y="12" width="24" height="25" rx="4" fill="#93672f" stroke="#f8d78e" stroke-width="2"/><path d="M18 19h12M18 25h12M18 31h8" stroke="#ffebaf" stroke-width="2"/>',
+ '<path d="M24 9 37 15v11c0 8-6 13-13 16-7-3-13-8-13-16V15Z" fill="#a16d2f" stroke="#f8d58a" stroke-width="2"/><path d="m17 25 5 5 10-11" fill="none" stroke="#ffedb6" stroke-width="3"/>',
+ '<path d="M12 16h24v19H12Z" fill="#95632d" stroke="#f6d38c" stroke-width="2"/><path d="m13 17 11 11 11-11" fill="none" stroke="#ffe5a7" stroke-width="2"/>',
+ '<path d="M12 35 19 12l5 9 5-9 7 23Z" fill="#9d6b32" stroke="#f9d891" stroke-width="2"/><circle cx="24" cy="29" r="4" fill="#ffdfa0"/>',
+ '<path d="M14 34V15h20v19Z" fill="#97682f" stroke="#f6d28a" stroke-width="2"/><path d="M18 20h12M18 25h12M18 30h8" stroke="#ffdf9b" stroke-width="2"/>',
+ '<path d="M10 27 24 11l14 16-14 12Z" fill="#a16c32" stroke="#f8d78d" stroke-width="2"/><circle cx="24" cy="25" r="6" fill="#1b3b29" stroke="#ffe0a0" stroke-width="2"/>'
+ ];
+ const motif=motifs[hash%motifs.length];const rotation=(hash>>>8)%360;
+ const accents=['#d9a95a','#e5bf70','#c99847','#f1cf87'];
+ const dots=Array.from({length:3},(_,i)=>{const a=((hash>>>(i*6))%360)*Math.PI/180;const x=(24+17*Math.cos(a)).toFixed(1),y=(24+17*Math.sin(a)).toFixed(1);return '<circle cx="'+x+'" cy="'+y+'" r="1.5" fill="'+accents[(hash>>>i)%4]+'"/>'}).join('');
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><radialGradient id="b"><stop stop-color="#315b3b"/><stop offset="1" stop-color="#071e14"/></radialGradient></defs><circle cx="24" cy="24" r="22" fill="url(#b)" stroke="#d8ad61" stroke-width="2"/><circle cx="24" cy="24" r="19" fill="none" stroke="#826439"/><g transform="rotate('+rotation+' 24 24)">'+motif+'</g>'+dots+'</svg>';
+ return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)
+}
+function submenuArtwork(item,group,workspace){const img=el('img');img.src=uniqueMenuIcon(workspace+'/'+group.label+'/'+item.id);img.alt='';img.width=48;img.height=48;return img}
+function categoryTitleImage(label,workspace){const img=el('img');img.src=uniqueMenuIcon('category/'+workspace+'/'+label);img.alt='';img.width=48;img.height=48;return img}
 
 function go(wid,pid){const w=menu.workspaces.find(x=>x.id===wid)||menu.workspaces[0];current=w.id;const items=w.groups.flatMap(g=>g.items);const item=items.find(x=>x.id===pid)||items[0];for(const b of portals.children)b.setAttribute('aria-selected',String(b.dataset.id===w.id));sidebar.replaceChildren();const sidebarRight=document.querySelector('#sidebar-right');sidebarRight.replaceChildren();const banner=el('div','side-hero',w.label.toUpperCase());sidebar.append(banner);sidebarRight.append(el('div','side-hero',w.label.toUpperCase()+' · DIRECTORY'));if(w.id==='realm'){const mail=el('button','mail-shortcut','✉  You’ve Got Mail');mail.onclick=()=>go('post','mail-inbox');sidebar.append(mail)}
 const groups=w.groups;let split=groups.length,best=Infinity;for(let i=1;i<groups.length;i++){const a=groups.slice(0,i).reduce((n,g)=>n+g.items.length+2,0),b=groups.slice(i).reduce((n,g)=>n+g.items.length+2,0),delta=Math.abs(a-b);if(delta<best){best=delta;split=i}}for(const [gi,g] of groups.entries()){const target=gi<split?sidebar:sidebarRight;const block=el('details','category-block');block.open=window.matchMedia('(min-width:721px)').matches||g.items.some(x=>x.id===item.id);const heading=el('summary','category-heading');heading.append(categoryTitleImage(g.label,w.id),el('span','category-name',g.label),el('span','category-count',String(g.items.length)));block.append(heading);const links=el('div','category-links');for(const x of g.items){const b=el('button','navitem');b.type='button';b.append(submenuArtwork(x,g,w.id),el('span','',x.label));b.setAttribute('aria-current',x.id===item.id?'page':'false');b.onclick=()=>go(w.id,x.id);links.append(b)}block.append(links);target.append(block)}content.replaceChildren();const hero=el('div','hero');hero.append(image(art[w.id]));const title=el('div');title.append(el('h1','',w.id==='realm'&&item.id==='game'?'My Realm — Developer Workspace':item.label),el('p','','Realm management, account tools and personal operations.'));hero.append(title);content.append(hero);
