@@ -21,7 +21,7 @@ jobs:
           set -euo pipefail
           git clone --depth 1 --branch fix/website-integrations-20261111 https://www.dunerealms.com/git/unimatrix/MC.git source
           actual="$(git -C source rev-parse HEAD)"
-          expected="86496ebbb1c6b8124777bb1a547c952eacf8f361"
+          expected="20e7deaa12d6c3331c9ca22b79e14151fe659bc8"
           echo "DuneGit head: $actual"
           test "$actual" = "$expected" || { echo "::error::PR 198 head changed; refusing to test a different snapshot"; exit 1; }
       - name: Install dependencies
