@@ -1,0 +1,25 @@
+name: Website regression tests
+on:
+  pull_request:
+    paths:
+      - 'website/**'
+      - '.github/workflows/website-regression.yml'
+  workflow_dispatch:
+jobs:
+  website-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install website dependencies
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund
+      - name: Build website worker for integration tests
+        run: node scripts/build.mjs
+      - name: Run website regression suite
+        run: node --test tests/*.test.mjs
