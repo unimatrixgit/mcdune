@@ -17,5 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Build website worker for integration tests
+        run: node scripts/build.mjs
       - name: Run website regression suite
         run: node --test tests/*.test.mjs
