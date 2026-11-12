@@ -26,4 +26,17 @@ test('revoked permissions remove menus; aliases retain parent selection and plac
  assert(menuItemFor('landsraad').placeholder);assert(menuItemFor('hosting-control').placeholder);
 });
 
-test('left and right menus balance items without changing order or losing category context',()=>{for(const groups of [USER_GROUPS,STAFF_GROUPS,menuGroupsFor(user('member',['user'],basic),'user')]){const halves=splitMenuGroups(groups);assert(Math.abs(flat(halves[0]).length-flat(halves[1]).length)<=1);assert.deepEqual([...flat(halves[0]),...flat(halves[1])],flat(groups));}assert.equal(splitMenuGroups(USER_GROUPS)[1][0][0],'DuneRealms · continued');});
+test('sidebars keep whole categories, original order, and closest possible item balance',()=>{
+ for(const groups of [USER_GROUPS,STAFF_GROUPS,menuGroupsFor(user('member',['user'],basic),'user')]){
+  const [left,right]=splitMenuGroups(groups);
+  assert.deepEqual([...left,...right],groups);
+  assert.deepEqual([...flat(left),...flat(right)],flat(groups));
+  assert(![...left,...right].some(([label])=>label.includes('continued')));
+  const total=flat(groups).length;
+  const best=Math.min(...Array.from({length:groups.length-1},(_,i)=>Math.abs(total-2*flat(groups.slice(0,i+1)).length)));
+  assert.equal(Math.abs(flat(left).length-flat(right).length),best);
+ }
+ assert.deepEqual(splitMenuGroups([]),[[],[]]);
+ assert.deepEqual(splitMenuGroups([USER_GROUPS[0]]),[[USER_GROUPS[0]],[]]);
+ assert.equal(splitMenuGroups(USER_GROUPS)[1][0][0],'Politics & Gameplay');
+});
